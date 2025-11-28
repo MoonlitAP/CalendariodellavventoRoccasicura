@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario dell’Avvento 2025 – Comune di Roccasicura</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script defer src="js/giorni.js"></script>
+  <script defer src="js/script.js"></script>
+</head>
+
+<body class="calendar">
+
+  <!-- Messaggio di benvenuto -->
+  <p id="benvenuto" class="benvenuto"></p>
+
+  <script>
+    const nome = localStorage.getItem("utente") || "Ospite";
+    document.getElementById("benvenuto").textContent = `🎅 Bentornato, ${nome}!`;
+  </script>
+
+  <!-- Immagine superiore -->
+  <section class="top-image">
+    <img src="immagini/copertina/cover.png" alt="Calendario dell’Avvento" class="home-top-img">
+  </section>
+
+  <!-- Griglia 24 giorni -->
+  <section class="calendar-section">
+    <div class="calendar-grid"></div>
+  </section>
+
+  <!-- Popup -->
+  <div id="popup" class="popup hidden">
+    <div class="popup-content">
+      <p id="popup-text"></p>
+      <button id="close-popup">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- SEZIONE BOTTONI IN BASSO -->
+  <section class="bottom-buttons">
+      <a href="index.html" class="btn-home-return">🏠 Torna alla Home</a>
+      <button onclick="cambiaNome()" class="btn-change-name">✏️ Cambia nome</button>
+  </section>
+
+  <script>
+    function cambiaNome() {
+      const nuovo = prompt("Inserisci un nuovo nome:");
+      if (nuovo && nuovo.trim() !== "") {
+        localStorage.setItem("utente", nuovo.trim());
+        location.reload();
+      }
+    }
+  </script>
+
+</body>
+</html>
