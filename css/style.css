@@ -182,3 +182,94 @@ body.home {
 }
 
 
+
+
+
+
+/* --- Calendario --- */
+
+body.calendar {
+  background-color: #7b0412;
+  font-family: 'Ubuntu', sans-serif;
+  color: white;
+  text-align: center;
+  padding-bottom: 60px;
+}
+
+.benvenuto {
+  margin-top: 15px;
+  font-size: 1.2em;
+}
+
+.home-top-img {
+  width: 90%;
+  max-width: 600px;
+  margin: 15px auto;
+  display: block;
+}
+
+.calendar-grid {
+  display: grid;
+  gap: 15px;
+  margin: 20px;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .calendar-grid {
+      grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-grid {
+      grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.day-box {
+  background-color: #fff2f2;
+  border: 4px solid #7b0412;
+  border-radius: 15px;
+  padding: 10px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.day-box:hover {
+  transform: scale(1.05);
+}
+
+.day-img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.day-number {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #7b0412;
+  margin-top: 5px;
+}
+
+/* Bottone in basso */
+.bottom-buttons {
+  margin-top: 30px;
+}
+
+.btn-change-name {
+  background: #f3e4e4;
+  color: #000;
+  padding: 10px 25px;
+  border-radius: 25px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.btn-change-name:hover {
+  background: #b71c1c;
+  color: white;
+}
+
