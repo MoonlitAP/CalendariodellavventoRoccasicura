@@ -166,15 +166,6 @@ body.calendar {
   border-radius: 12px;
 }
 
-/* Numero sotto */
-.day-number {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #f3e4e4;
-  margin-top: 8px;
-  display: block;
-}
-
 
 
 /* === CASELLA SPECIALE 25 === */
@@ -307,4 +298,5 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
