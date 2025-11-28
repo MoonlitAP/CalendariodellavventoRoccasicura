@@ -1,73 +1,144 @@
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to bottom, #b30000, #600000);
-    color: white;
+/* === HOME PRINCIPALE (home.html) === */
+
+body.home {
+  margin: 0;
+  background-color: #7b0412;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow-x: hidden;
+  font-family: 'Ubuntu', sans-serif;
+  position: relative;
 }
 
-.home-container {
-    text-align: center;
-    margin-top: 40px;
+/* Contenitore immagine + bottone */
+.overlay {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  padding: 20px;
+  z-index: 1;
 }
 
-.titolo-home {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 25px;
+/* Immagine principale */
+.cover-img {
+  width: 70%;
+  max-width: 1100px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: brightness(0.95);
+  transition: transform 0.4s ease;
+  z-index: 0;
+  pointer-events: none; /* evita blocco del bottone su mobile */
 }
 
-.img-copertina {
+/* Bottone ENTRARE */
+.btn-enter {
+  margin-top: 25px;
+  background-color: #f3e4e4;
+  color: #000;
+  text-decoration: none;
+  padding: 14px 42px;
+  border-radius: 40px;
+  font-size: 1.3em;
+  font-weight: bold;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 2;
+}
+
+.btn-enter:hover {
+  background-color: #b71c1c;
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* Bottone CAMBIA NOME */
+.btn-name {
+  position: absolute;
+  bottom: 25px;
+  right: 25px;
+  background-color: #f3e4e4;
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 22px;
+  font-weight: bold;
+  font-family: 'Ubuntu', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.btn-name:hover {
+  background-color: #b71c1c;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* === RESPONSIVE PER TABLET E SMARTPHONE === */
+@media (max-width: 1024px) {
+  .cover-img {
     width: 80%;
-    max-width: 360px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);
-    margin-bottom: 30px;
+    max-width: 700px;
+  }
+
+  .btn-enter {
+    font-size: 1.2em;
+    padding: 12px 38px;
+  }
 }
 
-.btn-home, .btn-cambia {
-    background: white;
-    color: #b30000;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    margin-top: 15px;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.btn-home:hover, .btn-cambia:hover {
-    transform: scale(1.05);
-    background: #ffe5e5;
-}
-
-.btn-cambia {
-    display: block;
-    margin: 20px auto;
-}
-
-
-/* 🌟 RESPONSIVE PER SMARTPHONE */
+/* === RESPONSIVE PER SMARTPHONE === */
 @media (max-width: 768px) {
+  body.home {
+    height: auto;
+    padding: 25px 0;
+    display: block;
+  }
 
-    .img-copertina {
-        width: 90%;
-        max-width: 260px;
-    }
+  .overlay {
+    padding: 10px;
+    margin-top: 10px;
+  }
 
-    .titolo-home {
-        font-size: 26px;
-    }
+  .cover-img {
+    width: 92%;
+    max-width: 480px;
+    margin-bottom: 20px;
+  }
 
-    .btn-home, .btn-cambia {
-        width: 80%;
-        font-size: 16px;
-        padding: 12px 20px;
-    }
+  .btn-enter {
+    font-size: 1.05em;
+    padding: 12px 32px;
+  }
 
-    .home-container {
-        margin-top: 20px;
-        padding: 10px;
-    }
+  .btn-name {
+    bottom: 15px;
+    right: 15px;
+    padding: 8px 18px;
+    font-size: 0.9em;
+  }
+}
+
+/* === RESPONSIVE EXTRA SMALL (telefoni molto piccoli) === */
+@media (max-width: 480px) {
+  .cover-img {
+    width: 95%;
+  }
+
+  .btn-enter {
+    font-size: 0.95em;
+    padding: 10px 26px;
+  }
 }
