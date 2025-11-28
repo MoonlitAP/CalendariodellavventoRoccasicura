@@ -12,6 +12,7 @@ body.home {
   position: relative;
 }
 
+
 /* Contenitore immagine + bottone */
 .overlay {
   position: relative;
@@ -142,3 +143,4 @@ body.home {
     padding: 10px 26px;
   }
 }
+
