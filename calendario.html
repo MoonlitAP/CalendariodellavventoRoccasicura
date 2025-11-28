@@ -13,33 +13,32 @@
 
 <body class="calendar">
 
-  <!-- 0️⃣ Benvenuto -->
   <p id="benvenuto" class="benvenuto"></p>
 
   <script>
     const nome = localStorage.getItem("utente") || "Ospite";
-    document.getElementById("benvenuto").textContent = `🎅 CIAOO! SEI PRONTO?, ${nome}!`;
+    document.getElementById("benvenuto").textContent = `🎅 Bentornato, ${nome}!`;
   </script>
 
-  <!-- 1️⃣ Immagine superiore -->
   <section class="top-image">
-    <img src="immagini/copertina/cover.png" alt="Calendario dell’Avvento" class="home-top-img">
+    <img src="immagini/copertina/cover.png" class="home-top-img">
   </section>
 
-  <!-- 2️⃣ Griglia dei giorni -->
   <section class="calendar-section">
     <div class="calendar-grid" id="calendar-grid"></div>
   </section>
 
-  <!-- 3️⃣ Popup -->
+  <!-- Popup -->
   <div id="popup" class="popup hidden">
     <div class="popup-content">
-      <p id="popup-text"></p>
+      <h2>⏳ Non ancora disponibile</h2>
+      <p>Mancano ancora</p>
+      <p id="countdown" class="countdown"></p>
+      <p>per l’apertura di questo giorno 🎁</p>
       <button id="close-popup">Chiudi</button>
     </div>
   </div>
 
-  <!-- 4️⃣ Bottone cambia nome (in basso) -->
   <section class="bottom-buttons">
     <button onclick="cambiaNome()" class="btn-change-name">✏️ Cambia nome</button>
   </section>
