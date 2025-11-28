@@ -107,16 +107,16 @@ body.home {
 
 /* === RESPONSIVE PER SMARTPHONE === */
 @media (max-width: 768px) {
-  body.home {
-    height: auto;
-    padding: 25px 0;
-    display: block;
+  .cover-img {
+    width: 95%;
+    max-width: 420px;
   }
 
   .overlay {
-    padding: 10px;
     margin-top: 10px;
   }
+}
+
 
   .cover-img {
     width: 92%;
@@ -148,5 +148,6 @@ body.home {
     padding: 10px 26px;
   }
 }
+
 
 
