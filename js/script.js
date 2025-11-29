@@ -1,28 +1,34 @@
 /* ============================================================
-   📌 GESTIONE NOME UTENTE
+   📌 GESTIONE NOME UTENTE (CON POPUP BELLO)
 ============================================================ */
 
+// ELEMENTI POPUP
+const popupNome = document.getElementById("name-popup");
+const inputNome = document.getElementById("input-nome");
+const btnSalvaNome = document.getElementById("btn-salva-nome");
+
+// Controllo nome salvato
 let utente = localStorage.getItem("utente");
 
+// Se non esiste → apri popup
 if (!utente) {
-    utente = prompt("🎄 Benvenuto! Inserisci il tuo nome:");
-    if (!utente || utente.trim() === "") utente = "Ospite";
-    localStorage.setItem("utente", utente);
+    popupNome.classList.remove("hidden");
 }
 
-// Funzione bottone ENTRA
-function entra() {
-    window.location.href = "calendario.html";
-}
+// Salva nome dal popup
+btnSalvaNome.addEventListener("click", () => {
+    let nome = inputNome.value.trim();
+    if (nome === "") nome = "Ospite";
 
-// Funzione CAMBIA NOME
+    localStorage.setItem("utente", nome);
+    popupNome.classList.add("hidden");
+    location.reload();
+});
+
+// Cambia nome (apre di nuovo il popup)
 function cambiaNome() {
-    let nuovoNome = prompt("Inserisci il nuovo nome:");
-    if (nuovoNome && nuovoNome.trim() !== "") {
-        localStorage.setItem("utente", nuovoNome.trim());
-        alert("Nome aggiornato!");
-        location.reload();
-    }
+    popupNome.classList.remove("hidden");
+    inputNome.value = "";
 }
 
 
@@ -45,7 +51,6 @@ for (let i = 1; i <= 24; i++) {
 
     box.innerHTML = `
         <img src="immagini/giorni/${i}.png" class="day-img" alt="Giorno ${i}">
-        <span class="day-number">${i}</span>
     `;
 
     box.addEventListener("click", () => gestisciClick(i));
@@ -68,12 +73,9 @@ function gestisciClick(giorno) {
     const oggi = new Date();
     const apertura = dataApertura(giorno);
 
-    // Se il giorno è già sbloccato → apri pagina
     if (oggi >= apertura) {
         window.location.href = `giornate/${giorno}.html`;
     } 
-    
-    // Altrimenti → mostra popup con countdown
     else {
         mostraPopup(apertura);
     }
@@ -104,7 +106,6 @@ function mostraPopup(apertura) {
     }, 1000);
 }
 
-// Chiudi popup
 closeBtn.addEventListener("click", () => {
     popup.classList.add("hidden");
     clearInterval(timerInterval);
