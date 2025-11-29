@@ -105,6 +105,65 @@ body.home {
 
 
 /* =====================================================================
+   📝 POPUP INSERIMENTO NOME
+===================================================================== */
+
+.name-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.hidden {
+  display: none;
+}
+
+.popup-box {
+  background: #fff;
+  color: #7b0412;
+  padding: 25px;
+  border-radius: 20px;
+  width: 85%;
+  max-width: 350px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.popup-box h2 {
+  margin: 0 0 10px 0;
+}
+
+.popup-box input {
+  width: 90%;
+  padding: 10px;
+  font-size: 1em;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 2px solid #7b0412;
+  outline: none;
+}
+
+.popup-box button {
+  margin-top: 15px;
+  background: #7b0412;
+  color: white;
+  padding: 10px 25px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.popup-box button:hover {
+  background: #b71c1c;
+}
+
+
+/* =====================================================================
    🎁 CALENDARIO (calendario.html)
    >>> VERSIONE CLEAN COME RICHIESTO <<<
 ===================================================================== */
@@ -304,5 +363,6 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
 
