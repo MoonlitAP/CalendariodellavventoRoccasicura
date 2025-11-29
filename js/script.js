@@ -43,40 +43,76 @@ function cambiaNome() {
 /* ============================================================
    📅 GENERA CASELLE 1-24 + POSIZIONAMENTO SPECIALE DEL 25
 ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const grid = document.querySelector(".calendar-grid");
+  const popup = document.getElementById("popup");
+  const popupText = document.getElementById("popup-text");
+  const closePopup = document.getElementById("close-popup");
+  let countdownInterval;
 
-const grid = document.getElementById("calendar-grid");
+  const oggi = new Date();
+  const anno = oggi.getFullYear();
+  const mese = 11; // Dicembre (0-based)
 
-function dataApertura(giorno) {
-    return new Date(`2025-12-${String(giorno).padStart(2, "0")}T00:00:00`);
-}
+  // 👉 CREA SOLO I GIORNI 1–24
+  for (let i = 1; i <= 24; i++) {
+    const dataGiorno = new Date(anno, mese, i);
+    const aperto = oggi >= dataGiorno;
 
-/* ---- CREA I GIORNI 1 → 24 IN ORDINE NORMALE ---- */
-for (let i = 1; i <= 24; i++) {
     const box = document.createElement("div");
-    box.classList.add("day-box");
+    box.classList.add("day-box");  // nessuna classe speciale per il 25
 
-    box.innerHTML = `
-        <img src="immagini/giorni/${i}.png" class="day-image" alt="Giorno ${i}">
-    `;
+    const img = document.createElement("img");
+    img.src = `immagini/giorni/${i}.png`;
+    img.alt = "";        // ⛔ niente testo visibile
+    img.classList.add("day-image");
+    box.appendChild(img);
 
-    box.addEventListener("click", () => gestisciClick(i));
+    // CLICK
+    box.addEventListener("click", () => {
+      clearInterval(countdownInterval);
+
+      if (aperto) {
+        window.location.href = `giorni/${i}.html`;
+      } else {
+        popup.classList.remove("hidden");
+        aggiornaCountdown(dataGiorno);
+        countdownInterval = setInterval(() => aggiornaCountdown(dataGiorno), 1000);
+      }
+    });
+
     grid.appendChild(box);
-}
+  }
 
-/* ---- CREA IL GIORNO 25 E LO METTE IN RIGA 8 - COLONNA 2 ---- */
-const box25 = document.createElement("div");
-box25.classList.add("day-box", "day-special");
+  function aggiornaCountdown(targetDate) {
+    const now = new Date();
+    const diff = targetDate - now;
 
-box25.innerHTML = `
-    <img src="immagini/giorni/25.png" class="day-image" alt="Giorno 25">
-`;
+    if (diff <= 0) {
+      popupText.innerHTML = "🎁 È arrivato il momento!";
+      clearInterval(countdownInterval);
+      return;
+    }
 
-box25.style.gridColumn = "2";   // colonna centrale
-box25.style.gridRow = "8";      // dopo le prime 7 righe
-box25.addEventListener("click", () => gestisciClick(25));
+    const giorni = Math.floor(diff / 86400000);
+    const ore = Math.floor((diff / 3600000) % 24);
+    const minuti = Math.floor((diff / 60000) % 60);
+    const secondi = Math.floor((diff / 1000) % 60);
 
-grid.appendChild(box25);
+    popupText.innerHTML = `
+      ⏳ Non ancora disponibile<br><br>
+      <strong style="color:#b71c1c; font-size:1.4em;">
+        ${giorni} g : ${String(ore).padStart(2,'0')} h : ${String(minuti).padStart(2,'0')} m : ${String(secondi).padStart(2,'0')} s
+      </strong><br><br>
+      per l’apertura di questo giorno 🎁
+    `;
+  }
 
+  closePopup.addEventListener("click", () => {
+    popup.classList.add("hidden");
+    clearInterval(countdownInterval);
+  });
+});
 
 /* ============================================================
    ⏳ CLICK + POPUP CONTO ALLA ROVESCIA
@@ -128,3 +164,4 @@ closeBtn.addEventListener("click", () => {
     popup.classList.add("hidden");
     clearInterval(timerInterval);
 });
+
