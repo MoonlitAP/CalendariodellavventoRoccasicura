@@ -61,7 +61,6 @@ body.home {
   transform: scale(1.07);
 }
 
-/* Bottone Cambia Nome */
 .btn-name {
   position: fixed;
   bottom: 25px;
@@ -107,6 +106,7 @@ body.home {
 
 /* =====================================================================
    🎁 CALENDARIO (calendario.html)
+   >>> VERSIONE CLEAN COME RICHIESTO <<<
 ===================================================================== */
 
 body.calendar {
@@ -139,55 +139,61 @@ body.calendar {
   margin: auto;
 }
 
-/* Caselle dei giorni */
-/* CASELLE - finestra 4:5 con cornice sottile */
+/* === CASELLE SOLO IMMAGINE — ZERO CORNICI === */
 .day-box {
-  aspect-ratio: 4 / 5;
-  background: none;
-  padding: 0;
+  background: none !important;
+  padding: 0 !important;
   cursor: pointer;
-  position: relative;
   transition: transform .2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .day-box:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
-/* Cornice 1 cm (~10px) elegante */
 .day-img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border: 10px solid #f3e4e4; /* colore elegante chiaro */
-  border-radius: 12px;
+  height: auto;
+
+  object-fit: contain;
+
+  /* RIMUOVO TUTTE LE COSE CHE NON VUOI */
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
+/* Rimuove completamente i numeri */
+.day-number {
+  display: none !important;
+}
 
-
-/* === CASELLA SPECIALE 25 === */
+/* === CASELLA 25 — IDENTICA ALLE ALTRE === */
 .special-25 {
-  margin: 35px auto 0 auto;
-  width: 60%;
-  max-width: 300px;
-  background: #fff2f2;
-  border-radius: 20px;
-  padding: 15px;
-  text-align: center;
-  transition: .2s;
+  background: none !important;
+  margin-top: 20px;
+  padding: 0 !important;
   cursor: pointer;
+  transition: transform .2s;
 }
 
 .special-25:hover {
-  transform: scale(1.07);
+  transform: scale(1.03);
+}
+
+.special-25 .day-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .special-25 .day-number {
-  font-size: 2em;
-  color: #b71c1c;
+  display: none !important;
 }
 
 
