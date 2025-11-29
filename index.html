@@ -14,28 +14,30 @@
 
 <body class="home">
 
-    <!-- CONTENITORE PRINCIPALE -->
+    <!-- POPUP INSERIMENTO NOME -->
+    <div id="name-popup" class="name-popup hidden">
+        <div class="popup-box">
+            <h2>🎄 Benvenuto!</h2>
+            <p>Inserisci il tuo nome</p>
+
+            <input id="input-nome" type="text" placeholder="Il tuo nome">
+
+            <button id="btn-salva-nome">Salva</button>
+        </div>
+    </div>
+
+    <!-- CONTENITORE COPERTINA -->
     <div class="overlay">
         <img src="immagini/copertina/cover.png" alt="Calendario dell’Avvento" class="cover-img">
-
-        <a href="calendario.html" class="btn-enter">ENTRARE</a>
     </div>
 
-    <!-- BOTTONE CAMBIA NOME -->
-    <button class="btn-name" onclick="cambiaNome()">✏️ Cambia nome</button>
+    <!-- BOTTONE ENTRARE (basso centrale) -->
+    <a href="calendario.html" class="btn-enter-home">ENTRARE</a>
 
-    <!-- POPUP INSERIMENTO NOME -->
-<div id="name-popup" class="name-popup hidden">
-    <div class="popup-box">
-        <h2>🎄 Benvenuto!</h2>
-        <p>Inserisci il tuo nome</p>
-        <input id="input-nome" type="text" placeholder="Il tuo nome">
-        <button id="btn-salva-nome">Salva</button>
-    </div>
-</div>
+    <!-- BOTTONE CAMBIA NOME (basso sinistra) -->
+    <button class="btn-name-home" onclick="cambiaNome()">✏️ Cambia nome</button>
 
     <!-- SCRIPT -->
     <script src="js/script.js"></script>
 </body>
 </html>
-
