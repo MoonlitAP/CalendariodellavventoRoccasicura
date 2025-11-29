@@ -109,14 +109,32 @@ body.home {
    📱 VERSIONE MOBILE (max 768px)
 ===================================================================== */
 
+
 @media (max-width: 768px) {
 
-  /* Immagine più grande e ben centrata */
+  body.home {
+    padding-top: 40px;
+    padding-bottom: 120px; /* ➜ aggiunge spazio sotto l’immagine */
+  }
+
+  .overlay {
+    margin-top: 20px;
+  }
+
   .cover-img {
     width: 95%;
-    margin-top: 20px;
-    margin-bottom: 25px;
+    margin-top: 40px;     /* ➜ spinge l’immagine un po’ più giù */
+    margin-bottom: 40px;
   }
+
+  .btn-enter {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: 15px;
+  }
+}
 
   /* ENTRARE ora NON è fisso in basso,
      ma diventa un normale bottone sopra l'immagine */
@@ -402,6 +420,7 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
 
 
