@@ -10,9 +10,22 @@ body {
   margin: 0;
   font-family: 'Ubuntu', sans-serif;
 }
+/* =====================================================================
+   🎄 STILE GENERALE
+===================================================================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+
 
 /* =====================================================================
-   🎅 HOME PRINCIPALE (home.html)
+   🎅 HOME PRINCIPALE (index.html)
 ===================================================================== */
 
 body.home {
@@ -34,24 +47,27 @@ body.home {
   margin-top: 20px;
 }
 
+/* Immagine centrale grande */
 .cover-img {
-  width: 70%;
+  width: 80%;
   max-width: 1100px;
-  filter: brightness(0.95);
+  filter: brightness(0.96);
   pointer-events: none;
-  transition: transform .3s;
+  transition: transform 0.3s ease;
 }
 
-/* ============================================================
-   BOTTONE ENTRARE (BASSO CENTRALE)
-============================================================ */
-.btn-enter-home,
+
+
+/* =====================================================================
+   🔘 BOTTONE ENTRARE (BASSO CENTRALE)
+===================================================================== */
+
 .btn-enter {
   position: fixed;
   bottom: 25px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #f3e4e4;
+  background-color: #ffffff;
   color: #000;
   padding: 14px 42px;
   border-radius: 40px;
@@ -59,28 +75,29 @@ body.home {
   font-size: 1.3em;
   text-decoration: none;
   box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-  transition: .3s;
+  transition: 0.3s;
   z-index: 9998;
 }
 
-.btn-enter-home:hover,
 .btn-enter:hover {
   background-color: #b71c1c;
   color: #fff;
   transform: translateX(-50%) scale(1.07);
 }
 
-/* ============================================================
-   BOTTONE CAMBIA NOME (BASSO SINISTRA)
-============================================================ */
-.btn-name-home,
+
+
+/* =====================================================================
+   ✏️ BOTTONE CAMBIA NOME (BASSO SINISTRA)
+===================================================================== */
+
 .btn-name {
   position: fixed;
   bottom: 25px;
   left: 25px;
   padding: 10px 22px;
   border: none;
-  border-radius: 20px;
+  border-radius: 30px;
   font-weight: bold;
   background: #f3e4e4;
   color: #000;
@@ -89,28 +106,30 @@ body.home {
   z-index: 9999;
 }
 
-.btn-name-home:hover,
 .btn-name:hover {
   background: #b71c1c;
   color: white;
 }
 
-/* MOBILE */
+
+
+/* =====================================================================
+   📱 VERSIONE MOBILE
+===================================================================== */
+
 @media (max-width: 768px) {
 
   .cover-img {
-    width: 92%;
-    max-width: 420px;
+    width: 90%;
+    max-width: 500px;
   }
 
-  .btn-enter-home,
   .btn-enter {
     font-size: 1.1em;
     padding: 12px 30px;
     bottom: 20px;
   }
 
-  .btn-name-home,
   .btn-name {
     padding: 10px 20px;
     bottom: 20px;
@@ -135,7 +154,7 @@ body.home {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .popup-box {
@@ -143,7 +162,7 @@ body.home {
   color: #7b0412;
   padding: 25px;
   border-radius: 20px;
-  width: 85%;
+  width: 90%;
   max-width: 350px;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
@@ -379,6 +398,7 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
 
 
