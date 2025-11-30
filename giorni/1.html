@@ -3,49 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎄 Giorno 1 – Puzzle Natalizio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>🎅 Giorno 1 – Babbo Natale raccogli i regali!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     body {
-      font-family: 'Ubuntu', sans-serif;
-      background-color: #7b0412;
-      color: white;
-      text-align: center;
-      padding: 20px;
       margin: 0;
+      background-color: #7b0412;
+      overflow: hidden;
+      font-family: 'Ubuntu', sans-serif;
+      color: #fff;
+      text-align: center;
     }
 
-    h1 { color: #ffd700; margin-bottom: 5px; }
-    h2 { font-size: 1.1em; font-weight: normal; margin-top: 0; color: #fff8d9; }
+    h1 {
+      margin: 10px 0;
+      color: #ffd700;
+    }
 
-    .timer { font-size: 1.3em; margin: 15px 0; color: #00ff99; }
+    .info {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 1.1em;
+      border: 1px solid #f5d97c;
+    }
 
-    .puzzle-container {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(3, 100px);
-      gap: 4px;
-      justify-content: center;
-      margin: 30px auto;
-      background-color: rgba(255,255,255,0.1);
+    canvas {
+      display: block;
+      margin: 20px auto 0;
+      background: url("../img/gioco1_sfondo.png") center/cover no-repeat;
+      border: 3px solid #f5d97c;
       border-radius: 10px;
-      padding: 5px;
+      touch-action: none;
     }
 
-    .piece {
-      width: 100px;
-      height: 100px;
-      background-image: url("../img/puzzle_natale.jpg");
-      background-size: 300px 300px;
-      border-radius: 6px;
-      cursor: grab;
-      transition: transform 0.2s, box-shadow 0.3s;
+    .boom {
+      position: absolute;
+      font-size: 2em;
+      color: #ff5555;
+      animation: fadeBoom 0.8s ease-out forwards;
     }
 
-    .piece.dragging { opacity: 0.7; transform: scale(1.05); box-shadow: 0 0 10px rgba(255,255,255,0.6); }
-    .piece.locked { cursor: default; box-shadow: 0 0 15px #00ff99; opacity: 0.95; }
+    @keyframes fadeBoom {
+      from { opacity: 1; transform: translateY(-20px) scale(1); }
+      to { opacity: 0; transform: translateY(-80px) scale(1.8); }
+    }
 
-    .btn {
+    .btn-back {
       display: inline-block;
       margin-top: 20px;
       background-color: #f3e4e4;
@@ -57,29 +66,23 @@
       transition: all 0.3s ease;
     }
 
-    .btn:hover { background-color: #b71c1c; color: white; transform: scale(1.05); }
+    .btn-back:hover {
+      background-color:#7b0412;
+      color: white;
+      transform: scale(1.05);
+    }
 
-    /* === CLASSIFICA === */
     .leaderboard {
-      margin-top: 40px;
+      margin-top: 15px;
       background-color: rgba(255,255,255,0.1);
       padding: 15px;
       border-radius: 10px;
       width: fit-content;
       margin-inline: auto;
-      transition: all 0.4s ease;
-      transform: scale(0.9);
-      opacity: 0;
-    }
-
-    .leaderboard.visible {
-      opacity: 1;
-      transform: scale(1);
     }
 
     .leaderboard table {
       border-collapse: collapse;
-      width: 100%;
       color: white;
     }
 
@@ -87,211 +90,238 @@
       border-bottom: 1px solid #f5d97c;
       padding: 6px 12px;
     }
-
-    /* === POPUP === */
-    .popup {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      visibility: hidden;
-      opacity: 0;
-      transition: all 0.4s ease;
-    }
-
-    .popup.active {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .popup-content {
-      background: #fffaf2;
-      color: #400000;
-      border-radius: 15px;
-      padding: 25px 40px;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(255,255,255,0.3);
-      animation: bounceIn 0.8s ease;
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      70% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-
-    .popup button {
-      margin-top: 15px;
-      background-color: #b71c1c;
-      color: white;
-      border: none;
-      padding: 10px 25px;
-      border-radius: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .popup button:hover {
-      background-color: #ffd700;
-      color: #000;
-    }
-
-    @media (max-width: 600px) {
-      .puzzle-container { grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); }
-      .piece { width: 80px; height: 80px; background-size: 240px 240px; }
-      .popup-content { width: 80%; padding: 20px; }
-    }
   </style>
 </head>
+
 <body>
 
-  <h1>🎁 Giorno 1 – Ricomponi il Puzzle!</h1>
-  <h2 id="utente-nome"></h2>
-  <div class="timer" id="timer">⏱ Tempo: 0s</div>
+  <h1>🎅 Giorno 1 – Babbo Natale raccogli i regali!</h1>
 
-  <div class="puzzle-container" id="puzzle"></div>
+  <canvas id="game"></canvas>
+  <div class="info" id="info">🎁 Punteggio: 0 | ⏱️ Tempo: 60s</div>
 
-  <div class="leaderboard" id="leaderboard">
-    <h3>🏆 Classifica locale</h3>
-    <table id="score-table">
-      <tr><th>Nome</th><th>Tempo (s)</th></tr>
-    </table>
-  </div>
+  <div id="fine" style="display:none;">
+    <h2 id="messaggio"></h2>
 
-  <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
-
-  <!-- 🎉 POPUP FINALE -->
-  <div class="popup" id="popup">
-    <div class="popup-content">
-      <h2>🎉 Complimenti!</h2>
-      <p id="popup-text"></p>
-      <button id="close-popup">Vedi Classifica 🏆</button>
+    <div class="leaderboard" id="leaderboard">
+      <h3>🏆 Classifica locale</h3>
+      <table id="score-table">
+        <tr><th>Nome</th><th>Punti</th></tr>
+      </table>
     </div>
+
+    <a href="../calendario.html" class="btn-back">⬅ Torna al Calendario</a>
   </div>
 
   <script>
-    // === RECUPERA IL NOME SALVATO ===
-    const utente = localStorage.getItem("utente") || "Ospite";
-    document.getElementById("utente-nome").textContent = `🎅 Buona fortuna, ${utente}!`;
+    const nome = localStorage.getItem("utente") || "Ospite";
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-    const container = document.getElementById('puzzle');
-    const timerDisplay = document.getElementById('timer');
-    const popup = document.getElementById('popup');
-    const popupText = document.getElementById('popup-text');
-    const leaderboard = document.getElementById('leaderboard');
-    const table = document.getElementById('score-table');
-    const closePopup = document.getElementById('close-popup');
-
-    let startTime = Date.now();
-    let completato = false;
-    const size = 3;
-    const pezzi = [];
-
-    // TIMER
-    setInterval(() => {
-      if (!completato) {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        timerDisplay.textContent = `⏱ Tempo: ${elapsed}s`;
+    // 🪟 Adatta per PC e smartphone
+    function resizeCanvas() {
+      if (window.innerWidth < 700) {
+        canvas.width = window.innerWidth - 20;
+        canvas.height = window.innerHeight * 0.6;
+      } else {
+        canvas.width = 900;
+        canvas.height = 500;
       }
-    }, 1000);
-
-    // CREA PEZZI
-    for (let i = 0; i < 9; i++) {
-      const piece = document.createElement('div');
-      piece.classList.add('piece');
-      const x = (i % size) * 100;
-      const y = Math.floor(i / size) * 100;
-      piece.style.backgroundPosition = `-${x}px -${y}px`;
-      piece.dataset.row = Math.floor(i / size);
-      piece.dataset.col = i % size;
-      pezzi.push(piece);
     }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
-    pezzi.sort(() => Math.random() - 0.5);
-    pezzi.forEach((p, i) => {
-      p.style.gridRowStart = Math.floor(i / size) + 1;
-      p.style.gridColumnStart = (i % size) + 1;
-      p.draggable = true;
-      container.appendChild(p);
-    });
+    // 🎅 Babbo Natale
+    const santa = { 
+      x: 100, 
+      y: canvas.height - 120, 
+      w: 70, 
+      h: 90, 
+      vy: 0, 
+      jumping: false, 
+      speed: 6 
+    };
+    const santaImg = new Image();
+    santaImg.src = "https://icons.iconarchive.com/icons/iconshock/merry-christmas/128/santa-claus-icon.png";
 
-    let dragged = null;
+    // 🎁 Regali e 💣 Bombe
+    const giftImg = new Image();
+    giftImg.src = "../img/gift.png";
 
-    pezzi.forEach(p => {
-      p.addEventListener("dragstart", e => {
-        if (p.classList.contains("locked")) { e.preventDefault(); return; }
-        dragged = p; p.classList.add("dragging");
-      });
-      p.addEventListener("dragend", () => p.classList.remove("dragging"));
-      p.addEventListener("dragover", e => { if (!p.classList.contains("locked")) e.preventDefault(); });
-      p.addEventListener("drop", () => {
-        if (p.classList.contains("locked") || dragged.classList.contains("locked")) return;
-        const tempRow = p.style.gridRowStart;
-        const tempCol = p.style.gridColumnStart;
-        p.style.gridRowStart = dragged.style.gridRowStart;
-        p.style.gridColumnStart = dragged.style.gridColumnStart;
-        dragged.style.gridRowStart = tempRow;
-        dragged.style.gridColumnStart = tempCol;
-        checkAndLock();
-      });
-    });
+    const bombImg = new Image();
+    bombImg.src = "../img/bomba.png";
 
-    function checkAndLock() {
-      let tuttiGiusti = true;
-      pezzi.forEach(p => {
-        const correctRow = parseInt(p.dataset.row) + 1;
-        const correctCol = parseInt(p.dataset.col) + 1;
-        const currentRow = parseInt(p.style.gridRowStart);
-        const currentCol = parseInt(p.style.gridColumnStart);
-        if (correctRow === currentRow && correctCol === currentCol) {
-          if (!p.classList.contains("locked")) {
-            p.classList.add("locked");
-            p.draggable = false;
-          }
-        } else tuttiGiusti = false;
-      });
+    let objects = [];
+    const keys = {};
 
-      if (tuttiGiusti && !completato) {
-        completato = true;
-        const totalTime = Math.floor((Date.now() - startTime) / 1000);
-        popupText.textContent = `${utente}, hai completato il puzzle in ${totalTime} secondi! 🎄`;
-        popup.classList.add("active");
-        salvaPunteggio(utente, totalTime);
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+
+    canvas.addEventListener("mousedown", jump);
+    canvas.addEventListener("touchstart", jump);
+
+    function jump() {
+      if (!santa.jumping) {
+        santa.vy = -12;
+        santa.jumping = true;
       }
     }
 
-    closePopup.addEventListener("click", () => {
-      popup.classList.remove("active");
-      leaderboard.classList.add("visible");
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    canvas.addEventListener("mousemove", e => {
+      if (e.buttons > 0) {
+        const rect = canvas.getBoundingClientRect();
+        santa.x = e.clientX - rect.left - santa.w / 2;
+      }
     });
 
-    function salvaPunteggio(nome, tempo) {
+    let touchX = null;
+    canvas.addEventListener("touchmove", e => {
+      const delta = e.touches[0].clientX - (touchX || e.touches[0].clientX);
+      santa.x += delta * 0.2;
+      touchX = e.touches[0].clientX;
+    });
+    canvas.addEventListener("touchend", () => { touchX = null; });
+
+    // 🕓 Timer
+    let score = 0;
+    let timeLeft = 60;
+
+    function updateTimer() {
+      const interval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    // 🎲 Regali e bombe
+    function spawnObject() {
+      const isBomb = Math.random() < 0.25;
+      const obj = {
+        x: Math.random() * (canvas.width - 40),
+        y: canvas.height - 160 - Math.random() * 100,
+        size: 40,
+        type: isBomb ? "bomb" : "gift",
+        collected: false
+      };
+      objects.push(obj);
+
+      setTimeout(() => {
+        obj.fade = true;
+        setTimeout(() => {
+          objects = objects.filter(o => o !== obj);
+        }, 400);
+      }, 2000);
+    }
+    setInterval(spawnObject, 1500);
+
+    function moveSanta() {
+      if (keys["ArrowLeft"]) santa.x -= santa.speed;
+      if (keys["ArrowRight"]) santa.x += santa.speed;
+      if (keys[" "] && !santa.jumping) jump();
+
+      santa.y += santa.vy;
+      santa.vy += 0.6;
+
+      if (santa.y > canvas.height - 120) {
+        santa.y = canvas.height - 120;
+        santa.vy = 0;
+        santa.jumping = false;
+      }
+
+      if (santa.x < 0) santa.x = 0;
+      if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
+    }
+
+    function boomEffect(x, y) {
+      const boom = document.createElement("div");
+      boom.textContent = "💥 -5";
+      boom.classList.add("boom");
+      boom.style.left = `${x}px`;
+      boom.style.top = `${y}px`;
+      document.body.appendChild(boom);
+      setTimeout(() => boom.remove(), 800);
+    }
+
+    function checkCollisions() {
+      objects.forEach(o => {
+        if (!o.collected &&
+            santa.x < o.x + o.size &&
+            santa.x + santa.w > o.x &&
+            santa.y < o.y + o.size &&
+            santa.y + santa.h > o.y) {
+          
+          o.collected = true;
+
+          if (o.type === "gift") score += 10;
+          else { score -= 5; boomEffect(santa.x + 50, santa.y); }
+
+          objects = objects.filter(x => x !== o);
+        }
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
+
+      objects.forEach(o => {
+        ctx.globalAlpha = o.fade ? 0.5 : 1;
+        ctx.drawImage(o.type === "gift" ? giftImg : bombImg, o.x, o.y, o.size, o.size);
+        ctx.globalAlpha = 1;
+      });
+
+      document.getElementById("info").textContent = `🎁 ${nome} | Punti: ${score} | ⏱️ ${timeLeft}s`;
+    }
+
+    function gameLoop() {
+      moveSanta();
+      checkCollisions();
+      draw();
+      if (timeLeft > 0) requestAnimationFrame(gameLoop);
+    }
+
+    // 🏁 Fine gioco + classifica
+    function endGame() {
+      document.getElementById("fine").style.display = "block";
+      document.getElementById("messaggio").textContent =
+        `🎉 Bravo ${nome}! Hai totalizzato ${score} punti!`;
+
+      salvaPunteggio(nome, score);
+      mostraClassifica();
+    }
+
+    function salvaPunteggio(nome, punti) {
       const key = "punteggi_giorno1";
       let punteggi = JSON.parse(localStorage.getItem(key)) || [];
-      punteggi.push({ nome, tempo });
-      punteggi.sort((a, b) => a.tempo - b.tempo);
-      punteggi = punteggi.slice(0, 10);
+      punteggi.push({ nome, punti });
+      punteggi.sort((a, b) => b.punti - a.punti);
       localStorage.setItem(key, JSON.stringify(punteggi));
-      mostraClassifica();
     }
 
     function mostraClassifica() {
       const key = "punteggi_giorno1";
       const punteggi = JSON.parse(localStorage.getItem(key)) || [];
-      table.innerHTML = "<tr><th>Nome</th><th>Tempo (s)</th></tr>";
-      punteggi.forEach(p => {
+      const table = document.getElementById("score-table");
+
+      table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+      punteggi.slice(0, 10).forEach(p => {
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${p.nome}</td><td>${p.tempo}</td>`;
+        row.innerHTML = `<td>${p.nome}</td><td>${p.punti}</td>`;
         table.appendChild(row);
       });
     }
 
-    mostraClassifica();
+    santaImg.onload = () => {
+      updateTimer();
+      gameLoop();
+    };
   </script>
+
 </body>
 </html>
+
+
