@@ -1,89 +1,33 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario dell’Avvento – Comune di Roccasicura</title>
+body {
+    font-family: "Ubuntu", sans-serif;
+    padding: 40px;
+    max-width: 900px;
+    margin: auto;
+    background-color: #fafafa;
+    color: #222;
+    line-height: 1.6;
+}
 
-    <!-- FONT -->
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 30px;
+    color: #8b0000;
+}
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
-</head>
+h2 {
+    margin-top: 25px;
+    color: #8b0000;
+}
 
-<body class="home">
+p, ul {
+    font-size: 17px;
+    margin-bottom: 18px;
+}
 
-    <!-- ============================
-         POPUP ROSSO NATALIZIO CONSENSO
-    ================================== -->
-    <div id="consent-popup" class="popup hidden">
-        <div class="popup-box">
-            <h2>🎄 Benvenuto nel Calendario dell’Avvento 2025 🎄</h2>
-
-            <p>
-                Per continuare, ti informiamo che questo sito utilizza solo funzioni tecniche
-                necessarie (localStorage) per migliorare la tua esperienza.
-                Nessun dato personale viene raccolto o condiviso.
-            </p>
-
-            <p>
-                Puoi leggere i nostri:<br>
-                <a href="tem_cond/terms.html" target="_blank">📄 Termini e Condizioni</a><br>
-                <a href="privacy/privacy.html" target="_blank">🔒 Informativa Privacy</a> (in arrivo)
-            </p>
-
-            <button id="accept-btn">Accetto</button>
-        </div>
-    </div>
-
-
-
-
-    <!-- ============================
-         IMMAGINE CENTRALE + ENTRA
-    ================================== -->
-    <div class="overlay">
-        <img src="immagini/copertina/cover.png" alt="Calendario dell’Avvento" class="cover-img">
-
-        <!-- BOTTONE ENTRARE -->
-        <a href="calendario.html" class="btn-enter">ENTRARE</a>
-    </div>
-
-    <!-- BOTTONE CAMBIA NOME -->
-    <button class="btn-name" onclick="apriPopupNome()">✏️ Cambia nome</button>
-
-    <!-- POPUP INSERIMENTO NOME -->
-    <div id="name-popup" class="name-popup hidden">
-        <div class="popup-box">
-            <h2>🎄 Benvenuto!</h2>
-            <p>Inserisci il tuo nome</p>
-            <input id="input-nome" type="text" placeholder="Il tuo nome">
-            <button id="btn-salva-nome">Salva</button>
-        </div>
-    </div>
-
-
-    <!-- SCRIPT -->
-    <script src="js/script.js"></script>
-
-    <script>
-        // ===== POPUP CONSENSO =====
-        document.addEventListener("DOMContentLoaded", () => {
-            const popup = document.getElementById("consent-popup");
-            const acceptBtn = document.getElementById("accept-btn");
-
-            if (!localStorage.getItem("consentAccepted")) {
-                popup.classList.remove("hidden");
-            }
-
-            acceptBtn.addEventListener("click", () => {
-                localStorage.setItem("consentAccepted", "yes");
-                popup.classList.add("hidden");
-            });
-        });
-    </script>
-
-</body>
-</html>
+a {
+    color: #8b0000;
+    font-weight: bold;
+    text-decoration: underline;
+}
 
