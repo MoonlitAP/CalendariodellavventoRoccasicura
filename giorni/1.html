@@ -45,7 +45,6 @@
 
     /* POPUP CLASSIFICA */
     #fine {
-      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -54,7 +53,7 @@
       background: rgba(0,0,0,0.65);
       backdrop-filter: blur(4px);
       z-index: 9999;
-      display: flex;
+      display: none;
       justify-content: center;
       align-items: center;
     }
@@ -97,6 +96,7 @@
       border-radius: 30px;
       font-weight: bold;
       transition: 0.3s;
+      cursor: pointer;
     }
 
     .btn-back:hover {
@@ -123,6 +123,12 @@
         <tr><th>Nome</th><th>Punti</th></tr>
       </table>
 
+      <!-- Bottone RIPROVA -->
+      <button id="retry-btn" class="btn-back" style="background:#d41e1e; margin-bottom:15px;">
+        🔄 Riprova
+      </button>
+
+      <!-- Torna al Calendario -->
       <a href="../calendario.html" class="btn-back">
         ⬅ Torna al Calendario
       </a>
@@ -263,20 +269,14 @@
         `🎁 ${nome} | Punti: ${score} | ⏱️ ${timeLeft}s`;
     }
 
-function gameLoop() {
+    function gameLoop() {
+      moveSanta();
+      checkCollisions();
+      draw();
 
-  // 🔥 Nasconde la classifica appena riparte il gioco
-  document.getElementById("popup-classifica").style.display = "none";
-
-  moveSanta();
-  checkCollisions();
-  draw();
-  
-  if (timeLeft > 0) 
-      requestAnimationFrame(gameLoop);
-}
-
-
+      if (timeLeft > 0)
+        requestAnimationFrame(gameLoop);
+    }
 
     /* FINE GIOCO */
     function endGame() {
@@ -318,10 +318,17 @@ function gameLoop() {
       updateTimer();
       gameLoop();
     };
+
+    /* BOTTONE RIPROVA */
+    document.getElementById("retry-btn").addEventListener("click", () => {
+      location.reload();
+    });
+
   </script>
 
 </body>
 </html>
+
 
 
 
