@@ -433,47 +433,6 @@ body.calendar {
   background-color: #b71c1c;
 }
 
-/* === POPUP CLASSIFICA GIORNI === */
-.popup-classifica {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.classifica-box {
-  background: rgba(255, 255, 255, 0.12);
-  border: 2px solid #ffd700;
-  border-radius: 15px;
-  padding: 25px;
-  width: 90%;
-  max-width: 450px;
-  backdrop-filter: blur(4px);
-  text-align: center;
-}
-
-.classifica-box h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #ffd700;
-  font-size: 1.4em;
-}
-
-#score-table {
-  width: 100%;
-  border-collapse: collapse;
-  color: white;
-  margin-top: 10px;
-}
-
-#score-table th,
-#score-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #ffd700;
-  text-align: center;
-}
-
-
 
 
 
@@ -504,5 +463,6 @@ body.calendar {
     object-fit: cover;
   }
 }
+
 
 
