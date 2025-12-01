@@ -20,18 +20,18 @@ body {
   text-align: center;
 }
 
-/* 🖼️ CANVAS MOBILE FIX */
+/* 🖼️ CANVAS FIX MOBILE + SFONDO ORIZZONTALE */
 canvas {
   display: none;
   margin: 20px auto;
   border: 3px solid #ffd700;
-  border-radius: 10px;
+  border-radius: 12px;
 
-  /* FOTO ORIZZONTALE PERFETTA ANCHE IN VERTICALE */
+  /* Mostra tutta la foto senza tagliarla */
   background: url("../img/sfondo_bosco.jpg") center center / contain no-repeat;
 }
 
-h1 { color: #ffd700; margin-top: 10px; }
+h1 { color: #ffd700; margin-top: 12px; }
 
 .info {
   display: none;
@@ -40,45 +40,44 @@ h1 { color: #ffd700; margin-top: 10px; }
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.5);
-  padding: 8px 16px;
-  border: 1px solid #ffd700;
+  padding: 10px 16px;
   border-radius: 12px;
+  border: 1px solid #ffd700;
 }
 
 #start-screen, #fine {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.65);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
-
 #fine { display: none; }
 
 .start-box, .classifica-box {
   background: #fffaf2;
   color: #400000;
-  padding: 25px;
-  border-radius: 20px;
+  padding: 28px;
   border: 2px solid #ffd700;
+  border-radius: 18px;
   width: 90%;
   max-width: 420px;
 }
 
 .start-btn, .btn {
-  margin-top: 10px;
-  padding: 14px;
   width: 80%;
+  margin-top: 14px;
+  padding: 14px;
   border-radius: 30px;
   border: none;
   cursor: pointer;
-  font-weight: bold;
   background: #7b0412;
   color: white;
+  font-weight: bold;
 }
 .start-btn:hover, .btn:hover {
   background: #ffd700;
@@ -94,22 +93,29 @@ h1 { color: #ffd700; margin-top: 10px; }
 <!-- 🟢 SCHERMATA INIZIALE -->
 <div id="start-screen">
   <div class="start-box">
-    <p>🌲 Evita gli alberi<br>🦌 Premi per saltare<br>✨ Salto lungo fino a 15s<br>☁ Nuvole dopo 10s reali</p>
+    <p>
+      🌲 Evita gli alberi<br>
+      🦌 Premi per saltare<br>
+      ✨ Salto lungo fino a 15 secondi<br>
+      ☁ Nuvole dopo 10 secondi reali
+    </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
   </div>
 </div>
 
-<!-- 🟢 GIOCO -->
+<!-- 🟢 AREA DI GIOCO -->
 <canvas id="game"></canvas>
 <div class="info" id="info">Distanza: 0m</div>
 
-<!-- 🟢 FINE GIOCO -->
+<!-- 🟢 POPUP FINALE -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
     <h3>🏆 Top 10</h3>
-    <table id="score-table"><tr><th>Nome</th><th>Punti</th></tr></table>
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
     <button id="retry-btn" class="btn">🔄 Riprova</button>
     <a href="../calendario.html" class="btn">⬅ Calendario</a>
   </div>
@@ -135,10 +141,11 @@ const db = firebase.database();
 // USERNAME
 // --------------------------------------------------
 const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+const nomeMascherato =
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
 // --------------------------------------------------
-// CANVAS RESPONSIVE (MOBILE FIX)
+// CANVAS RESPONSIVE
 // --------------------------------------------------
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -169,6 +176,7 @@ cloudImg.src = "../img/cloud.png";
 // VARIABILI DI GIOCO
 // --------------------------------------------------
 let renna = { x: 120, y: 300, w: 110, h: 110, vy: 0, jumping: false };
+
 let ostacoli = [];
 let distanza = 0;
 let giocoTerminato = false;
@@ -182,7 +190,7 @@ let nuvole = [];
 let nuvoleAttive = false;
 
 // --------------------------------------------------
-// INPUT TOUCH + MOUSE + TASTI
+// INPUT
 // --------------------------------------------------
 function jump() {
   if (!renna.jumping) {
@@ -231,9 +239,9 @@ function generaNuvole() {
   const baseY = renna.y + 80;
 
   nuvole = [
-    { x: -250, y: baseY, w: 180, h: 120, speed: 6 },
-    { x: -450, y: baseY, w: 180, h: 120, speed: 6 },
-    { x: -650, y: baseY, w: 180, h: 120, speed: 6 }
+    { x: -150, y: baseY, w: 180, h: 120, speed: 5 },
+    { x: -300, y: baseY, w: 180, h: 120, speed: 5 },
+    { x: -450, y: baseY, w: 180, h: 120, speed: 5 }
   ];
 
   nuvoleAttive = true;
@@ -298,43 +306,40 @@ function caricaClassifica() {
 }
 
 // --------------------------------------------------
-// GAME LOOP
+// GAME LOOP (VERSIONE DEFINITIVA)
 // --------------------------------------------------
 function gameLoop() {
   if (giocoTerminato) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // ▶ TEMPO REALE DI SALTO (NON SI RESETTA SE BATTE IN ALTO)
+  // 🟢 TEMPO REALE DI VOLO
   if (renna.jumping && !nuvoleAttive) {
       tempoVoloReale += 1 / 60;
 
-    // salto lungo
       if (saltoLungo && tempoVoloReale < 15) {
           renna.vy = -6;
       }
   }
 
-// ▶ ATTIVA NUBI DOPO 10s (INDIPENDENTE DAI RIMBALZI)
-if (!nuvoleAttive && tempoVoloReale >= 10) {
-    generaNuvole();
-}
+  // 🟢 NUVOLE DOPO 10 SECONDI REALI
+  if (!nuvoleAttive && tempoVoloReale >= 10) {
+      generaNuvole();
+  }
 
-
-
-  // gravità
+  // 🟢 GRAVITÀ
   renna.y += renna.vy;
   renna.vy += 0.8;
 
-  // limite alto
-  if (renna.y < canvas.height * 0.02){
-    renna.y = canvas.height * 0.1;
-    renna.vy = 2;
+  // 🟢 LIMITE SUPERIORE
+  if (renna.y < canvas.height * 0.05) {
+    renna.y = canvas.height * 0.05;
+    renna.vy = 1;
   }
 
   const terreno = canvas.height - 150;
 
-  // terra
+  // 🟢 TERRA
   if (renna.y > terreno) {
     renna.y = terreno;
     renna.vy = 0;
@@ -343,23 +348,15 @@ if (!nuvoleAttive && tempoVoloReale >= 10) {
     nuvoleAttive = false;
   }
 
-  // disegna renna
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-if (!nuvoleAttive && !renna.jumping) {
-    ostacoli.forEach(o => {
-        if (
-          renna.x < o.x + o.w &&
-          renna.x + renna.w > o.x &&
-          renna.y < o.y + o.h &&
-          renna.y + renna.h > o.y
-        ) {
-          fineGioco();
-        }
-    });
-}
+  // 🟢 NUBI
+  if (nuvoleAttive) {
+    disegnaNuvole();
+    controllaAtterraggioNuvole();
+  }
 
-  // ostacoli
+  // 🟢 OSTACOLI
   gestisciOstacoli();
   ostacoli.forEach((o, i) => {
     o.x -= 6;
@@ -409,5 +406,3 @@ document.getElementById("retry-btn").onclick = () => location.reload();
 
 </body>
 </html>
-
-
