@@ -180,12 +180,17 @@ document.addEventListener("keyup", e => keys[e.key] = false);
 /* SALTO */
 function jump() {
   if (!santa.jumping) {
-    santa.vy = -14; // salto più forte🔥
+    santa.vy = -14; // salto forte 🔥
     santa.jumping = true;
   }
 }
-document.addEventListener("keypress", e => {
-  if (e.key === " " || e.key === "ArrowUp") jump();
+
+// ➤ SPACE + ARROW UP funzionali ovunque
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    e.preventDefault(); // evita scroll della pagina
+    jump();
+  }
 });
 
 /* MOUSE */
@@ -342,3 +347,4 @@ document.getElementById("retry-btn").addEventListener("click", () => location.re
 
 </body>
 </html>
+
