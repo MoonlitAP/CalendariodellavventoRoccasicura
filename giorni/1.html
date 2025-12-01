@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎅 Giorno 1 – Babbo Natale raccogli i regali!</title>
+
+  <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- FIREBASE -->
@@ -14,24 +16,13 @@
     body {
       margin: 0;
       background-color: #7b0412;
-      overflow-x: hidden;
       font-family: 'Ubuntu', sans-serif;
       color: #fff;
       text-align: center;
+      overflow-x: hidden;
     }
 
-    h1 { margin: 10px 0; color: #ffd700; }
-
-    .info {
-      position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-size: 1.1em;
-      border: 1px solid #f5d97c;
-      z-index: 20;
-    }
+    h1 { color: #ffd700; margin-top: 10px; }
 
     canvas {
       display: none;
@@ -40,6 +31,20 @@
       border: 3px solid #f5d97c;
       border-radius: 10px;
       touch-action: none;
+    }
+
+    .info {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid #f5d97c;
+      font-size: 1.1em;
+      z-index: 30;
     }
 
     /* POPUP FINALE */
@@ -59,7 +64,8 @@
       background: #fffaf2;
       padding: 25px;
       border-radius: 20px;
-      width: 90%; max-width: 450px;
+      width: 90%;
+      max-width: 450px;
       border: 2px solid #ffd700;
       color: #400000;
       animation: popup .4s ease-out;
@@ -70,66 +76,59 @@
       to   { transform: scale(1); opacity: 1; }
     }
 
-    .classifica-box table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    .classifica-box th, .classifica-box td {
-      padding: 8px;
-      border-bottom: 1px solid #d7bb5f;
-      text-align: center;
-    }
-
     .btn {
       display: inline-block;
-      margin-top: 20px;
-      background-color: #7b0412;
-      color: #fff;
+      margin-top: 15px;
       padding: 12px 30px;
       border-radius: 30px;
       font-weight: bold;
-      cursor: pointer;
       text-decoration: none;
+      cursor: pointer;
+      color: #fff;
+      background: #7b0412;
       transition: .3s;
     }
+    .btn:hover { background: #ffd700; color: #000; }
 
-    .btn:hover {
-      background: #ffd700;
-      color: #000;
-    }
-
-    /* OVERLAY INIZIALE */
-    #start-overlay {
+    /* MENU INIZIALE */
+    #start-screen {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.60);
       backdrop-filter: blur(4px);
+      z-index: 9998;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
     }
 
     .start-box {
       background: #fffaf2;
-      color: #400000;
-      padding: 25px;
-      width: 90%; max-width: 430px;
+      padding: 30px;
       border-radius: 20px;
-      text-align: center;
+      width: 90%;
+      max-width: 420px;
       border: 2px solid #ffd700;
-      animation: popup .4s ease-out;
+      color: #400000;
+      text-align: center;
     }
 
-    .start-description {
-      font-size: 1em;
-      margin: 10px 0 15px;
-      line-height: 1.4em;
+    .start-btn {
+      width: 80%;
+      margin: 10px auto;
+      padding: 14px;
+      border-radius: 30px;
+      font-size: 1.1em;
+      cursor: pointer;
+      background: #7b0412;
+      color: white;
+      border: none;
     }
+    .start-btn:hover { background: #ffd700; color: #000; }
 
+    table { width: 100%; margin-top: 15px; }
+    th, td { padding: 8px; text-align: center; border-bottom: 1px solid #d7bb5f; }
   </style>
 </head>
 
@@ -137,36 +136,27 @@
 
 <h1>🎅 Giorno 1 – Babbo Natale raccogli i regali!</h1>
 
-<!-- OVERLAY INIZIALE -->
-<div id="start-overlay">
+<!-- MENU INIZIALE -->
+<div id="start-screen">
   <div class="start-box">
-    <h2>🎄 Sei pronto a giocare?</h2>
+    <h2>🎄 Inizia il Gioco!</h2>
+    <p>Muovi Babbo Natale a destra e sinistra <br>
+       e raccogli più regali possibile evitando le bombe.</p>
 
-    <p class="start-description">
-      Muovi Babbo Natale <b>a destra e sinistra</b>  
-      usando il dito, il mouse o le frecce.   
-      Tocca / clicca o premi <b>SPACE</b> per saltare!  
-      Raccogli quanti più regali puoi 🎁  
-      e <b>evita le bombe</b> 💣.
-    </p>
-
-    <button id="start-btn" class="btn">▶ Inizia il Gioco</button>
-    <button id="view-classifica" class="btn" style="background:#b68c00;margin-top:10px;">
-      🏆 Vedi Classifica Globale
-    </button>
+    <button id="btn-start" class="start-btn">▶️ INIZIA GIOCO</button>
+    <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA GLOBALE</button>
   </div>
 </div>
 
 <canvas id="game"></canvas>
-<div id="info" class="info">🎁 Punteggio: 0 | ⏱️ 60s</div>
+<div class="info" id="info">🎁 Punteggio: 0 | ⏱️ 60s</div>
 
-<!-- POPUP FINALE -->
+<!-- POPUP CLASSIFICA -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
 
-    <h3>🏆 Classifica Globale</h3>
-
+    <h3>🏆 Top 10 Globale</h3>
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
     </table>
@@ -177,7 +167,9 @@
 </div>
 
 <script>
-/* FIREBASE CONFIG */
+/* =======================================================
+   🔥 FIREBASE CONFIG
+======================================================= */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
@@ -187,18 +179,21 @@ firebase.initializeApp({
   messagingSenderId: "38731898044",
   appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
 });
-
 const db = firebase.database();
 
-/* NOME MASCHERATO */
+/* =======================================================
+   🎭 NOME MASCHERATO
+======================================================= */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+const nomeMascherato =
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-/* CANVAS */
+/* =======================================================
+   🎮 CANVAS CONFIG
+======================================================= */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* RESIZE */
 function resizeCanvas() {
   if (window.innerWidth < 700) {
     canvas.width = window.innerWidth - 20;
@@ -211,73 +206,96 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* PERSONAGGIO */
-const santa = { x:100, y:canvas.height-120, w:70, h:90, vy:0, jumping:false, speed:12 };
+/* =======================================================
+   🎅 SANTA
+======================================================= */
+const santa = {
+  x: 100,
+  y: canvas.height - 120,
+  w: 70, h: 90,
+  vy: 0,
+  jumping: false,
+  speed: 12
+};
+
 const santaImg = new Image();
 santaImg.src = "../img/babbo.png";
 
 /* OGGETTI */
-const giftImg = new Image(); giftImg.src = "../img/gift.png";
-const bombImg = new Image(); bombImg.src = "../img/bomba.png";
+const giftImg = new Image();
+giftImg.src = "../img/gift.png";
+const bombImg = new Image();
+bombImg.src = "../img/bomba.png";
 
 let objects = [];
 const keys = {};
 
+/* TASTI */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
-
 document.addEventListener("keydown", e => {
-  if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); }
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    e.preventDefault();
+    jump();
+  }
 });
 
-/* TOUCH E MOUSE */
+/* TOUCH + MOUSE */
 canvas.addEventListener("mousedown", jump);
 canvas.addEventListener("touchstart", jump);
-
 canvas.addEventListener("mousemove", e => {
   if (e.buttons > 0) {
     const r = canvas.getBoundingClientRect();
     santa.x = e.clientX - r.left - santa.w/2;
   }
 });
-
 canvas.addEventListener("touchmove", e => {
   e.preventDefault();
   const r = canvas.getBoundingClientRect();
   santa.x = e.touches[0].clientX - r.left - santa.w/2;
-},{passive:false});
+}, { passive:false });
 
 /* SALTO */
 function jump() {
-  if (!santa.jumping) { santa.vy = -15; santa.jumping = true; }
+  if (!santa.jumping) {
+    santa.vy = -15;
+    santa.jumping = true;
+  }
 }
 
 /* TIMER */
-let score = 0, timeLeft = 60;
+let score = 0;
+let timeLeft = 60;
 
 function updateTimer() {
-  const int = setInterval(() => {
+  const interval = setInterval(() => {
     timeLeft--;
-    if (timeLeft <= 0) { clearInterval(int); endGame(); }
-  },1000);
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      endGame();
+    }
+  }, 1000);
 }
 
-/* OGGETTI CASUALI */
+/* SPAWN OGGETTI */
 function spawnObject() {
-  const isBomb = Math.random()<0.25;
+  const isBomb = Math.random() < 0.25;
   const obj = {
-    x: Math.random()*(canvas.width-40),
-    y: canvas.height-160-Math.random()*100,
-    size:40,
-    type:isBomb?"bomb":"gift",
-    fade:false
+    x: Math.random()*(canvas.width - 40),
+    y: canvas.height - 160 - Math.random()*100,
+    size: 40,
+    type: isBomb ? "bomb" : "gift",
+    fade: false
   };
   objects.push(obj);
 
-  setTimeout(()=>{ obj.fade=true; setTimeout(()=>objects=objects.filter(o=>o!==obj),300); },2000);
+  setTimeout(() => {
+    obj.fade = true;
+    setTimeout(() => objects = objects.filter(o => o !== obj), 300);
+  }, 2000);
 }
 
-let spawnInterval;
+let spawnInterval = null;
 
 /* MOVIMENTO */
 function moveSanta() {
@@ -287,58 +305,59 @@ function moveSanta() {
   santa.y += santa.vy;
   santa.vy += 0.6;
 
-  if (santa.y > canvas.height-120) {
-    santa.y = canvas.height-120;
-    santa.vy = 0; santa.jumping=false;
+  if (santa.y > canvas.height - 120) {
+    santa.y = canvas.height - 120;
+    santa.vy = 0;
+    santa.jumping = false;
   }
 
-  if (santa.x < 0) santa.x=0;
-  if (santa.x + santa.w > canvas.width) santa.x = canvas.width-santa.w;
+  if (santa.x < 0) santa.x = 0;
+  if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
 }
 
 /* COLLISIONI */
 function checkCollisions() {
-  objects.forEach(o=>{
-    if (santa.x < o.x+o.size &&
-        santa.x+santa.w > o.x &&
-        santa.y < o.y+o.size &&
-        santa.y+santa.h > o.y) {
+  objects.forEach(o => {
+    if (santa.x < o.x + o.size &&
+        santa.x + santa.w > o.x &&
+        santa.y < o.y + o.size &&
+        santa.y + santa.h > o.y) {
 
-      objects = objects.filter(x=>x!==o);
-      if (o.type==="gift") score+=10;
-      else score-=5;
+      objects = objects.filter(x => x !== o);
+      if (o.type === "gift") score += 10;
+      else score -= 5;
     }
   });
 }
 
 /* DISEGNO */
 function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
 
-  objects.forEach(o=>{
-    ctx.globalAlpha = o.fade?0.5:1;
-    ctx.drawImage(o.type==="gift"?giftImg:bombImg, o.x,o.y,o.size,o.size);
-    ctx.globalAlpha=1;
+  objects.forEach(o => {
+    ctx.globalAlpha = o.fade ? 0.5 : 1;
+    ctx.drawImage(o.type === "gift" ? giftImg : bombImg, o.x, o.y, o.size, o.size);
+    ctx.globalAlpha = 1;
   });
 
   document.getElementById("info").textContent =
     `🎁 ${nomeMascherato} | Punti: ${score} | ⏱️ ${timeLeft}s`;
 }
 
-/* LOOP */
+/* GAME LOOP */
 function gameLoop() {
   moveSanta();
   checkCollisions();
   draw();
-  if (timeLeft>0) requestAnimationFrame(gameLoop);
+  if (timeLeft > 0) requestAnimationFrame(gameLoop);
 }
 
-/* FINE */
+/* FINE GIOCO */
 function endGame() {
-  canvas.style.display="none";
-  document.getElementById("info").style.display="none";
-  document.getElementById("fine").style.display="flex";
+  canvas.style.display = "none";
+  document.getElementById("info").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
 
   document.getElementById("messaggio").textContent =
     `🎉 Bravo ${nomeMascherato}! Hai totalizzato ${score} punti!`;
@@ -346,63 +365,72 @@ function endGame() {
   salvaOnline(nomeMascherato, score);
 }
 
-/* FIREBASE SAVE */
-function salvaOnline(nome,punti) {
-  db.ref("punteggi/giorno1").push({
-    nome, punti, timestamp:Date.now()
-  }).then(()=>caricaClassifica());
+/* 📡 SALVATAGGIO GLOBALE */
+function salvaOnline(nome, punti) {
+  const ref = db.ref("punteggi/giorno1").push();
+  ref.set({
+    nome,
+    punti: Number(punti),   // <<< CORRETTO
+    timestamp: Date.now()
+  }).then(() => caricaClassifica());
 }
 
-/* CLASSIFICA */
+/* 📡 CARICA TOP 10 */
 function caricaClassifica() {
   const table = document.getElementById("score-table");
-  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
   db.ref("punteggi/giorno1")
     .orderByChild("punti")
     .limitToLast(10)
     .once("value", snap => {
+      
+      let list = [];
+      snap.forEach(child => {
+        const val = child.val();
+        list.push({
+          nome: val.nome,
+          punti: Number(val.punti)
+        });
+      });
 
-      let list=[];
-      snap.forEach(c=>list.push(c.val()));
+      list.sort((a,b) => b.punti - a.punti);
 
-      list.sort((a,b)=>b.punti-a.punti);
-
-      list.forEach(r=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${r.nome}</td><td>${r.punti}</td>`;
+      list.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.nome}</td><td>${row.punti}</td>`;
         table.appendChild(tr);
       });
     });
 }
 
-/* START GAME → SOLO DOPO CLICK */
-document.getElementById("start-btn").addEventListener("click", ()=>{
-  document.getElementById("start-overlay").style.display="none";
-  canvas.style.display="block";
+/* LOGICA AVVIO */
+document.getElementById("btn-start").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
+
+  canvas.style.display = "block";
+  document.getElementById("info").style.display = "block";
+
+  spawnInterval = setInterval(spawnObject, 1300);
 
   updateTimer();
-  spawnInterval = setInterval(spawnObject,1300);
   gameLoop();
 });
 
-/* VIEW CLASSIFICA */
-document.getElementById("view-classifica").addEventListener("click", ()=>{
-  document.getElementById("start-overlay").style.display="none";
-  document.getElementById("fine").style.display="flex";
+document.getElementById("btn-top10").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
   caricaClassifica();
 });
 
 /* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click",()=>{
-  location.reload();
-});
+document.getElementById("retry-btn").addEventListener("click", () => location.reload());
 </script>
 
-<!-- COUNTER -->
-<script src="https://cdn.counter.dev/script.js" 
-        data-id="9d666b79-dc20-433b-8015-ac699700813e" 
-        data-utcoffset="1"></script>
+<!-- COUNTER DEV -->
+<script src="https://cdn.counter.dev/script.js"
+data-id="9d666b79-dc20-433b-8015-ac699700813e"
+data-utcoffset="1"></script>
 
 </body>
 </html>
