@@ -293,10 +293,6 @@ let classificaCaricata = false;
 
 
 
-
-
-
-
 /* =======================================================
    🎮 INPUT – SALTO NORMALE + SALTO PROLUNGATO
 ======================================================= */
@@ -356,7 +352,7 @@ function gestisciOstacoli() {
 }
 
 /* =======================================================
-   ☁️ NUVOLA PNG – APPARE DOPO 10s E ARRIVA DA SINISTRA
+   ☁️ NUVOLA PNG – DOPO 10s DA SINISTRA
 ======================================================= */
 
 let nuvoleDiscesa = [];
@@ -364,23 +360,24 @@ let nuvoleDiscesaAttive = false;
 let tempoInAria = 0;
 
 function generaNuvoleDiDiscesa() {
+
   const startY = renna.y + 80;
 
   nuvoleDiscesa = [
-    { x: -200, y: startY, w: 160, h: 90, speed: 6 },
-    { x: -360, y: startY, w: 160, h: 90, speed: 6 },
-    { x: -520, y: startY, w: 160, h: 90, speed: 6 }
+    { x: -250, y: startY, w: 180, h: 120, speed: 6 },
+    { x: -450, y: startY, w: 180, h: 120, speed: 6 },
+    { x: -650, y: startY, w: 180, h: 120, speed: 6 }
   ];
 
   nuvoleDiscesaAttive = true;
 
-  // Rimuove alberi nella zona di caduta
+  // Nessun albero nel punto dove deve cadere
   ostacoli = ostacoli.filter(o => o.x > renna.x + 350);
 }
 
 function disegnaNuvoleDiDiscesa() {
   nuvoleDiscesa.forEach(n => {
-    n.x += n.speed; // si muovono verso destra (come gli alberi verso sinistra)
+    n.x += n.speed;
     ctx.drawImage(cloudImg, n.x, n.y, n.w, n.h);
   });
 }
@@ -393,9 +390,8 @@ function gestisciAtterraggioSuNuvole() {
       renna.x + renna.w > n.x &&
       renna.x < n.x + n.w &&
       renna.y + renna.h >= n.y &&
-      renna.y + renna.h <= n.y + n.h
+      renna.y + renna.h <= n.y + (n.h * 0.7)
     ) {
-      // Atterra sulla nuvola
       renna.y = n.y - renna.h;
       renna.vy = 0;
       renna.jumping = false;
@@ -404,21 +400,6 @@ function gestisciAtterraggioSuNuvole() {
     }
   });
 }
-
-/* =======================================================
-   ❄️ NEVE
-======================================================= */
-function creaNeve() {
-  const snow = document.createElement("div");
-  snow.className = "snowflake";
-  snow.textContent = "❄";
-  snow.style.left = Math.random() * 100 + "vw";
-  snow.style.animationDuration = 3 + Math.random() * 5 + "s";
-  snow.style.fontSize = 14 + Math.random() * 10 + "px";
-  document.body.appendChild(snow);
-  setTimeout(() => snow.remove(), 8000);
-}
-setInterval(creaNeve, 200);
 
 /* =======================================================
    🔁 GAME LOOP COMPLETO
@@ -434,10 +415,8 @@ function gameLoop() {
     if (tempoInAria < 15) renna.vy = -6;
   }
 
-  /* Dopo 10 secondi → arrivano le nuvole PNG */
-  if (tempoInAria > 10 && !nuvoleDiscesaAttive) {
-    generaNuvoleDiDiscesa();
-  }
+  /* Nuvole PNG dopo 10 secondi */
+  if (tempoInAria > 10 && !nuvoleDiscesaAttive) generaNuvoleDiDiscesa();
 
   /* Gravità */
   renna.y += renna.vy;
@@ -450,7 +429,7 @@ function gameLoop() {
     renna.vy = 2;
   }
 
-  /* LIMITE DEL TERRENO */
+  /* 🚫 LIMITE DEL TERRENO (fisso sotto gli alberi) */
   const terreno = canvas.height - 150;
   if (renna.y > terreno) {
     renna.y = terreno;
@@ -469,7 +448,7 @@ function gameLoop() {
     gestisciAtterraggioSuNuvole();
   }
 
-  /* Ostacoli */
+  /* 💥 OSTACOLI */
   gestisciOstacoli();
 
   ostacoli.forEach((o, i) => {
@@ -496,122 +475,3 @@ function gameLoop() {
 
   requestAnimationFrame(gameLoop);
 }
-
-
-
-
-  
-
-
-
-  
-
-
-
-
-  
-
-
-
-/* =======================================================
-   🏁 FINE GIOCO – SCHERMATA E BLOCCO SALVATAGGIO
-======================================================= */
-function fineGioco() {
-  if (giocoTerminato) return;
-  giocoTerminato = true;
-
-  /* Stop musica */
-  const music = document.getElementById("musica");
-  music.pause();
-  music.currentTime = 0;
-
-  canvas.style.display = "none";
-  document.getElementById("info").style.display = "none";
-  document.getElementById("fine").style.display = "flex";
-
-  const puntiFinali = Math.floor(distanza);
-
-  document.getElementById("messaggio").textContent =
-    `🎉 Bravo ${nomeMascherato}! Hai percorso ${puntiFinali} metri!`;
-
-  salvaOnline(nomeMascherato, puntiFinali);
-}
-
-/* =======================================================
-   💾 SALVATAGGIO – SCRITTURA SU punteggi/giorno2
-======================================================= */
-function salvaOnline(nome, punti) {
-  if (punteggioSalvato) return;
-  punteggioSalvato = true;
-
-  db.ref("punteggi/giorno2").push({
-    nome,
-    punti,
-    timestamp: Date.now()
-  }).then(() => caricaClassifica());
-}
-
-/* =======================================================
-   🏆 CLASSIFICA GLOBALE – TOP 10
-======================================================= */
-function caricaClassifica() {
-  if (classificaCaricata) return;
-  classificaCaricata = true;
-
-  const table = document.getElementById("score-table");
-  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
-
-  db.ref("punteggi/giorno2")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value", snap => {
-      let lista = [];
-      snap.forEach(child => lista.push(child.val()));
-
-      lista.sort((a, b) => b.punti - a.punti);
-
-      lista.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${row.nome}</td><td>${row.punti}</td>`;
-        table.appendChild(tr);
-      });
-    });
-}
-
-/* =======================================================
-   ▶️ AVVIO – START SCREEN E MUSICA
-======================================================= */
-document.getElementById("btn-start").addEventListener("click", () => {
-  document.getElementById("start-screen").style.display = "none";
-  canvas.style.display = "block";
-  document.getElementById("info").style.display = "block";
-
-  /* Avvia musica */
-  const music = document.getElementById("musica");
-  music.volume = 0.35;
-  music.play();
-
-  gameLoop();
-});
-
-/* MOSTRA CLASSIFICA SENZA GIOCARE */
-document.getElementById("btn-top10").addEventListener("click", () => {
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("fine").style.display = "flex";
-  caricaClassifica();
-});
-
-/* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click", () => location.reload());
-
-</script>
-
-</body>
-</html>
-
-
-
-
-
-
-
