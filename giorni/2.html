@@ -310,9 +310,7 @@ window.addEventListener("keydown", e => {
   }
 });
 window.addEventListener("keyup", e => {
-  if (e.code === "Space" || e.code === "ArrowUp") {
-    saltoLungo = false;
-  }
+  if (e.code === "Space" || e.code === "ArrowUp") saltoLungo = false;
 });
 
 /* Mouse */
@@ -329,7 +327,7 @@ canvas.addEventListener("touchstart", () => {
 });
 canvas.addEventListener("touchend", () => saltoLungo = false);
 
-/* Salto iniziale */
+/* Salto singolo */
 function jump() {
   if (!renna.jumping) {
     renna.vy = -16;
@@ -342,7 +340,7 @@ function jump() {
    🌲 OSTACOLI – DISTANZA MINIMA
 ======================================================= */
 function generaOstacolo() {
-  if (nuvoleDiscesaAttive) return; // se ci sono nuvole di discesa, NON creare ostacoli
+  if (nuvoleDiscesaAttive) return;
   ostacoli.push({
     x: canvas.width + 20,
     y: canvas.height - 120,
@@ -354,43 +352,39 @@ function generaOstacolo() {
 function gestisciOstacoli() {
   if (ostacoli.length === 0) generaOstacolo();
   const ultimo = ostacoli[ostacoli.length - 1];
-  if (ultimo.x < canvas.width - distanzaMinima) {
-    generaOstacolo();
-  }
+  if (ultimo.x < canvas.width - distanzaMinima) generaOstacolo();
 }
 
 /* =======================================================
-   ☁️ NUVOLA DI DISCESA – APPARE DOPO 10 SECONDI
+   ☁️ NUVOLA PNG – APPARE DOPO 10s E ARRIVA DA SINISTRA
 ======================================================= */
 
 let nuvoleDiscesa = [];
 let nuvoleDiscesaAttive = false;
+let tempoInAria = 0;
 
 function generaNuvoleDiDiscesa() {
+  const startY = renna.y + 80;
 
   nuvoleDiscesa = [
-    { x: renna.x - 80, y: renna.y + 100, w: 120, h: 40 },
-    { x: renna.x + 40, y: renna.y + 100, w: 120, h: 40 },
-    { x: renna.x + 160, y: renna.y + 100, w: 120, h: 40 }
+    { x: -200, y: startY, w: 160, h: 90, speed: 6 },
+    { x: -360, y: startY, w: 160, h: 90, speed: 6 },
+    { x: -520, y: startY, w: 160, h: 90, speed: 6 }
   ];
 
   nuvoleDiscesaAttive = true;
 
-  /* Cancella ostacoli sotto */
-  ostacoli = ostacoli.filter(o => o.x > renna.x + 300);
+  // Rimuove alberi nella zona di caduta
+  ostacoli = ostacoli.filter(o => o.x > renna.x + 350);
 }
 
-/* Disegno delle nuvole piattaforma */
 function disegnaNuvoleDiDiscesa() {
   nuvoleDiscesa.forEach(n => {
-    ctx.fillStyle = "rgba(255,255,255,0.95)";
-    ctx.fillRect(n.x, n.y, n.w, n.h);
-    ctx.strokeStyle = "rgba(180,180,180,0.9)";
-    ctx.strokeRect(n.x, n.y, n.w, n.h);
+    n.x += n.speed; // si muovono verso destra (come gli alberi verso sinistra)
+    ctx.drawImage(cloudImg, n.x, n.y, n.w, n.h);
   });
 }
 
-/* Controllo se la renna ci “cammina sopra” */
 function gestisciAtterraggioSuNuvole() {
   if (!nuvoleDiscesaAttive) return;
 
@@ -401,6 +395,7 @@ function gestisciAtterraggioSuNuvole() {
       renna.y + renna.h >= n.y &&
       renna.y + renna.h <= n.y + n.h
     ) {
+      // Atterra sulla nuvola
       renna.y = n.y - renna.h;
       renna.vy = 0;
       renna.jumping = false;
@@ -433,16 +428,13 @@ function gameLoop() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  /* SALTO PROLUNGATO FINO A 15 SECONDI */
+  /* ✈️ Salto prolungato fino a 15 secondi */
   if (saltoLungo && renna.jumping && !nuvoleDiscesaAttive) {
-    tempoInAria += 1 / 60;
-
-    if (tempoInAria < 15) {
-      renna.vy = -6;
-    }
+    tempoInAria += 1/60;
+    if (tempoInAria < 15) renna.vy = -6;
   }
 
-  /* DOPO 10 SECONDI COMPARE LE NUVOLA PIATTAFORMA */
+  /* Dopo 10 secondi → arrivano le nuvole PNG */
   if (tempoInAria > 10 && !nuvoleDiscesaAttive) {
     generaNuvoleDiDiscesa();
   }
@@ -451,17 +443,27 @@ function gameLoop() {
   renna.y += renna.vy;
   renna.vy += 0.8;
 
-  /* Non oltre il limite superiore */
+  /* LIMITE SUPERIORE */
   const limiteAlto = canvas.height * 0.12;
   if (renna.y < limiteAlto) {
     renna.y = limiteAlto;
     renna.vy = 2;
   }
 
+  /* LIMITE DEL TERRENO */
+  const terreno = canvas.height - 150;
+  if (renna.y > terreno) {
+    renna.y = terreno;
+    renna.vy = 0;
+    renna.jumping = false;
+    tempoInAria = 0;
+    nuvoleDiscesaAttive = false;
+  }
+
   /* Disegna renna */
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* Nuvole piattaforma */
+  /* Nuvole PNG */
   if (nuvoleDiscesaAttive) {
     disegnaNuvoleDiDiscesa();
     gestisciAtterraggioSuNuvole();
@@ -494,8 +496,6 @@ function gameLoop() {
 
   requestAnimationFrame(gameLoop);
 }
-
-
 
 
 
@@ -608,6 +608,7 @@ document.getElementById("retry-btn").addEventListener("click", () => location.re
 
 </body>
 </html>
+
 
 
 
