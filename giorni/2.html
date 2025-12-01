@@ -292,7 +292,13 @@ let classificaCaricata = false;
 
 
 
-/* =======================================================
+
+
+
+
+
+
+  /* =======================================================
    🎮 INPUT – SALTO NORMALE + SALTO PROLUNGATO
 ======================================================= */
 
@@ -338,7 +344,7 @@ function jump() {
    🌲 OSTACOLI – GENERAZIONE E DISTANZA MINIMA
 ======================================================= */
 function generaOstacolo() {
-  if (nuvolaAttiva) return; // non creare alberi mentre la nuvola è attiva
+  if (nuvolaAttiva) return; // non creare alberi mentre la nuvola è sotto
   ostacoli.push({
     x: canvas.width + 20,
     y: canvas.height - 120,
@@ -356,30 +362,35 @@ function gestisciOstacoli() {
 }
 
 /* =======================================================
-   ☁️ NUVOLA – DOPO 5 SECONDI DI SALTO LUNGO
+   ☁️ NUVOLA – DOPO 2 SECONDI DI VOLO
 ======================================================= */
 function gestisciNuvola() {
-  /* Quando la renna tiene premuto e rimane in aria */
+
+  /* Se tiene premuto e rimane in aria */
   if (saltoLungo && renna.jumping && !nuvolaAttiva) {
-    tempoInAria += 1 / 60;
+    tempoInAria += 1 / 60; // tempo in secondi
   }
 
-  /* Se vola troppo → appare la nuvola */
-  if (tempoInAria > 5 && !nuvolaAttiva) {
-    nuvola.x = Math.max(renna.x - 10, 20);
-    nuvola.y = Math.min(renna.y + 60, canvas.height - 40);
+  /* Dopo 2 secondi appare la nuvola */
+  if (tempoInAria > 2 && !nuvolaAttiva) {
+    nuvola.x = renna.x + renna.w/2;
+    nuvola.y = renna.y + renna.h - 20;
     nuvolaAttiva = true;
   }
 
   /* Comportamento nuvola attiva */
   if (nuvolaAttiva) {
-    renna.vy = 8; // forza verso il basso
+    renna.vy = 8; // spinta verso il basso
 
-    // Disegna la nuvola
+    // Disegno nuvola migliorato
     ctx.fillStyle = "rgba(255,255,255,0.95)";
     ctx.beginPath();
     ctx.arc(nuvola.x, nuvola.y, nuvola.size, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(200,200,200,0.8)";
+    ctx.stroke();
 
     /* -------------------------------
        💀 COLLISIONE RENNA ↔ NUVOLA
@@ -393,7 +404,7 @@ function gestisciNuvola() {
       return;
     }
 
-    // Reset nuvola quando tocca il terreno
+    // Quando tocca terra → reset
     if (!renna.jumping) {
       nuvolaAttiva = false;
       tempoInAria = 0;
@@ -417,31 +428,32 @@ function creaNeve() {
 setInterval(creaNeve, 200);
 
 /* =======================================================
-   🔁 GAME LOOP – FISICA, MOVIMENTO, LIMITI, COLLISIONI
+   🔁 GAME LOOP – FISICA, LIMITI, COLLISIONI
 ======================================================= */
 function gameLoop() {
   if (giocoTerminato) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  /* ✈️ Salto prolungato con limite */
+  /* ✈️ Salto prolungato limitato */
   if (saltoLungo && renna.jumping && !nuvolaAttiva) {
-    const limiteAltezza = canvas.height * 0.25; // 25% altezza
+    const limiteAltezza = canvas.height * 0.18;  // più alto ma non troppo
     if (renna.y > limiteAltezza) {
       renna.vy = -6;
     } else {
-      renna.vy = 0; // blocca salita
+      renna.vy = 0;
     }
   }
 
   /* Nuvola */
   gestisciNuvola();
 
-  /* Gravità + limite superiore */
+  /* Gravità */
   renna.y += renna.vy;
   renna.vy += 0.8;
 
-  const limiteAlto = canvas.height * 0.20;
+  /* Limite superiore */
+  const limiteAlto = canvas.height * 0.15; 
   if (renna.y < limiteAlto) {
     renna.y = limiteAlto;
     renna.vy = 2;
@@ -457,7 +469,7 @@ function gameLoop() {
     o.x -= 6;
     ctx.drawImage(alberoImg, o.x, o.y - 30, o.w, o.h);
 
-    // COLLISIONE CON ALBERO
+    // Collisione con albero
     if (
       renna.x < o.x + o.w &&
       renna.x + renna.w > o.x &&
@@ -477,7 +489,6 @@ function gameLoop() {
 
   requestAnimationFrame(gameLoop);
 }
-
 
 
 
@@ -589,6 +600,7 @@ document.getElementById("retry-btn").addEventListener("click", () => location.re
 
 </body>
 </html>
+
 
 
 
