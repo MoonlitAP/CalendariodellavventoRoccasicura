@@ -20,18 +20,16 @@ body {
   text-align: center;
 }
 
-/* 🖼️ CANVAS FIX MOBILE + SFONDO ORIZZONTALE */
+/* 🖼️ CANVAS MOBILE + FOTO ORIZZONTALE PERFETTA */
 canvas {
   display: none;
   margin: 20px auto;
   border: 3px solid #ffd700;
   border-radius: 12px;
-
-  /* Mostra tutta la foto senza tagliarla */
   background: url("../img/sfondo_bosco.jpg") center center / contain no-repeat;
 }
 
-h1 { color: #ffd700; margin-top: 12px; }
+h1 { color: #ffd700; margin-top: 10px; }
 
 .info {
   display: none;
@@ -39,8 +37,8 @@ h1 { color: #ffd700; margin-top: 12px; }
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+  padding: 8px 16px;
   background: rgba(0,0,0,0.5);
-  padding: 10px 16px;
   border-radius: 12px;
   border: 1px solid #ffd700;
 }
@@ -49,7 +47,7 @@ h1 { color: #ffd700; margin-top: 12px; }
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
@@ -61,22 +59,22 @@ h1 { color: #ffd700; margin-top: 12px; }
 .start-box, .classifica-box {
   background: #fffaf2;
   color: #400000;
-  padding: 28px;
-  border: 2px solid #ffd700;
-  border-radius: 18px;
+  padding: 30px;
   width: 90%;
   max-width: 420px;
+  border: 2px solid #ffd700;
+  border-radius: 20px;
 }
 
 .start-btn, .btn {
   width: 80%;
-  margin-top: 14px;
   padding: 14px;
+  margin-top: 14px;
   border-radius: 30px;
-  border: none;
-  cursor: pointer;
   background: #7b0412;
+  border: none;
   color: white;
+  cursor: pointer;
   font-weight: bold;
 }
 .start-btn:hover, .btn:hover {
@@ -97,7 +95,7 @@ h1 { color: #ffd700; margin-top: 12px; }
       🌲 Evita gli alberi<br>
       🦌 Premi per saltare<br>
       ✨ Salto lungo fino a 15 secondi<br>
-      ☁ Nuvole dopo 10 secondi reali
+      ☁ Nuvola finale dopo 10 secondi reali
     </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
@@ -145,7 +143,7 @@ const nomeMascherato =
   nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
 // --------------------------------------------------
-// CANVAS RESPONSIVE
+// CANVAS RESIZE
 // --------------------------------------------------
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -173,21 +171,19 @@ const cloudImg = new Image();
 cloudImg.src = "../img/cloud.png";
 
 // --------------------------------------------------
-// VARIABILI DI GIOCO
+// VARIABILI
 // --------------------------------------------------
 let renna = { x: 120, y: 300, w: 110, h: 110, vy: 0, jumping: false };
-
 let ostacoli = [];
 let distanza = 0;
-let giocoTerminato = false;
 
-// salto lungo + timer reale
 let saltoLungo = false;
 let tempoVoloReale = 0;
 
-// nuvole
-let nuvole = [];
-let nuvoleAttive = false;
+let nuvola = null;
+let nuvolaAttiva = false;
+
+let giocoTerminato = false;
 
 // --------------------------------------------------
 // INPUT
@@ -200,30 +196,26 @@ function jump() {
   }
 }
 
-["keydown"].forEach(ev =>
-  window.addEventListener(ev, e => {
-    if (["Space", "ArrowUp"].includes(e.code)) {
-      saltoLungo = true;
-      jump();
-    }
-  })
-);
-["keyup"].forEach(ev =>
-  window.addEventListener(ev, () => saltoLungo = false)
-);
-
 canvas.addEventListener("touchstart", e => { e.preventDefault(); saltoLungo = true; jump(); });
 canvas.addEventListener("touchend", () => saltoLungo = false);
 
 canvas.addEventListener("mousedown", () => { saltoLungo = true; jump(); });
 canvas.addEventListener("mouseup", () => saltoLungo = false);
 
+window.addEventListener("keydown", e => {
+  if (["Space", "ArrowUp"].includes(e.code)) {
+    saltoLungo = true;
+    jump();
+  }
+});
+window.addEventListener("keyup", () => saltoLungo = false);
+
 // --------------------------------------------------
 // OSTACOLI
 // --------------------------------------------------
 function generaOstacolo() {
-  if (nuvoleAttive) return;
-  ostacoli.push({ x: canvas.width + 20, y: canvas.height - 120, w: 70, h: 100 });
+  if (nuvolaAttiva) return;
+  ostacoli.push({ x: canvas.width + 40, y: canvas.height - 120, w: 70, h: 100 });
 }
 
 function gestisciOstacoli() {
@@ -233,46 +225,45 @@ function gestisciOstacoli() {
 }
 
 // --------------------------------------------------
-// NUBI
+// NUVOLA (OSTACOLO FINALE)
 // --------------------------------------------------
-function generaNuvole() {
-  const baseY = renna.y + 80;
+function generaNuvola() {
+  nuvola = {
+    x: canvas.width + 40,
+    y: renna.y,
+    w: 140,   // più piccola come richiesto
+    h: 95,
+    speed: 6
+  };
 
-  nuvole = [
-    { x: -150, y: baseY, w: 180, h: 120, speed: 5 },
-    { x: -300, y: baseY, w: 180, h: 120, speed: 5 },
-    { x: -450, y: baseY, w: 180, h: 120, speed: 5 }
-  ];
+  nuvolaAttiva = true;
 
-  nuvoleAttive = true;
-
+  // rimuovi gli alberi davanti
   ostacoli = ostacoli.filter(o => o.x > renna.x + 350);
 }
 
-function disegnaNuvole() {
-  nuvole.forEach(n => {
-    n.x += n.speed;
-    ctx.drawImage(cloudImg, n.x, n.y, n.w, n.h);
-  });
+function disegnaNuvola() {
+  nuvola.x -= nuvola.speed;
+  ctx.drawImage(cloudImg, nuvola.x, nuvola.y, nuvola.w, nuvola.h);
 }
 
-function controllaAtterraggioNuvole() {
-  if (!nuvoleAttive) return;
+function controllaCollisioneNuvola() {
+  if (!nuvolaAttiva) return;
 
-  nuvole.forEach(n => {
-    if (
-      renna.x + renna.w > n.x &&
-      renna.x < n.x + n.w &&
-      renna.y + renna.h >= n.y &&
-      renna.y + renna.h <= n.y + n.h * 0.7
-    ) {
-      renna.y = n.y - renna.h;
-      renna.vy = 0;
-      renna.jumping = false;
-      tempoVoloReale = 0;
-      nuvoleAttive = false;
-    }
-  });
+  if (
+    renna.x < nuvola.x + nuvola.w &&
+    renna.x + renna.w > nuvola.x &&
+    renna.y < nuvola.y + nuvola.h &&
+    renna.y + renna.h > nuvola.y
+  ) {
+    fineGioco();
+  }
+
+  // se esce dallo schermo
+  if (nuvola.x + nuvola.w < 0) {
+    nuvolaAttiva = false;
+    nuvola = null;
+  }
 }
 
 // --------------------------------------------------
@@ -281,10 +272,14 @@ function controllaAtterraggioNuvole() {
 function fineGioco() {
   giocoTerminato = true;
   document.getElementById("fine").style.display = "flex";
+
   document.getElementById("messaggio").textContent =
     `Hai percorso ${Math.floor(distanza)} metri!`;
 
-  db.ref("giorno2").push({ nome: nomeMascherato, punti: Math.floor(distanza) });
+  db.ref("giorno2").push({
+    nome: nomeMascherato,
+    punti: Math.floor(distanza)
+  });
 
   caricaClassifica();
 }
@@ -306,57 +301,56 @@ function caricaClassifica() {
 }
 
 // --------------------------------------------------
-// GAME LOOP (VERSIONE DEFINITIVA)
+// GAME LOOP
 // --------------------------------------------------
 function gameLoop() {
   if (giocoTerminato) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🟢 TEMPO REALE DI VOLO
-  if (renna.jumping && !nuvoleAttive) {
-      tempoVoloReale += 1 / 60;
+  // tempo reale in aria
+  if (renna.jumping && !nuvolaAttiva) {
+    tempoVoloReale += 1/60;
 
-      if (saltoLungo && tempoVoloReale < 15) {
-          renna.vy = -6;
-      }
+    if (saltoLungo && tempoVoloReale < 15) {
+      renna.vy = -6;
+    }
   }
 
-  // 🟢 NUVOLE DOPO 10 SECONDI REALI
-  if (!nuvoleAttive && tempoVoloReale >= 10) {
-      generaNuvole();
+  // attiva nuvola dopo 10s
+  if (!nuvolaAttiva && tempoVoloReale >= 10) {
+    generaNuvola();
   }
 
-  // 🟢 GRAVITÀ
+  // gravità
   renna.y += renna.vy;
   renna.vy += 0.8;
 
-  // 🟢 LIMITE SUPERIORE
+  // limite alto
   if (renna.y < canvas.height * 0.05) {
     renna.y = canvas.height * 0.05;
     renna.vy = 1;
   }
 
+  // terreno
   const terreno = canvas.height - 150;
-
-  // 🟢 TERRA
   if (renna.y > terreno) {
     renna.y = terreno;
     renna.vy = 0;
     renna.jumping = false;
     tempoVoloReale = 0;
-    nuvoleAttive = false;
   }
 
+  // disegna renna
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  // 🟢 NUBI
-  if (nuvoleAttive) {
-    disegnaNuvole();
-    controllaAtterraggioNuvole();
+  // nuvola finale
+  if (nuvolaAttiva) {
+    disegnaNuvola();
+    controllaCollisioneNuvola();
   }
 
-  // 🟢 OSTACOLI
+  // ostacoli
   gestisciOstacoli();
   ostacoli.forEach((o, i) => {
     o.x -= 6;
@@ -374,8 +368,9 @@ function gameLoop() {
     if (o.x + o.w < 0) ostacoli.splice(i, 1);
   });
 
+  // distanza
   distanza += 0.3;
-  document.getElementById("info").textContent =
+  document.getElementById("info").textContent = 
     `Distanza: ${Math.floor(distanza)}m`;
 
   requestAnimationFrame(gameLoop);
@@ -386,11 +381,9 @@ function gameLoop() {
 // --------------------------------------------------
 document.getElementById("btn-start").onclick = () => {
   document.getElementById("start-screen").style.display = "none";
-
   canvas.style.display = "block";
   resizeCanvas();
   document.getElementById("info").style.display = "block";
-
   document.getElementById("musica").play();
   gameLoop();
 };
@@ -406,3 +399,5 @@ document.getElementById("retry-btn").onclick = () => location.reload();
 
 </body>
 </html>
+
+
