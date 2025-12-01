@@ -6,6 +6,10 @@
   <title>🎅 Giorno 1 – Babbo Natale raccogli i regali!</title>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
+  <!-- FIREBASE (CDN – deve stare QUI) -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -66,7 +70,7 @@
 
     @keyframes popup {
       from { transform: scale(.7); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      to   { transform: scale(1); opacity: 1; }
     }
 
     .classifica-box table {
@@ -106,41 +110,60 @@
 <h1>🎅 Giorno 1 – Babbo Natale raccogli i regali!</h1>
 
 <canvas id="game"></canvas>
-<div id="info" class="info">🎁 Punteggio: 0 | ⏱️ Tempo: 60s</div>
+<div id="info" class="info">🎁 Punteggio: 0 | ⏱️ 60s</div>
 
-<!-- POPUP -->
+<!-- POPUP CLASSIFICA -->
 <div id="fine">
   <div class="classifica-box">
-
     <h2 id="messaggio"></h2>
 
-    <h3>🏆 Classifica Completa</h3>
+    <h3>🏆 Classifica Globale</h3>
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
     </table>
 
-    <button id="retry-btn" class="btn-back" style="background:#d41e1e">
+    <button id="retry-btn" class="btn-back" style="background:#d41e1e;">
       🔄 Riprova
     </button>
 
     <a href="../calendario.html" class="btn-back">⬅ Torna al Calendario</a>
-
   </div>
 </div>
 
 <script>
-/* NOME MASCHERATO */
-const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+/* =======================================================
+   🔥 FIREBASE CONFIG
+======================================================= */
+firebase.initializeApp({
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+});
 
-/* CANVAS CONFIG */
+const db = firebase.database();
+
+/* =======================================================
+   🎭 NOME MASCHERATO (privacy)
+======================================================= */
+const nomeReale = localStorage.getItem("utente") || "Ospite";
+const nomeMascherato =
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+
+
+/* =======================================================
+   🎮 CANVAS CONFIG
+======================================================= */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   if (window.innerWidth < 700) {
     canvas.width = window.innerWidth - 20;
-    canvas.height = window.innerHeight * 0.6;
+    canvas.height = window.innerHeight * 0.55;
   } else {
     canvas.width = 900;
     canvas.height = 500;
@@ -149,21 +172,25 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* SANTA */
+
+/* =======================================================
+   🎅 SANTA
+======================================================= */
 const santa = {
   x: 100,
   y: canvas.height - 120,
-  w: 70,
-  h: 90,
+  w: 70, h: 90,
   vy: 0,
   jumping: false,
-  speed: 10  // 🔥 velocità aumentata
+  speed: 12  // super veloce per telefono
 };
 
 const santaImg = new Image();
 santaImg.src = "../img/babbo.png";
 
-/* OGGETTI */
+/* =======================================================
+   🎁 OGGETTI
+======================================================= */
 const giftImg = new Image();
 giftImg.src = "../img/gift.png";
 
@@ -173,44 +200,55 @@ bombImg.src = "../img/bomba.png";
 let objects = [];
 const keys = {};
 
-/* MOVIMENTO PC */
+
+/* =======================================================
+   ⌨️ TASTI
+======================================================= */
 document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
+document.addEventListener("keyup",   e => keys[e.key] = false);
 
-/* SALTO */
-function jump() {
-  if (!santa.jumping) {
-    santa.vy = -14; // salto forte 🔥
-    santa.jumping = true;
-  }
-}
-
-// ➤ SPACE + ARROW UP funzionali ovunque
 document.addEventListener("keydown", e => {
   if (e.code === "Space" || e.code === "ArrowUp") {
-    e.preventDefault(); // evita scroll della pagina
+    e.preventDefault();
     jump();
   }
 });
 
-/* MOUSE */
+
+/* =======================================================
+   🖱️ MOUSE / TOUCH
+======================================================= */
 canvas.addEventListener("mousedown", jump);
+canvas.addEventListener("touchstart", jump);
+
 canvas.addEventListener("mousemove", e => {
   if (e.buttons > 0) {
-    const rect = canvas.getBoundingClientRect();
-    santa.x = e.clientX - rect.left - santa.w/2;
+    const r = canvas.getBoundingClientRect();
+    santa.x = e.clientX - r.left - santa.w/2;
   }
 });
 
-/* TOUCH SUPER VELOCE */
-canvas.addEventListener("touchstart", jump);
 canvas.addEventListener("touchmove", e => {
   e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  santa.x = e.touches[0].clientX - rect.left - santa.w/2;
+  const r = canvas.getBoundingClientRect();
+  santa.x = e.touches[0].clientX - r.left - santa.w/2;
 }, { passive:false });
 
-/* TIMER */
+
+/* =======================================================
+   ⬆️ SALTO
+======================================================= */
+function jump() {
+  if (!santa.jumping) {
+    santa.vy = -15;
+    santa.jumping = true;
+  }
+}
+
+
+/* =======================================================
+   ⏱️ TIMER
+======================================================= */
 let score = 0;
 let timeLeft = 60;
 
@@ -224,7 +262,10 @@ function updateTimer() {
   }, 1000);
 }
 
-/* OGGETTI */
+
+/* =======================================================
+   🎲 OGGETTI
+======================================================= */
 function spawnObject() {
   const isBomb = Math.random() < 0.25;
   const obj = {
@@ -238,14 +279,20 @@ function spawnObject() {
 
   setTimeout(() => {
     obj.fade = true;
-    setTimeout(() => objects = objects.filter(o => o !== obj), 400);
+    setTimeout(() => {
+      objects = objects.filter(o => o !== obj);
+    }, 300);
   }, 2000);
 }
+
 setInterval(spawnObject, 1300);
 
-/* MOVIMENTO SANTA */
+
+/* =======================================================
+   🤶 MOVIMENTO
+======================================================= */
 function moveSanta() {
-  if (keys["ArrowLeft"]) santa.x -= santa.speed;
+  if (keys["ArrowLeft"])  santa.x -= santa.speed;
   if (keys["ArrowRight"]) santa.x += santa.speed;
 
   santa.y += santa.vy;
@@ -261,7 +308,10 @@ function moveSanta() {
   if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
 }
 
-/* COLLISIONI */
+
+/* =======================================================
+   💥 COLLISIONI
+======================================================= */
 function checkCollisions() {
   objects.forEach(o => {
     if (santa.x < o.x + o.size &&
@@ -277,7 +327,10 @@ function checkCollisions() {
   });
 }
 
-/* DISEGNO */
+
+/* =======================================================
+   🖼️ DISEGNO
+======================================================= */
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
@@ -292,7 +345,10 @@ function draw() {
     `🎁 ${nomeMascherato} | Punti: ${score} | ⏱️ ${timeLeft}s`;
 }
 
-/* LOOP */
+
+/* =======================================================
+   🎮 GAME LOOP
+======================================================= */
 function gameLoop() {
   moveSanta();
   checkCollisions();
@@ -301,50 +357,74 @@ function gameLoop() {
   if (timeLeft > 0) requestAnimationFrame(gameLoop);
 }
 
-/* FINE GIOCO */
+
+/* =======================================================
+   🏁 FINE GIOCO + FIREBASE
+======================================================= */
 function endGame() {
   canvas.style.display = "none";
   document.getElementById("info").style.display = "none";
-
   document.getElementById("fine").style.display = "flex";
+
   document.getElementById("messaggio").textContent =
     `🎉 Bravo ${nomeMascherato}! Hai totalizzato ${score} punti!`;
 
-  salvaPunteggio(nomeMascherato, score);
-  mostraClassifica();
+  salvaOnline(nomeMascherato, score);
 }
 
-/* CLASSIFICA LOCALE (privata) */
-function salvaPunteggio(nome, punti) {
-  let arr = JSON.parse(localStorage.getItem("punteggi_giorno1")) || [];
-  arr.push({ nome, punti });
-  arr.sort((a,b)=>b.punti - a.punti);
-  localStorage.setItem("punteggi_giorno1", JSON.stringify(arr));
+
+/* =======================================================
+   📡 SALVATAGGIO GLOBALE (FIREBASE)
+======================================================= */
+function salvaOnline(nome, punti) {
+  const ref = db.ref("punteggi/giorno1").push();
+  ref.set({ nome, punti, timestamp: Date.now() })
+      .then(() => caricaClassifica());
 }
 
-function mostraClassifica() {
-  const arr = JSON.parse(localStorage.getItem("punteggi_giorno1")) || [];
+
+/* =======================================================
+   📡 CLASSIFICA GLOBALE
+======================================================= */
+function caricaClassifica() {
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
-  arr.forEach(p => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${p.nome}</td><td>${p.punti}</td>`;
-    table.appendChild(tr);
-  });
+  db.ref("punteggi/giorno1")
+    .orderByChild("punti")
+    .limitToLast(50)
+    .once("value", snap => {
+
+      let list = [];
+      snap.forEach(child => list.push(child.val()));
+
+      list.sort((a,b) => b.punti - a.punti);
+
+      list.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.nome}</td><td>${row.punti}</td>`;
+        table.appendChild(tr);
+      });
+    });
 }
 
-/* START GAME */
+
+/* =======================================================
+   ▶️ START GAME
+======================================================= */
 santaImg.onload = () => {
   updateTimer();
   gameLoop();
 };
 
-/* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click", () => location.reload());
 
+/* =======================================================
+   🔄 RIPROVA
+======================================================= */
+document.getElementById("retry-btn").addEventListener("click", () => {
+  location.reload();
+});
 </script>
 
 </body>
 </html>
-
