@@ -305,25 +305,29 @@ function gameLoop() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // tempo reale in aria
+  // ▶ TEMPO REALE DI SALTO (NON SI RESETTA SE BATTE IN ALTO)
   if (renna.jumping && !nuvoleAttive) {
-    tempoVoloReale += 1 / 60;
+      tempoVoloReale += 1 / 60;
 
-    if (saltoLungo && tempoVoloReale < 15) {
-      renna.vy = -6;
-    }
-
-    if (tempoVoloReale >= 10 && !nuvoleAttive) {
-      generaNuvole();
-    }
+    // salto lungo
+      if (saltoLungo && tempoVoloReale < 15) {
+          renna.vy = -6;
+      }
   }
+
+// ▶ ATTIVA NUBI DOPO 10s (INDIPENDENTE DAI RIMBALZI)
+if (!nuvoleAttive && tempoVoloReale >= 10) {
+    generaNuvole();
+}
+
+
 
   // gravità
   renna.y += renna.vy;
   renna.vy += 0.8;
 
   // limite alto
-  if (renna.y < canvas.height * 0.1) {
+  if (renna.y < canvas.height * 0.02){
     renna.y = canvas.height * 0.1;
     renna.vy = 2;
   }
@@ -342,10 +346,18 @@ function gameLoop() {
   // disegna renna
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  if (nuvoleAttive) {
-    disegnaNuvole();
-    controllaAtterraggioNuvole();
-  }
+if (!nuvoleAttive && !renna.jumping) {
+    ostacoli.forEach(o => {
+        if (
+          renna.x < o.x + o.w &&
+          renna.x + renna.w > o.x &&
+          renna.y < o.y + o.h &&
+          renna.y + renna.h > o.y
+        ) {
+          fineGioco();
+        }
+    });
+}
 
   // ostacoli
   gestisciOstacoli();
@@ -397,4 +409,5 @@ document.getElementById("retry-btn").onclick = () => location.reload();
 
 </body>
 </html>
+
 
