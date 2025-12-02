@@ -53,8 +53,10 @@ canvas {
 /* START SCREEN */
 #start-screen {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.65);
   backdrop-filter: blur(5px);
   display: flex;
@@ -90,18 +92,98 @@ canvas {
   background: #ffd700;
   color: #400000;
 }
+
+/* COUNTDOWN */
+#countdown {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.countdown-number {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 20px black;
+  animation: zoomFade 1s ease forwards;
+}
+
+@keyframes zoomFade {
+  0% { opacity: 0; transform: scale(0.4); }
+  30% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+/* END SCREEN */
+#fine {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.classifica-box {
+  background: #fffaf2;
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 460px;
+  border: 2px solid #ffd700;
+  color: #400000;
+  text-align: center;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  background: #7b0412;
+  text-decoration: none;
+}
+.btn:hover {
+  background: #ffd700;
+  color: #400000;
+}
+
+table {
+  width: 100%;
+  margin-top: 15px;
+}
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #d7bb5f;
+  text-align: center;
+}
 </style>
 </head>
 
 <body>
 
 <h1>🎄 Giorno 2 – Reindeer Runner</h1>
+
 <div id="punteggio">Punteggio: 0 | ❤️ 3</div>
 
 <!-- START SCREEN -->
 <div id="start-screen">
   <div class="start-box">
-
     <p>
       🌲 Evita gli alberi<br>
       🎁 Regali (+10)<br>
@@ -114,14 +196,10 @@ canvas {
 
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
-
   </div>
 </div>
 
-
-
-
-  <!-- COUNTDOWN -->
+<!-- COUNTDOWN -->
 <div id="countdown">
   <div id="countdown-number" class="countdown-number">3</div>
 </div>
@@ -133,8 +211,8 @@ canvas {
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
-
     <h3>🏆 Top 10 Globale</h3>
+
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
     </table>
@@ -158,17 +236,17 @@ firebase.initializeApp({
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "calendarioroccasicura"
 });
+
 const db = firebase.database();
 
 /* ============================================
    USER MASK
 ============================================ */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato =
-  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
 /* ============================================
-   CANVAS SETUP
+   CANVAS
 ============================================ */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -185,10 +263,17 @@ window.addEventListener("resize", resizeCanvas);
 /* ============================================
    IMMAGINI
 ============================================ */
-const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
-const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
-const giftImg = new Image(); giftImg.src = "../img/gift.png";
-const giftGoldImg = new Image(); giftGoldImg.src = "../img/gift_gold.png";
+const rennaImg = new Image();
+rennaImg.src = "../img/renna.png";
+
+const alberoImg = new Image();
+alberoImg.src = "../img/albero.png";
+
+const giftImg = new Image();
+giftImg.src = "../img/gift.png";
+
+const giftGoldImg = new Image();
+giftGoldImg.src = "../img/gift_gold.png";
 
 /* ============================================
    PARAMETRI
@@ -202,7 +287,6 @@ let renna = { x: 40, y: 0, w: 80, h: 80, vy: 0 };
 let ostacoli = [];
 let regali = [];
 let fiocchi = [];
-
 let punteggio = 0;
 let vite = 3;
 let pulsante = false;
@@ -213,9 +297,8 @@ let finito = false;
 ============================================ */
 canvas.addEventListener("touchstart", e => { e.preventDefault(); pulsante = true; });
 canvas.addEventListener("touchend",   () => pulsante = false);
-
-canvas.addEventListener("mousedown", () => pulsante = true);
-canvas.addEventListener("mouseup",   () => pulsante = false);
+canvas.addEventListener("mousedown",   () => pulsante = true);
+canvas.addEventListener("mouseup",     () => pulsante = false);
 
 window.addEventListener("keydown", e => {
   if (["Space","ArrowUp"].includes(e.code)) pulsante = true;
@@ -224,14 +307,11 @@ window.addEventListener("keyup", e => {
   if (["Space","ArrowUp"].includes(e.code)) pulsante = false;
 });
 
-
-
-
-
-  /* ============================================
+/* ============================================
    GENERA OSTACOLI
 ============================================ */
 let ultimoOstacolo = Date.now();
+
 function generaOstacolo() {
   const ora = Date.now();
   if (ora - ultimoOstacolo < 1700) return;
@@ -252,6 +332,7 @@ setInterval(generaOstacolo, 50);
 ============================================ */
 function generaRegalo() {
   const speciale = Math.random() < 0.12;
+
   regali.push({
     x: canvas.width + 20,
     y: canvas.height - (160 + Math.random()*60),
@@ -283,10 +364,8 @@ function fineGioco() {
   finito = true;
 
   document.getElementById("fine").style.display = "flex";
-  document.getElementById("messaggio").textContent =
-    `Hai totalizzato ${punteggio} punti!`;
+  document.getElementById("messaggio").textContent = `Hai totalizzato ${punteggio} punti!`;
 
-  // Salva punteggio
   db.ref("punteggi/giorno2").push({
     nome: nomeMascherato,
     punti: punteggio,
@@ -307,10 +386,11 @@ function caricaClassifica() {
     .orderByChild("punti")
     .limitToLast(10)
     .once("value", snap => {
+
       let arr = [];
       snap.forEach(child => arr.push(child.val()));
 
-      arr.sort((a,b)=>b.punti - a.punti);
+      arr.sort((a,b) => b.punti - a.punti);
 
       arr.forEach(r => {
         const tr = document.createElement("tr");
@@ -351,6 +431,7 @@ function gameLoop() {
   for (let i = ostacoli.length - 1; i >= 0; i--) {
     const o = ostacoli[i];
     o.x -= V_OSTACOLI;
+
     ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
     const hit =
@@ -389,10 +470,8 @@ function gameLoop() {
 
     if (preso) {
       punteggio += g.oro ? 50 : 10;
-
       document.getElementById("punteggio").textContent =
         `Punteggio: ${punteggio} | ❤️ ${vite}`;
-
       regali.splice(i,1);
       continue;
     }
@@ -417,7 +496,7 @@ function gameLoop() {
 }
 
 /* ============================================
-   COUNTDOWN + START
+   START + COUNTDOWN
 ============================================ */
 function startCountdown(cb) {
   const c = document.getElementById("countdown");
@@ -427,19 +506,20 @@ function startCountdown(cb) {
   c.style.display = "flex";
   num.textContent = n;
 
-  const timer = setInterval(()=>{
+  const timer = setInterval(() => {
     n--;
+
     if (n > 0) {
       num.textContent = n;
     } else {
       num.textContent = "VIA!";
-      setTimeout(()=>{
+      setTimeout(() => {
         clearInterval(timer);
         c.style.display = "none";
         cb();
-      },500);
+      }, 500);
     }
-  },1000);
+  }, 1000);
 }
 
 function iniziaGioco() {
@@ -448,8 +528,7 @@ function iniziaGioco() {
   gameLoop();
 }
 
-/* PULSANTE INIZIA */
-document.getElementById("btn-start").addEventListener("click", ()=>{
+document.getElementById("btn-start").addEventListener("click", () => {
   document.getElementById("start-screen").style.display = "none";
 
   const musica = document.getElementById("musica");
@@ -460,14 +539,14 @@ document.getElementById("btn-start").addEventListener("click", ()=>{
 });
 
 /* CLASSIFICA */
-document.getElementById("btn-top10").addEventListener("click", ()=>{
+document.getElementById("btn-top10").addEventListener("click", () => {
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
   caricaClassifica();
 });
 
 /* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click", ()=>{
+document.getElementById("retry-btn").addEventListener("click", () => {
   location.reload();
 });
 </script>
