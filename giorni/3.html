@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
-<title>🎄 Giorno 3 – Snowman Escape</title>
+<title>🎄 Giorno 3 – Escape</title>
 
+<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- FIREBASE -->
@@ -12,9 +13,12 @@
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
+/* ============================================
+   GENERALE
+============================================ */
 body {
   margin: 0;
-  background: #7b0412;
+  background-color: #7b0412;
   font-family: 'Ubuntu', sans-serif;
   color: white;
   text-align: center;
@@ -24,19 +28,74 @@ body {
 h1 {
   color: #ffd700;
   margin-top: 10px;
+  font-size: 2rem;
 }
 
-/* CANVAS */
-canvas {
-  display: none;
-  margin: 20px auto;
+/* ============================================
+   CANVAS 4:9 centrato
+============================================ */
+.canvas-wrapper {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 420px;
+  padding: 10px;
+}
+
+#gameCanvas {
+  width: 100%;
+  aspect-ratio: 4 / 9;
   border: 3px solid #ffd700;
-  border-radius: 10px;
+  border-radius: 14px;
   background: #bde0fe;
-  touch-action: none;
+  display: none;
 }
 
-/* START SCREEN (come giorno 2) */
+/* ============================================
+   BOTTONI DI CONTROLLO
+============================================ */
+.controls {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 90%;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.control-btn {
+  background: #ffd700;
+  color: #7b0412;
+  font-size: 22px;
+  font-weight: bold;
+  border: 3px solid #fff3b0;
+  border-radius: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255,215,0,0.6);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-rete {
+  background: white;
+  color: #7b0412;
+  font-size: 20px;
+  border: 3px solid #ffd700;
+  opacity: 0.5;
+}
+
+.btn-rete.enabled {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(255,215,0,0.7);
+}
+
+/* ============================================
+   START SCREEN (identico giorno 2)
+============================================ */
 #start-screen {
   position: fixed;
   top: 0; left: 0;
@@ -72,12 +131,15 @@ canvas {
   border: none;
   font-weight: bold;
 }
+
 .start-btn:hover {
   background: #ffd700;
   color: #400000;
 }
 
-/* COUNTDOWN */
+/* ============================================
+   COUNTDOWN
+============================================ */
 #countdown {
   position: fixed;
   top: 0; left: 0;
@@ -103,7 +165,9 @@ canvas {
   100% { opacity: 0; transform: scale(2); }
 }
 
-/* END SCREEN (classifica finale come Giorno 2) */
+/* ============================================
+   END SCREEN + CLASSIFICA (identico giorno 2)
+============================================ */
 #fine {
   position: fixed;
   top: 0; left: 0;
@@ -138,6 +202,7 @@ canvas {
   background: #7b0412;
   text-decoration: none;
 }
+
 .btn:hover {
   background: #ffd700;
   color: #400000;
@@ -147,6 +212,7 @@ table {
   width: 100%;
   margin-top: 15px;
 }
+
 th, td {
   padding: 8px;
   border-bottom: 1px solid #d7bb5f;
@@ -154,6 +220,7 @@ th, td {
 }
 </style>
 </head>
+
 <body>
 
 <h1>🎄 Giorno 3 – Snowman Escape</h1>
@@ -162,12 +229,12 @@ th, td {
 <div id="start-screen">
   <div class="start-box">
     <p>
-      ❄ Evita i pupazzi<br>
-      🎁 Raccogli i regali<br>
-      🎯 Spara le bamboline<br>
+      🎅 Babbo al centro<br>
+      ❄ Pupazzi in arrivo<br>
+      🎯 Spara con le bamboline<br>
+      🕸 Premi per usare la rete<br>
+      🎁 Prendi il regalo per attivarla<br>
       ❤️ 3 vite<br>
-      📱 Tocca per salire<br>
-      🧊 Perfetto su telefono!
     </p>
 
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
@@ -180,8 +247,16 @@ th, td {
   <div id="countdown-number" class="countdown-number">3</div>
 </div>
 
-<!-- GAME CANVAS -->
-<canvas id="gameCanvas"></canvas>
+<!-- CANVAS -->
+<div class="canvas-wrapper">
+  <canvas id="gameCanvas"></canvas>
+</div>
+
+<!-- BOTTONI -->
+<div class="controls">
+  <button id="btnSpara" class="control-btn">🎯 SPARA!</button>
+  <button id="btnRete" class="control-btn btn-rete" disabled>🕸 USA RETE</button>
+</div>
 
 <!-- END SCREEN -->
 <div id="fine">
@@ -197,9 +272,12 @@ th, td {
     <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
   </div>
 </div>
-<script>
+
+
+
+  <script>
 /* ======================================================
-   FIREBASE CONFIG (sarà completato in PARTE C)
+   FIREBASE INIT (completo in PARTE 3)
 ====================================================== */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
@@ -207,7 +285,6 @@ firebase.initializeApp({
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "calendarioroccasicura"
 });
-
 const db = firebase.database();
 
 /* ======================================================
@@ -216,7 +293,7 @@ const db = firebase.database();
 const nomeReale = localStorage.getItem("utente") || "Player";
 const nomeMascherato =
   nomeReale[0] +
-  Math.floor(Math.random() * 900 + 100) +
+  Math.floor(Math.random()*900+100) +
   nomeReale.slice(1);
 
 /* ======================================================
@@ -227,7 +304,7 @@ const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   const w = Math.min(window.innerWidth - 20, 420);
-  const h = Math.floor(w * 1.6);
+  const h = Math.floor(w * 2.25); /* ratio 4:9 */
   canvas.width = w;
   canvas.height = h;
 }
@@ -246,92 +323,102 @@ imgSnowman.src = "./img/snowman.png";
 const imgGift = new Image();
 imgGift.src = "./img/gift.png";
 
+const imgRete = new Image();
+imgRete.src = "./img/rete.png";
+
 const proiettiliSrc = ["./img/b1.png","./img/b2.png","./img/b3.png"];
 let proiettiliImg = [];
 proiettiliSrc.forEach(src => { let i = new Image(); i.src = src; proiettiliImg.push(i); });
 
 /* ======================================================
-   PARAMETRI DI GIOCO
+   VARIABILI DI GIOCO
 ====================================================== */
-let babbo = { x: 40, y: 0, w: 70, h: 70, vy: 0 };
-let touching = false;
 
-let snowmen = [];
-let gifts = [];
-let bullets = [];
-let reteAttiva = false;
-let reteTimer = 0;
+let babbo = {
+  x: 40,
+  y: 0,
+  w: 80,
+  h: 80
+};
+
+let pupazzi = [];
+let regali = [];
+let palline = [];
+let retiLanciate = [];
+
+let indicePallina = 0;
 
 let score = 0;
 let lives = 3;
 let running = false;
 
 /* ======================================================
-   CONTROLLO MOVIMENTO (TAP → Vola, Rilascio → Scende)
-====================================================== */
-canvas.addEventListener("touchstart", () => touching = true);
-canvas.addEventListener("touchend",   () => touching = false);
-canvas.addEventListener("mousedown",  () => touching = true);
-canvas.addEventListener("mouseup",    () => touching = false);
-
-function moveBabbo() {
-  if (touching) babbo.vy = -4;
-  else babbo.vy = 4;
-
-  babbo.y += babbo.vy;
-
-  if (babbo.y < 0) babbo.y = 0;
-  if (babbo.y + babbo.h > canvas.height) babbo.y = canvas.height - babbo.h;
-}
-
-/* ======================================================
-   SPAWN PUPAZZI
+   FUNZIONI DI SPAWN
 ====================================================== */
 let spawnSnowmanTimer = 0;
+let spawnGiftTimer = 0;
 
 function spawnSnowman() {
-  snowmen.push({
-    x: canvas.width + 40,
+  pupazzi.push({
+    x: canvas.width + 30,
     y: Math.random() * (canvas.height - 120),
     w: 90,
     h: 90,
-    speed: 2
+    speed: 2.2
   });
 }
 
-/* ======================================================
-   SPAWN REGALI
-====================================================== */
-let spawnGiftTimer = 0;
-
 function spawnGift() {
-  gifts.push({
-    x: canvas.width + 40,
+  regali.push({
+    x: canvas.width + 30,
     y: Math.random() * (canvas.height - 120),
     w: 60,
     h: 60,
-    speed: 2
+    speed: 2.2
   });
 }
 
 /* ======================================================
-   SPARA (BAMBOLINE)
+   SPARA: PALLINE ROTANTI + CATAPULTA
 ====================================================== */
-function spara() {
-  const img = proiettiliImg[Math.floor(Math.random()*proiettiliImg.length)];
+document.getElementById("btnSpara").addEventListener("click", () => {
 
-  bullets.push({
+  let img = proiettiliImg[indicePallina];
+  indicePallina = (indicePallina + 1) % proiettiliImg.length;
+
+  palline.push({
     x: babbo.x + babbo.w,
-    y: babbo.y + babbo.h / 2 - 20,
+    y: babbo.y + babbo.h/2 - 20,
     w: 40,
     h: 40,
-    speed: 6,
+    speed: 7,
+    rot: 0,
     img: img
   });
-}
+});
 
 /* ======================================================
-   COLLISIONE RETTANGOLARE
+   USA RETE → lancia rete.png ridotta al 50%
+====================================================== */
+document.getElementById("btnRete").addEventListener("click", () => {
+  if (document.getElementById("btnRete").disabled) return;
+
+  let scale = 0.5;
+
+  retiLanciate.push({
+    x: babbo.x + babbo.w,
+    y: babbo.y + 20,
+    w: imgRete.width * scale,
+    h: imgRete.height * scale,
+    speed: 4
+  });
+
+  document.getElementById("btnRete").disabled = true;
+  document.getElementById("btnRete").classList.remove("enabled");
+});
+
+/* ======================================================
+   COLLISIONE
 ====================================================== */
 function coll(a,b) {
   return (
@@ -343,122 +430,137 @@ function coll(a,b) {
 }
 
 /* ======================================================
-   GAME LOOP PRINCIPALE
+   GAME LOOP
 ====================================================== */
 function updateGame() {
   if (!running) return;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  /* Babbo */
-  moveBabbo();
+  /* Babbo centrato */
+  babbo.y = canvas.height/2 - babbo.h/2;
   ctx.drawImage(imgBabbo, babbo.x, babbo.y, babbo.w, babbo.h);
 
-  /* SPAWN PUPAZZI */
+  /* ----------------------------------------------
+     Spawn pupazzi e regali
+  ---------------------------------------------- */
   spawnSnowmanTimer++;
   if (spawnSnowmanTimer > 80) {
     spawnSnowman();
     spawnSnowmanTimer = 0;
   }
 
-  /* SPAWN REGALI */
   spawnGiftTimer++;
   if (spawnGiftTimer > 200) {
     spawnGift();
     spawnGiftTimer = 0;
   }
 
-  /* --------------------------------------
-     PUPAZZI DI NEVE
-  -------------------------------------- */
-  snowmen.forEach((s, si) => {
-    s.x -= s.speed;
-    ctx.drawImage(imgSnowman, s.x, s.y, s.w, s.h);
+  /* ----------------------------------------------
+     Pupazzi
+  ---------------------------------------------- */
+  pupazzi.forEach((p, pi) => {
+    p.x -= p.speed;
+    ctx.drawImage(imgSnowman, p.x, p.y, p.w, p.h);
+
+    /* Hitbox ridotta */
+    let box = {
+      x: p.x + 10,
+      y: p.y + 10,
+      w: p.w - 20,
+      h: p.h - 20
+    };
 
     /* Collisione con Babbo */
-    if (coll(babbo, s)) {
+    if (coll(babbo, box)) {
       lives--;
-      snowmen.splice(si,1);
-
+      pupazzi.splice(pi,1);
       if (lives <= 0) return gameOver();
-
-    }
-
-    /* Rete attiva → meno 30 punti */
-    if (reteAttiva && reteTimer > 0) {
-      const rete = { x: babbo.x + babbo.w + 10, y: babbo.y, w: 130, h: babbo.h };
-
-      ctx.strokeStyle = "rgba(255,255,255,0.4)";
-      ctx.strokeRect(rete.x, rete.y, rete.w, rete.h);
-
-      if (coll(rete, s)) {
-        score -= 30;
-        if (score < 0) score = 0;
-        snowmen.splice(si, 1);
-      }
     }
   });
 
-  /* Timer rete */
-  if (reteTimer > 0) {
-    reteTimer--;
-    if (reteTimer === 0) reteAttiva = false;
-  }
-
-  /* --------------------------------------
-     REGALI
-  -------------------------------------- */
-  gifts.forEach((g, gi) => {
+  /* ----------------------------------------------
+     Regali → abilita rete
+  ---------------------------------------------- */
+  regali.forEach((g, gi) => {
     g.x -= g.speed;
     ctx.drawImage(imgGift, g.x, g.y, g.w, g.h);
 
     if (coll(babbo, g)) {
-      gifts.splice(gi,1);
-      reteAttiva = true;
-      reteTimer = 70;
+      regali.splice(gi,1);
+      document.getElementById("btnRete").disabled = false;
+      document.getElementById("btnRete").classList.add("enabled");
     }
   });
 
-  /* --------------------------------------
-     PROIETTILI
-  -------------------------------------- */
-  bullets.forEach((p, pi) => {
+  /* ----------------------------------------------
+     Palline (catapulta + rotazione)
+  ---------------------------------------------- */
+  palline.forEach((p, pi) => {
     p.x += p.speed;
-    ctx.drawImage(p.img, p.x, p.y, p.w, p.h);
+    p.rot += 0.2;
 
-    if (p.x > canvas.width + 50) bullets.splice(pi,1);
+    ctx.save();
+    ctx.translate(p.x + p.w/2, p.y + p.h/2);
+    ctx.rotate(p.rot);
+    ctx.drawImage(p.img, -p.w/2, -p.h/2, p.w, p.h);
+    ctx.restore();
 
-    snowmen.forEach((s, si) => {
-      if (coll(p, s)) {
+    pupazzi.forEach((snow, si) => {
+      let box = {
+        x: snow.x + 10,
+        y: snow.y + 10,
+        w: snow.w - 20,
+        h: snow.h - 20
+      };
+
+      if (coll({x:p.x,y:p.y,w:p.w,h:p.h}, box)) {
         score += 50;
-        snowmen.splice(si,1);
-        bullets.splice(pi,1);
+        pupazzi.splice(si,1);
+        palline.splice(pi,1);
       }
     });
   });
 
-  /* Testo punteggio */
+  /* ----------------------------------------------
+     RETE LANCIA (come un proiettile)
+  ---------------------------------------------- */
+  retiLanciate.forEach((r, ri) => {
+    r.x += r.speed;
+    ctx.drawImage(imgRete, r.x, r.y, r.w, r.h);
+
+    pupazzi.forEach((snow, si) => {
+      let box = {
+        x: snow.x + 10,
+        y: snow.y + 10,
+        w: snow.w - 20,
+        h: snow.h - 20
+      };
+
+      if (coll(r, box)) {
+        pupazzi.splice(si,1);
+        retiLanciate.splice(ri,1);
+      }
+    });
+  });
+
+  /* ----------------------------------------------
+     TESTO PUNTEGGIO E VITE
+  ---------------------------------------------- */
   ctx.fillStyle = "white";
-  ctx.font = "18px Ubuntu";
+  ctx.font = "20px Ubuntu";
   ctx.fillText("Punteggio: " + score, 20, 30);
   ctx.fillText("❤️ " + lives, 20, 60);
 
   requestAnimationFrame(updateGame);
 }
-
-/* ======================================================
-   FINE PARTE B
-   Ora serve PARTE C → countdown, start, firebase classifica
-====================================================== */
 </script>
 
 
 
-
-
-    <script>
+  <script>
 /* ======================================================
-   GAME OVER → mostra popup e salva su Firebase
+   GAME OVER → MOSTRA POPUP E SALVA SU FIREBASE
 ====================================================== */
 function gameOver() {
   running = false;
@@ -467,7 +569,7 @@ function gameOver() {
   document.getElementById("messaggio").textContent =
     `Hai totalizzato ${score} punti!`;
 
-  /* Salva punteggio su Firebase giorno3 */
+  /* Salva punteggio su Firebase → giorno3 */
   db.ref("punteggi/giorno3").push({
     nome: nomeMascherato,
     punti: score,
@@ -478,7 +580,7 @@ function gameOver() {
 }
 
 /* ======================================================
-   CLASSIFICA GLOBALE TOP 10
+   CLASSIFICA TOP 10 → FIREBASE
 ====================================================== */
 function caricaClassifica() {
   const table = document.getElementById("score-table");
@@ -488,49 +590,47 @@ function caricaClassifica() {
     .orderByChild("punti")
     .limitToLast(10)
     .once("value", snap => {
-
       let arr = [];
       snap.forEach(child => arr.push(child.val()));
 
       arr.sort((a,b) => b.punti - a.punti);
 
-      arr.forEach(r => {
+      arr.forEach(record => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
+        tr.innerHTML = `<td>${record.nome}</td><td>${record.punti}</td>`;
         table.appendChild(tr);
       });
     });
 }
 
 /* ======================================================
-   COUNTDOWN VISUALE
+   COUNTDOWN COME GIORNO 2
 ====================================================== */
-function startCountdown(cb) {
-  const c = document.getElementById("countdown");
-  const num = document.getElementById("countdown-number");
+function startCountdown(callback) {
+  const layer = document.getElementById("countdown");
+  const number = document.getElementById("countdown-number");
 
   let n = 3;
-  c.style.display = "flex";
-  num.textContent = n;
+  layer.style.display = "flex";
+  number.textContent = n;
 
   const timer = setInterval(() => {
     n--;
-
     if (n > 0) {
-      num.textContent = n;
+      number.textContent = n;
     } else {
-      num.textContent = "VIA!";
+      number.textContent = "VIA!";
       setTimeout(() => {
         clearInterval(timer);
-        c.style.display = "none";
-        cb();
+        layer.style.display = "none";
+        callback();
       }, 500);
     }
   }, 1000);
 }
 
 /* ======================================================
-   START GAME
+   AVVIA GIOCO
 ====================================================== */
 function avviaGioco() {
   document.getElementById("start-screen").style.display = "none";
@@ -540,19 +640,25 @@ function avviaGioco() {
   updateGame();
 }
 
-/* INIZIARE IL GIOCO */
+/* ======================================================
+   BOTTONE "INIZIA"
+====================================================== */
 document.getElementById("btn-start").addEventListener("click", () => {
   startCountdown(avviaGioco);
 });
 
-/* MOSTRARE CLASSIFICA DAL MENU */
+/* ======================================================
+   BOTTONE "CLASSIFICA"
+====================================================== */
 document.getElementById("btn-top10").addEventListener("click", () => {
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
   caricaClassifica();
 });
 
-/* RICOMINCIARE */
+/* ======================================================
+   RICOMINCIA
+====================================================== */
 document.getElementById("retry-btn").addEventListener("click", () => {
   location.reload();
 });
