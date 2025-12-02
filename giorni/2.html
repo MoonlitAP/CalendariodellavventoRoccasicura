@@ -1,175 +1,447 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>🎄 Reindeer Jump</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<title>🎄 Reindeer Jump – Giorno 2</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #7b0412;
+  background-color: #7b0412;
+  font-family: 'Ubuntu', sans-serif;
+  color: white;
   text-align: center;
-  color: #ffd700;
+  overflow-x: hidden;
 }
 
 h1 {
-  margin-top: 12px;
+  color: #ffd700;
+  margin-top: 15px;
 }
 
+/* CANVAS */
 canvas {
-  margin-top: 20px;
-  background: url("../img/sfondo_bosco.jpg") center/cover no-repeat;
+  display: none;
+  margin: 20px auto;
   border: 3px solid #ffd700;
   border-radius: 10px;
+  background: url("../img/sfondo_bosco.jpg") center/cover no-repeat;
+  touch-action: none;
+}
+
+/* DISTANZA */
+#info {
+  display: none;
+  background: rgba(0,0,0,0.5);
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1px solid #ffd700;
+  margin: 10px auto;
+  width: fit-content;
+}
+
+/* START */
+#start-screen {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  display:flex; justify-content:center; align-items:center;
+  z-index:9998;
+}
+
+.start-box {
+  background:#fffaf2;
+  padding:30px;
+  border-radius:20px;
+  border:2px solid #ffd700;
+  width:90%;
+  max-width:420px;
+  color:#400000;
+}
+
+.start-btn {
+  width:80%;
+  margin-top:12px;
+  padding:14px;
+  border-radius:30px;
+  font-size:1.1em;
+  cursor:pointer;
+  background:#7b0412;
+  color:white;
+  border:none;
+  font-weight:bold;
+}
+.start-btn:hover { background:#ffd700; color:black; }
+
+/* COUNTDOWN */
+#countdown {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.50);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.countdown-number {
+  font-size:6rem;
+  font-weight:bold;
+  color:#ffd700;
+  text-shadow:0 0 20px black;
+  animation:zoomFade 1s ease forwards;
+}
+
+@keyframes zoomFade {
+  0% {opacity:0; transform:scale(0.4);}
+  30% {opacity:1; transform:scale(1);}
+  100% {opacity:0; transform:scale(2);}
+}
+
+/* FINE GIOCO */
+#fine {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.classifica-box {
+  background:#fffaf2;
+  padding:25px;
+  border-radius:20px;
+  width:90%;
+  max-width:460px;
+  border:2px solid #ffd700;
+  color:#400000;
+  text-align:center;
+}
+
+.btn {
+  display:inline-block;
+  margin-top:15px;
+  padding:12px 30px;
+  border-radius:30px;
+  font-weight:bold;
+  background:#7b0412;
+  color:white;
+  text-decoration:none;
+}
+.btn:hover { background:#ffd700; color:black; }
+
+table { width:100%; margin-top:15px; }
+th, td {
+  padding:8px;
+  border-bottom:1px solid #d7bb5f;
+  text-align:center;
 }
 </style>
 </head>
 
 <body>
-<h1>🎄 Reindeer Jump</h1>
 
+<h1>🎄 Reindeer Jump – Giorno 2</h1>
+
+<!-- START -->
+<div id="start-screen">
+  <div class="start-box">
+    <p>
+      🌲 Evita gli alberi<br>
+      🎁 Prendi i regali (+10 punti)<br>
+      🦌 Tocca lo schermo per saltare<br>
+      💻 Space / Click / Freccia ↑ su PC
+    </p>
+    <button id="btn-start" class="start-btn">▶️ INIZIA</button>
+    <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div id="countdown">
+  <div id="countdown-number" class="countdown-number">3</div>
+</div>
+
+<!-- CANVAS -->
 <canvas id="game"></canvas>
+<div id="info">Distanza: 0m</div>
+
+<!-- FINE -->
+<div id="fine">
+  <div class="classifica-box">
+    <h2 id="messaggio"></h2>
+    <h3>🏆 Top 10 Globale</h3>
+
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
+
+    <button id="retry-btn" class="btn">🔄 Riprova</button>
+    <a href="../calendario.html" class="btn">⬅ Calendario</a>
+  </div>
+</div>
+
+<!-- MUSICA -->
+<audio id="musica" loop>
+  <source src="../audio/jingle_bells_instrumental.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-/* ============================================================
-   📱 RICONOSCIMENTO DISPOSITIVO
-   ============================================================ */
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+/* FIREBASE */
+firebase.initializeApp({
+  apiKey: "INSERISCI_API_KEY",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura"
+});
+const db = firebase.database();
 
-/* ============================================================
-   🎮 CANVAS RESPONSIVE 4:5
-   ============================================================ */
+/* NOME */
+const nomeReale = localStorage.getItem("utente") || "Ospite";
+const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+
+/* CANVAS */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   const w = window.innerWidth;
-  const cw = Math.min(w - 20, 450);
-  const ch = cw * 1.25;
-  canvas.width = cw;
-  canvas.height = ch;
+  canvas.width = Math.min(w - 20, 450);
+  canvas.height = Math.floor(canvas.width * 1.3);
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* ============================================================
-   🦌 RENNA
-   ============================================================ */
-const rennaImg = new Image();
-rennaImg.src = "../img/renna.png";
+/* IMMAGINI */
+const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
+const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
+const giftImg   = new Image(); giftImg.src  = "../img/gift.png";
 
+/* GIOCO */
 let renna = {
-  x: 40,
-  y: canvas.height - 120,
-  w: 70,
-  h: 70,
+  x: 60, y: 300,
+  w: 85, h: 85,
   vy: 0,
   jumping: false
 };
 
-/* ============================================================
-   🌲 ALBERI — VELOCITÀ DIVERSA
-   ============================================================ */
-const alberoImg = new Image();
-alberoImg.src = "../img/albero.png";
-
-/* velocità lenta su telefono, normale su PC */
-const OSTACOLO_SPEED = isMobile ? 2.2 : 5.0;
+let distanza = 0;
+let punti = 0;
+let salto = false;
 
 let ostacoli = [];
+let regali = [];
+let giocoTerminato = false;
 
-/* genera alberi */
-function generaOstacolo() {
-  ostacoli.push({
-    x: canvas.width + 20,
-    y: canvas.height - 120,
-    w: isMobile ? 55 : 70,
-    h: isMobile ? 90 : 110
-  });
-}
-
-/* controllo distanza tra alberi */
-let spawnTimer = 0;
-
-/* ============================================================
-   🖐 CONTROLLI
-   ============================================================ */
-function salta() {
+/* SALTO */
+function jump() {
   if (!renna.jumping) {
-    renna.vy = -13;
+    renna.vy = -14;
     renna.jumping = true;
   }
 }
 
-/* telefono */
-canvas.addEventListener("touchstart", e => {
-  e.preventDefault();
-  salta();
-});
-
-/* browser PC */
+/* CONTROLLI */
 window.addEventListener("keydown", e => {
-  if (["Space", "ArrowUp"].includes(e.code)) salta();
+  if (["Space","ArrowUp"].includes(e.code)) { salto = true; jump(); }
 });
-window.addEventListener("mousedown", e => {
-  /* click destro, sinistro, touchpad → tutti validi */
-  salta();
-});
+window.addEventListener("keyup", () => salto = false);
+canvas.addEventListener("mousedown", () => { salto = true; jump(); });
+canvas.addEventListener("mouseup", () => salto = false);
+canvas.addEventListener("touchstart", e => { e.preventDefault(); salto = true; jump(); });
+canvas.addEventListener("touchend", () => salto = false);
 
-/* ============================================================
-   🏃‍♂ GAME LOOP
-   ============================================================ */
+/* OSTACOLI */
+function creaAlbero() {
+  ostacoli.push({
+    x: canvas.width + 30,
+    y: canvas.height - 120,
+    w: 55,
+    h: 85
+  });
+}
+
+function gestisciAlberi() {
+  if (ostacoli.length === 0) creaAlbero();
+  const ultimo = ostacoli[ostacoli.length - 1];
+  if (ultimo.x < canvas.width - 380) creaAlbero();
+}
+
+/* REGALI */
+function creaRegalo() {
+  regali.push({
+    x: canvas.width + 30,
+    y: canvas.height - 180,
+    w: 45,
+    h: 45
+  });
+}
+
+setInterval(creaRegalo, 3500);
+
+/* FINE GIOCO */
+function fineGioco() {
+  if (giocoTerminato) return;
+  giocoTerminato = true;
+
+  document.getElementById("fine").style.display = "flex";
+  document.getElementById("messaggio").textContent =
+    `Hai fatto ${punti} punti!`;
+
+  db.ref("giorno2").push({
+    nome: nomeMascherato,
+    punti: punti,
+    timestamp: Date.now()
+  });
+
+  caricaClassifica();
+}
+
+/* CLASSIFICA */
+function caricaClassifica() {
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+  db.ref("giorno2")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap => {
+      let arr = [];
+      snap.forEach(s => arr.push(s.val()));
+      arr.sort((a,b) => b.punti - a.punti);
+
+      arr.forEach(r => {
+        table.innerHTML += `<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+      });
+    });
+}
+
+/* GAME LOOP */
 function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (giocoTerminato) return;
 
-  /* Gravità */
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
   renna.y += renna.vy;
-  renna.vy += 0.6;
+  renna.vy += 0.7;
 
-  const terreno = canvas.height - 120;
+  const terreno = canvas.height - 140;
   if (renna.y > terreno) {
     renna.y = terreno;
     renna.vy = 0;
     renna.jumping = false;
   }
 
-  /* disegna renna */
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* generazione alberi */
-  spawnTimer++;
-  if (spawnTimer > (isMobile ? 110 : 70)) {
-    generaOstacolo();
-    spawnTimer = 0;
-  }
-
-  /* movimento + disegno alberi */
-  ostacoli.forEach((o, i) => {
-    o.x -= OSTACOLO_SPEED;
-
+  gestisciAlberi();
+  ostacoli.forEach((o,i) => {
+    o.x -= 4;
     ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
-    /* collisione */
     if (
-      renna.x < o.x + o.w &&
-      renna.x + renna.w > o.x &&
-      renna.y < o.y + o.h &&
-      renna.y + renna.h > o.y
+      renna.x < o.x+o.w &&
+      renna.x+renna.w > o.x &&
+      renna.y < o.y+o.h &&
+      renna.y+renna.h > o.y
+    ) fineGioco();
+
+    if (o.x + o.w < 0) ostacoli.splice(i,1);
+  });
+
+  regali.forEach((g,i) => {
+    g.x -= 4;
+    ctx.drawImage(giftImg, g.x, g.y, g.w, g.h);
+
+    if (
+      renna.x < g.x+g.w &&
+      renna.x+renna.w > g.x &&
+      renna.y < g.y+g.h &&
+      renna.y+renna.h > g.y
     ) {
-      alert("Game Over! 😭");
-      document.location.reload();
+      punti += 10;
+      regali.splice(i,1);
     }
 
-    /* rimuovi se fuori schermo */
-    if (o.x + o.w < 0) ostacoli.splice(i, 1);
+    if (g.x + g.w < 0) regali.splice(i,1);
   });
+
+  distanza += 0.3;
+  document.getElementById("info").textContent =
+    `Distanza: ${Math.floor(distanza)}m — Punti: ${punti}`;
 
   requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+/* COUNTDOWN */
+function avviaCountdown(callback) {
+  const ctn = document.getElementById("countdown");
+  const num = document.getElementById("countdown-number");
+
+  let n = 3;
+  ctn.style.display = "flex";
+  num.textContent = n;
+
+  const interval = setInterval(() => {
+    n--;
+    if (n > 0) {
+      num.textContent = n;
+      num.classList.remove("countdown-number");
+      void num.offsetWidth;
+      num.classList.add("countdown-number");
+    } else {
+      num.textContent = "VIA!";
+      setTimeout(() => {
+        ctn.style.display = "none";
+        clearInterval(interval);
+        callback();
+      }, 600);
+    }
+  }, 1000);
+}
+
+/* AVVIO GIOCO */
+function iniziaGioco() {
+  canvas.style.display = "block";
+  resizeCanvas();
+
+  document.getElementById("info").style.display = "block";
+
+  const musica = document.getElementById("musica");
+  musica.play().catch(() => {
+    canvas.addEventListener("touchstart", ()=> musica.play(), {once:true});
+    canvas.addEventListener("mousedown", ()=> musica.play(), {once:true});
+  });
+
+  gameLoop();
+}
+
+/* START BUTTON */
+document.getElementById("btn-start").onclick = () => {
+  document.getElementById("start-screen").style.display = "none";
+  avviaCountdown(iniziaGioco);
+};
+
+/* TOP 10 */
+document.getElementById("btn-top10").onclick = () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+  caricaClassifica();
+};
+
+/* RIPROVA */
+document.getElementById("retry-btn").onclick = () => location.reload();
 </script>
 
 </body>
