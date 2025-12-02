@@ -26,7 +26,7 @@ h1 {
   margin-top: 10px;
 }
 
-/* CANVAS 4:5 */
+/* CANVAS */
 canvas {
   display: none;
   margin: 20px auto;
@@ -36,7 +36,7 @@ canvas {
   touch-action: none;
 }
 
-/* Punteggio */
+/* PUNTEGGIO */
 #punteggio {
   display: none;
   margin-top: 10px;
@@ -47,6 +47,7 @@ canvas {
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
+  font-size: 1.2em;
 }
 
 /* START SCREEN */
@@ -70,7 +71,6 @@ canvas {
   max-width: 420px;
   border: 2px solid #ffd700;
   color: #400000;
-  text-align: center;
 }
 
 .start-btn {
@@ -85,6 +85,7 @@ canvas {
   border: none;
   font-weight: bold;
 }
+
 .start-btn:hover {
   background: #ffd700;
   color: #400000;
@@ -122,11 +123,11 @@ canvas {
   top: 0; left: 0;
   width: 100%; height: 100%;
   background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(4px);
   display: none;
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  backdrop-filter: blur(4px);
 }
 
 .classifica-box {
@@ -151,6 +152,7 @@ canvas {
   background: #7b0412;
   text-decoration: none;
 }
+
 .btn:hover {
   background: #ffd700;
   color: #400000;
@@ -168,15 +170,17 @@ th, td {
 <body>
 
 <h1>🎄 Giorno 2 – Reindeer Runner</h1>
-<div id="punteggio">Punteggio: 0</div>
+<div id="punteggio">Punteggio: 0 | ❤️ 3</div>
 
 <!-- START SCREEN -->
 <div id="start-screen">
   <div class="start-box">
     <p>
       🌲 Evita gli alberi<br>
-      🎁 Prendi i regali (+10 punti)<br>
-      🦌 Premi per saltare<br>
+      🎁 Raccogli regali normali (+10)<br>
+      ⭐ Trova i regali d’oro (+50)<br>
+      ❤️ Hai 3 vite!<br>
+      🦌 Tieni premuto per salire<br>
       📱 Perfetto per telefono!
     </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
@@ -243,65 +247,86 @@ window.addEventListener("resize", resizeCanvas);
 const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
 const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
 const giftImg = new Image(); giftImg.src = "../img/gift.png";
+const giftGoldImg = new Image(); giftGoldImg.src = "../img/gift_gold.png";
 
-/* ===== PARAMETRI DIFFICOLTÀ ===== */
+/* ===== PARAMETRI ===== */
 const VELOCITA_OSTACOLI = 2;
 const VELOCITA_REGALI = 2;
 const VELOCITA_GRAVITA = 0.55;
 const SALTO_FORZA = -15;
-const SPAWN_OSTACOLI_MS = 2600;
-const SPAWN_REGALI_MS = 1800;
 
-/* ===== OGGETTI ===== */
 let renna = {
   x: 40,
   y: 0,
   w: 80,
   h: 80,
-  vy: 0,
-  jumping: false
+  vy: 0
 };
 
 let ostacoli = [];
 let regali = [];
+let fiocchi = [];
 let punteggioTotale = 0;
+let vite = 3;
 let giocoTerminato = false;
+let pulsantePremuto = false;
 
-/* ===== SALTO ===== */
-function jump() {
-  if (!renna.jumping) {
-    renna.vy = SALTO_FORZA;
-    renna.jumping = true;
-  }
-}
+/* ===== CONTROLLI ===== */
+canvas.addEventListener("touchstart", e => { e.preventDefault(); pulsantePremuto = true; });
+canvas.addEventListener("touchend", () => pulsantePremuto = false);
+canvas.addEventListener("mousedown", () => pulsantePremuto = true);
+canvas.addEventListener("mouseup", () => pulsantePremuto = false);
 
-canvas.addEventListener("touchstart", e => { e.preventDefault(); jump(); });
-canvas.addEventListener("mousedown", () => jump());
 window.addEventListener("keydown", e => {
-  if (["Space", "ArrowUp"].includes(e.code)) jump();
+  if (["Space", "ArrowUp"].includes(e.code)) pulsantePremuto = true;
+});
+window.addEventListener("keyup", e => {
+  if (["Space", "ArrowUp"].includes(e.code)) pulsantePremuto = false;
 });
 
-/* ===== GENERA OSTACOLI ===== */
+/* ===== GENERA OSTACOLI DISTANZIATI ===== */
+let ultimoOstacoloX = 0;
 function generaOstacolo() {
+  const distanzaMinima = canvas.width * 0.8;
+  const adesso = canvas.width + 20;
+
+  if (adesso - ultimoOstacoloX < distanzaMinima) return;
+
   ostacoli.push({
     x: canvas.width + 20,
     y: canvas.height - 140,
     w: 60,
     h: 90
   });
-}
-setInterval(generaOstacolo, SPAWN_OSTACOLI_MS);
 
-/* ===== GENERA REGALI ===== */
+  ultimoOstacoloX = canvas.width + 20;
+}
+setInterval(generaOstacolo, 2700);
+
+/* ===== GENERA REGALI (NORMALE + SPECIALI) ===== */
 function generaRegalo() {
+  const speciale = Math.random() < 0.10;
+
   regali.push({
     x: canvas.width + 20,
     y: canvas.height - (160 + Math.random()*50),
-    w: 45,
-    h: 45
+    w: speciale ? 55 : 45,
+    h: speciale ? 55 : 45,
+    speciale: speciale
   });
 }
-setInterval(generaRegalo, SPAWN_REGALI_MS);
+setInterval(generaRegalo, 1900);
+
+/* ===== NEVE ===== */
+function generaFiocco() {
+  fiocchi.push({
+    x: Math.random() * canvas.width,
+    y: -10,
+    r: Math.random() * 2 + 1,
+    v: Math.random() * 1.2 + 0.3
+  });
+}
+setInterval(generaFiocco, 120);
 
 /* ===== FINE ===== */
 function fineGioco() {
@@ -327,15 +352,25 @@ function caricaClassifica() {
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
   db.ref("punteggi/giorno2")
-    .once("value")
-    .then(snap => {
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snapshot => {
+
       let arr = [];
-      snap.forEach(s=>arr.push(s.val()));
-      arr.sort((a,b)=>b.punti-a.punti);
-      arr = arr.slice(0,10);
+      snapshot.forEach(ch => {
+        const v = ch.val();
+        arr.push({
+          nome: v.nome,
+          punti: Number(v.punti)
+        });
+      });
+
+      arr.sort((a,b)=>b.punti - a.punti);
 
       arr.forEach(r=>{
-        table.innerHTML += `<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
+        table.appendChild(tr);
       });
     });
 }
@@ -346,31 +381,49 @@ function gameLoop() {
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  /* Gravità */
-  renna.y += renna.vy;
-  renna.vy += VELOCITA_GRAVITA;
+  /* Movimento verticale */
+  if (pulsantePremuto) {
+    renna.vy = -5.2;
+  } else {
+    renna.vy += VELOCITA_GRAVITA;
+  }
 
+  renna.y += renna.vy;
+
+  /* Limite superiore */
+  const limiteSuperiore = 30;
+  if (renna.y < limiteSuperiore) {
+    renna.y = limiteSuperiore;
+    renna.vy = 0;
+  }
+
+  /* Terreno */
   const terreno = canvas.height - 150;
   if (renna.y > terreno) {
     renna.y = terreno;
     renna.vy = 0;
-    renna.jumping = false;
   }
 
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* ALBERI */
+  /* OSTACOLI */
   ostacoli.forEach((o,i)=>{
     o.x -= VELOCITA_OSTACOLI;
     ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
-    // Hitbox più permissiva
     if (
       renna.x + 20 < o.x + o.w &&
       renna.x + renna.w - 20 > o.x &&
       renna.y + 20 < o.y + o.h &&
       renna.y + renna.h - 20 > o.y
-    ) fineGioco();
+    ) {
+      ostacoli.splice(i,1);
+      vite--;
+
+      if (vite <= 0) {
+        fineGioco();
+      }
+    }
 
     if (o.x + o.w < 0) ostacoli.splice(i,1);
   });
@@ -378,7 +431,10 @@ function gameLoop() {
   /* REGALI */
   regali.forEach((g,i)=>{
     g.x -= VELOCITA_REGALI;
-    ctx.drawImage(giftImg, g.x, g.y, g.w, g.h);
+    ctx.drawImage(
+      g.speciale ? giftGoldImg : giftImg,
+      g.x, g.y, g.w, g.h
+    );
 
     if (
       renna.x < g.x + g.w &&
@@ -386,13 +442,25 @@ function gameLoop() {
       renna.y < g.y + g.h &&
       renna.y + renna.h > g.y
     ) {
-      punteggioTotale += 10;
+      punteggioTotale += g.speciale ? 50 : 10;
+
       document.getElementById("punteggio").textContent =
-        `Punteggio: ${punteggioTotale}`;
+        `Punteggio: ${punteggioTotale} | ❤️ ${vite}`;
+
       regali.splice(i,1);
     }
 
     if (g.x + g.w < 0) regali.splice(i,1);
+  });
+
+  /* NEVE */
+  fiocchi.forEach((f,i)=>{
+    f.y += f.v;
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+    ctx.fill();
+    if (f.y > canvas.height) fiocchi.splice(i,1);
   });
 
   requestAnimationFrame(gameLoop);
@@ -457,3 +525,4 @@ document.getElementById("retry-btn").addEventListener("click", ()=>{
 
 </body>
 </html>
+
