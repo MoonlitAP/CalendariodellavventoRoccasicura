@@ -252,14 +252,40 @@ window.addEventListener("resize", resizeCanvas);
 /* ============================================
    IMMAGINI
 ============================================ */
-const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
-const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
-const giftImg = new Image(); giftImg.src = "../img/gift.png";
-const giftGoldImg = new Image(); giftGoldImg.src = "../img/gift_gold.png";
+const rennaImg = new Image();
+const alberoImg = new Image();
+const giftImg = new Image();
+const giftGoldImg = new Image();
 
 /* ============================================
-   PARAMETRI
+   PRELOAD DURANTE COUNTDOWN
 ============================================ */
+let preloadOk = false;
+
+function preloadAssets(callback) {
+  let loaded = 0;
+  const total = 4;
+
+  function done() {
+    loaded++;
+    if (loaded >= total) {
+      preloadOk = true;
+      callback();
+    }
+  }
+
+  rennaImg.onload = done;
+  alberoImg.onload = done;
+  giftImg.onload = done;
+  giftGoldImg.onload = done;
+
+  rennaImg.src = "../img/renna.png";
+  alberoImg.src = "../img/albero.png";
+  giftImg.src = "../img/gift.png";
+  giftGoldImg.src = "../img/gift_gold.png";
+}
+
+/* PARAMETRI */
 const V_OSTACOLI = 2.2;
 const V_REGALI = 2.2;
 const V_NEVE = 1;
@@ -269,7 +295,6 @@ let renna = { x: 40, y: 0, w: 80, h: 80, vy: 0 };
 let ostacoli = [];
 let regali = [];
 let fiocchi = [];
-
 let punteggio = 0;
 let vite = 3;
 let pulsante = false;
@@ -325,9 +350,7 @@ function generaRegalo() {
 }
 setInterval(generaRegalo, 1900);
 
-/* ============================================
-   NEVE
-============================================ */
+/* NEVE */
 function generaFiocco() {
   fiocchi.push({
     x: Math.random() * canvas.width,
@@ -339,52 +362,6 @@ function generaFiocco() {
 setInterval(generaFiocco, 120);
 
 /* ============================================
-   FINE GIOCO
-============================================ */
-function fineGioco() {
-  if (finito) return;
-  finito = true;
-
-  document.getElementById("fine").style.display = "flex";
-  document.getElementById("messaggio").textContent =
-    `Hai totalizzato ${punteggio} punti!`;
-
-  db.ref("punteggi/giorno2").push({
-    nome: nomeMascherato,
-    punti: punteggio,
-    timestamp: Date.now()
-  });
-
-  caricaClassifica();
-}
-
-/* ============================================
-   CLASSIFICA
-============================================ */
-function caricaClassifica() {
-  const table = document.getElementById("score-table");
-  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
-
-  db.ref("punteggi/giorno2")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value", snap => {
-      let arr = [];
-      snap.forEach(child => {
-        arr.push(child.val());
-      });
-
-      arr.sort((a,b)=>b.punti - a.punti);
-
-      arr.forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
-        table.appendChild(tr);
-      });
-    });
-}
-
-/* ============================================
    GAME LOOP
 ============================================ */
 function gameLoop() {
@@ -392,7 +369,6 @@ function gameLoop() {
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  /* MOVIMENTO RENNA (jetpack) */
   if (pulsante) renna.vy = -5.2;
   else renna.vy += V_GRAV;
 
@@ -411,14 +387,13 @@ function gameLoop() {
 
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* ALBERI – FOR INVERSO (no freeze) */
+  /* ALBERI */
   for (let i = ostacoli.length - 1; i >= 0; i--) {
     const o = ostacoli[i];
     o.x -= V_OSTACOLI;
 
     ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
-    /* COLLISIONE */
     const hit =
       renna.x + 20 < o.x + o.w &&
       renna.x + renna.w - 20 > o.x &&
@@ -483,9 +458,9 @@ function gameLoop() {
 }
 
 /* ============================================
-   COUNTDOWN + START
+   COUNTDOWN CON PRELOAD
 ============================================ */
-function startCountdown(cb) {
+function startCountdown(onFinish) {
   const c = document.getElementById("countdown");
   const num = document.getElementById("countdown-number");
 
@@ -493,49 +468,66 @@ function startCountdown(cb) {
   c.style.display = "flex";
   num.textContent = n;
 
-  const timer = setInterval(()=>{
+  preloadAssets(() => {
+    console.log("✔ Tutte le immagini pronte prima del VIA!");
+  });
+
+  const timer = setInterval(() => {
     n--;
+
     if (n > 0) {
       num.textContent = n;
     } else {
       num.textContent = "VIA!";
-      setTimeout(()=>{
+
+      setTimeout(() => {
         clearInterval(timer);
         c.style.display = "none";
-        cb();
-      },500);
+
+        const wait = setInterval(() => {
+          if (preloadOk) {
+            clearInterval(wait);
+            onFinish();
+          }
+        }, 30);
+
+      }, 500);
     }
-  },1000);
+  }, 1000);
 }
 
+/* ============================================
+   START GAME
+============================================ */
 function iniziaGioco() {
   canvas.style.display = "block";
   document.getElementById("punteggio").style.display = "block";
   gameLoop();
 }
 
-document.getElementById("btn-start").addEventListener("click", ()=>{
+document.getElementById("btn-start").addEventListener("click", () => {
   document.getElementById("start-screen").style.display = "none";
 
   const musica = document.getElementById("musica");
   musica.currentTime = 0;
-  musica.play().catch(()=>{});
+  musica.play().catch(() => {});
 
   startCountdown(iniziaGioco);
 });
 
 /* CLASSIFICA */
-document.getElementById("btn-top10").addEventListener("click", ()=>{
+document.getElementById("btn-top10").addEventListener("click", () => {
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
   caricaClassifica();
 });
 
 /* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click", ()=>{
+document.getElementById("retry-btn").addEventListener("click", () => {
   location.reload();
 });
 </script>
 
 </body>
 </html>
+
