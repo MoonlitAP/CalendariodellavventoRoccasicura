@@ -155,12 +155,6 @@ h1 {
   animation: zoom 1s ease;
 }
 
-@keyframes zoom {
-  0% { opacity: 0; transform: scale(0.4); }
-  50% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(2); }
-}
-
 /* END SCREEN */
 #fine {
   position: fixed;
@@ -268,7 +262,7 @@ const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   const w = Math.min(window.innerWidth - 20, 520);
-  const h = Math.floor(w * 0.6); 
+  const h = Math.floor(w * 0.6);
   canvas.width = w;
   canvas.height = h;
 }
@@ -282,22 +276,17 @@ imgBabbo.src = "./img/babbo_sacco.png";
 const imgSnowman = new Image();
 imgSnowman.src = "./img/snowman.png";
 
-const imgGift    = new Image();
+const imgGift = new Image();
 imgGift.src = "./img/gift.png";
 
-const imgRete    = new Image();
+const imgRete = new Image();
 imgRete.src = "./img/rete.png";
 
 const sfondo = new Image();
 sfondo.src = "./img/rocca.png";
 
-/* Palline */
-const pallineImgs = ["./img/b1.png","./img/b2.png","./img/b3.png"].map(src=>{
-  let im = new Image();
-  im.src=src;
-  return im;
-});
-let pallinaIndex = 0;
+const pallineImgs=["./img/b1.png","./img/b2.png","./img/b3.png"].map(src=>{let im=new Image();im.src=src;return im;});
+let pallinaIndex=0;
 
 /* VARIABILI */
 let running=false;
@@ -308,12 +297,12 @@ let score=0;
 let babbo={x:0,y:0,w:0,h:0};
 
 imgBabbo.onload=()=>{
-  const scale=0.36;
+  const scale=0.45;      // 🔥 Babbo più grande
   babbo.w=imgBabbo.width*scale;
   babbo.h=imgBabbo.height*scale;
 
-  babbo.x = canvas.width * 0.12;
-  babbo.y = canvas.height * 0.60;
+  babbo.x=canvas.width*0.05;  // 🔥 MOLTO più a sinistra
+  babbo.y=canvas.height*0.38; // 🔥 Più alto
 };
 
 let oggetti=[];
@@ -324,16 +313,16 @@ function updateHUD(){
   document.getElementById("hud").textContent=`❤️ ${lives} | ⭐ ${score}`;
 }
 
-/* OGGETTI SULLA STESSA LINEA */
+/* OGGETTI sulla stessa linea DI BABBO */
 function generaOggetto(){
   if(!running) return;
 
-  const tipo = Math.random()<0.5 ? "snowman":"gift";
+  const tipo=Math.random()<0.5 ? "snowman" : "gift";
 
   oggetti.push({
     type:tipo,
     x:canvas.width+40,
-    y:canvas.height*0.60,
+    y:babbo.y,        // 🔥 stessa linea precisa
     w:tipo==="snowman"?65:50,
     h:tipo==="snowman"?65:50,
     speed:3.2
@@ -347,7 +336,7 @@ document.getElementById("btnSpara").addEventListener("click",()=>{
 
   proiettili.push({
     x:babbo.x+babbo.w,
-    y:babbo.y+10,
+    y:babbo.y,
     w:40,h:40,
     speed:7,
     angle:0,
@@ -369,10 +358,10 @@ document.getElementById("btnRete").addEventListener("click",()=>{
   };
 });
 
-/* COLLISIONE */
+/* COLLISIONI */
 function hit(a,b){
   return(
-    a.x<b.x+b.h &&
+    a.x<b.x+b.w &&
     a.x+a.w>b.x &&
     a.y<b.y+b.h &&
     a.y+a.h>b.y
@@ -391,6 +380,7 @@ function updateGame(){
 
   oggetti.forEach((o,i)=>{
     o.x-=o.speed;
+
     ctx.drawImage(o.type==="snowman"?imgSnowman:imgGift,o.x,o.y,o.w,o.h);
 
     if(hit(babbo,o)){
@@ -399,7 +389,6 @@ function updateGame(){
 
       oggetti.splice(i,1);
       updateHUD();
-
       if(lives<=0) return gameOver();
     }
 
@@ -420,7 +409,6 @@ function updateGame(){
       if(hit(p,o)){
         if(o.type==="snowman") score+=15;
         else score-=5;
-
         if(score<0) score=0;
 
         oggetti.splice(oi,1);
@@ -434,6 +422,7 @@ function updateGame(){
 
   if(rete){
     rete.x+=rete.speed;
+
     ctx.drawImage(imgRete,rete.x,rete.y,rete.w,rete.h);
 
     oggetti.forEach((o,oi)=>{
@@ -516,8 +505,7 @@ function gameOver(){
   running=false;
   document.getElementById("fine").style.display="flex";
 
-  document.getElementById("messaggio").textContent=
-    `Hai totalizzato ${score} punti!`;
+  document.getElementById("messaggio").textContent=`Hai totalizzato ${score} punti!`;
 
   db.ref("punteggi/giorno3").push({
     nome:nomeMascherato,
