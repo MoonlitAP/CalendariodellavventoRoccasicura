@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
-<title>🎄 Giorno 3 – Escape</title>
+<title>🎄 Giorno 3 – Snowman Escape</title>
 
 <!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
@@ -13,9 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
-/* ============================================
-   GENERALE
-============================================ */
+/* GENERALE */
 body {
   margin: 0;
   background-color: #7b0412;
@@ -31,71 +29,70 @@ h1 {
   font-size: 2rem;
 }
 
-/* ============================================
-   CANVAS 4:9 centrato
-============================================ */
+/* HUD (vite + punteggio) SOPRA AL CANVAS */
+#hud {
+  margin-top: 10px;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+/* CANVAS 5:3 */
 .canvas-wrapper {
-  margin: 0 auto;
   width: 100%;
-  max-width: 420px;
-  padding: 10px;
+  max-width: 520px;
+  margin: 10px auto;
 }
 
 #gameCanvas {
   width: 100%;
-  aspect-ratio: 4 / 9;
-  border: 3px solid #ffd700;
-  border-radius: 14px;
+  aspect-ratio: 5 / 3;
   background: #bde0fe;
+  border: 2px solid #ffd700;
+  border-radius: 12px;
   display: none;
 }
 
-/* ============================================
-   BOTTONI DI CONTROLLO
-============================================ */
+/* BOTTONI AFFIANCATI */
 .controls {
   margin-top: 12px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   gap: 12px;
-  width: 90%;
-  max-width: 420px;
+  width: 100%;
+  max-width: 520px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.control-btn {
+.btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: 3px solid #fff3b0;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#btnRete {
+  background: white;
+  color: #7b0412;
+  opacity: 0.4;
+  border: 3px solid #ffd700;
+}
+
+#btnRete.enabled {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(255,215,0,0.8);
+}
+
+#btnSpara {
   background: #ffd700;
   color: #7b0412;
-  font-size: 22px;
-  font-weight: bold;
-  border: 3px solid #fff3b0;
-  border-radius: 14px;
-  padding: 12px 20px;
-  cursor: pointer;
   box-shadow: 0 0 10px rgba(255,215,0,0.6);
 }
 
-.control-btn:active {
-  transform: scale(0.95);
-}
-
-.btn-rete {
-  background: white;
-  color: #7b0412;
-  font-size: 20px;
-  border: 3px solid #ffd700;
-  opacity: 0.5;
-}
-
-.btn-rete.enabled {
-  opacity: 1;
-  box-shadow: 0 0 10px rgba(255,215,0,0.7);
-}
-
-/* ============================================
-   START SCREEN (identico giorno 2)
-============================================ */
+/* START SCREEN */
 #start-screen {
   position: fixed;
   top: 0; left: 0;
@@ -110,26 +107,27 @@ h1 {
 
 .start-box {
   background: #fffaf2;
-  padding: 30px;
+  padding: 25px;
   border-radius: 20px;
   width: 90%;
-  max-width: 420px;
+  max-width: 450px;
   border: 2px solid #ffd700;
   color: #400000;
   text-align: center;
+  font-size: 1.15rem;
 }
 
 .start-btn {
-  width: 80%;
-  margin-top: 12px;
+  width: 85%;
+  margin-top: 10px;
   padding: 14px;
   border-radius: 30px;
-  font-size: 1.1em;
+  font-size: 1.2rem;
   cursor: pointer;
   background: #7b0412;
   color: white;
-  border: none;
   font-weight: bold;
+  border: none;
 }
 
 .start-btn:hover {
@@ -137,9 +135,7 @@ h1 {
   color: #400000;
 }
 
-/* ============================================
-   COUNTDOWN
-============================================ */
+/* COUNTDOWN */
 #countdown {
   position: fixed;
   top: 0; left: 0;
@@ -156,18 +152,9 @@ h1 {
   font-weight: bold;
   color: #ffd700;
   text-shadow: 0 0 20px black;
-  animation: zoomFade 1s ease forwards;
 }
 
-@keyframes zoomFade {
-  0% { opacity: 0; transform: scale(0.4); }
-  30% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(2); }
-}
-
-/* ============================================
-   END SCREEN + CLASSIFICA (identico giorno 2)
-============================================ */
+/* END SCREEN */
 #fine {
   position: fixed;
   top: 0; left: 0;
@@ -176,8 +163,8 @@ h1 {
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
   backdrop-filter: blur(4px);
+  z-index: 9999;
 }
 
 .classifica-box {
@@ -191,23 +178,6 @@ h1 {
   text-align: center;
 }
 
-.btn {
-  display: inline-block;
-  margin-top: 15px;
-  padding: 12px 30px;
-  border-radius: 30px;
-  font-weight: bold;
-  cursor: pointer;
-  color: white;
-  background: #7b0412;
-  text-decoration: none;
-}
-
-.btn:hover {
-  background: #ffd700;
-  color: #400000;
-}
-
 table {
   width: 100%;
   margin-top: 15px;
@@ -218,6 +188,7 @@ th, td {
   border-bottom: 1px solid #d7bb5f;
   text-align: center;
 }
+
 </style>
 </head>
 
@@ -225,16 +196,34 @@ th, td {
 
 <h1>🎄 Giorno 3 – Snowman Escape</h1>
 
+<!-- HUD -->
+<div id="hud">❤️ 3 | ⭐ 0</div>
+
+<!-- CANVAS 5:3 -->
+<div class="canvas-wrapper">
+  <canvas id="gameCanvas"></canvas>
+</div>
+
+<!-- BOTTONI AFFIANCATI -->
+<div class="controls">
+  <button id="btnRete" class="btn">🕸 PRENDI IL REGALO</button>
+  <button id="btnSpara" class="btn">🎯 SPARA!</button>
+</div>
+
 <!-- START SCREEN -->
 <div id="start-screen">
   <div class="start-box">
-    <p>
-      🎅 Babbo al centro<br>
-      ❄ Pupazzi in arrivo<br>
-      🎯 Spara con le bamboline<br>
-      🕸 Premi per usare la rete<br>
-      🎁 Prendi il regalo per attivarla<br>
-      ❤️ 3 vite<br>
+
+    <p><b>Insieme a Babbo, cattura i regali e distruggi i pupazzi di neve che ti ostacolano il cammino!</b></p>
+
+    <h3>⭐ Sistema Punteggio</h3>
+
+    <p style="text-align:left;">
+    🎁 <b>Pacco catturato</b> → <b>+50 punti</b><br>
+    ☃️ <b>Snowman sparato</b> → <b>+15 punti</b><br>
+    💥 <b>Pacco colpito da sparo</b> → <b>-5 punti</b><br>
+    🕸 <b>Snowman catturato con la rete</b> → <b>-1 vita</b><br>
+    ☃️➡️🎅 <b>Snowman tocca Babbo</b> → <b>-1 vita</b>
     </p>
 
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
@@ -242,78 +231,46 @@ th, td {
   </div>
 </div>
 
-<!-- COUNTDOWN -->
-<div id="countdown">
-  <div id="countdown-number" class="countdown-number">3</div>
-</div>
-
-<!-- CANVAS -->
-<div class="canvas-wrapper">
-  <canvas id="gameCanvas"></canvas>
-</div>
-
-<!-- BOTTONI -->
-<div class="controls">
-  <button id="btnSpara" class="control-btn">🎯 SPARA!</button>
-  <button id="btnRete" class="control-btn btn-rete" disabled>🕸 USA RETE</button>
-</div>
-
-<!-- END SCREEN -->
-<div id="fine">
-  <div class="classifica-box">
-    <h2 id="messaggio"></h2>
-    <h3>🏆 Top 10 Globale</h3>
-
-    <table id="score-table">
-      <tr><th>Nome</th><th>Punti</th></tr>
-    </table>
-
-    <button id="retry-btn" class="btn" style="background:#d41e1e;">🔄 Riprova</button>
-    <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
-  </div>
-</div>
 
 
 
-  <script>
-/* ======================================================
-   FIREBASE INIT (completo in PARTE 3)
-====================================================== */
+   <script>
+/* ===============================================
+   FIREBASE INIT
+================================================= */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "calendarioroccasicura"
 });
+
 const db = firebase.database();
 
-/* ======================================================
-   NOME MASCHERATO COME GIORNO 2
-====================================================== */
-const nomeReale = localStorage.getItem("utente") || "Player";
+/* Nome mascherato come Giorno 2 */
+const nomeReale = localStorage.getItem("utente") || "Ospite";
 const nomeMascherato =
-  nomeReale[0] +
-  Math.floor(Math.random()*900+100) +
-  nomeReale.slice(1);
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-/* ======================================================
+/* ===============================================
    CANVAS
-====================================================== */
+================================================= */
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+/* Rende canvas responsive (5:3) */
 function resizeCanvas() {
-  const w = Math.min(window.innerWidth - 20, 420);
-  const h = Math.floor(w * 2.25); /* ratio 4:9 */
+  const w = Math.min(window.innerWidth - 20, 520);
+  const h = Math.floor(w * 0.6); // proporzione 5:3
   canvas.width = w;
   canvas.height = h;
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* ======================================================
+/* ===============================================
    IMMAGINI
-====================================================== */
+================================================= */
 const imgBabbo = new Image();
 imgBabbo.src = "./img/babbo_3.png";
 
@@ -326,101 +283,108 @@ imgGift.src = "./img/gift.png";
 const imgRete = new Image();
 imgRete.src = "./img/rete.png";
 
-const proiettiliSrc = ["./img/b1.png","./img/b2.png","./img/b3.png"];
-let proiettiliImg = [];
-proiettiliSrc.forEach(src => { let i = new Image(); i.src = src; proiettiliImg.push(i); });
+/* Palline (proiettili) ciclati */
+const palline = [
+  "./img/b1.png",
+  "./img/b2.png",
+  "./img/b3.png"
+];
+let pallineImgs = [];
+palline.forEach(src => {
+  const i = new Image();
+  i.src = src;
+  pallineImgs.push(i);
+});
+let pallinaIndex = 0;
 
-/* ======================================================
-   VARIABILI DI GIOCO
-====================================================== */
+/* ===============================================
+   OGGETTI DI GIOCO
+================================================= */
+let running = false;
 
+let score = 0;
+let lives = 3;
+
+/* HUD update */
+function updateHUD() {
+  document.getElementById("hud").textContent =
+    `❤️ ${lives} | ⭐ ${score}`;
+}
+
+/* Babbo */
 let babbo = {
   x: 40,
-  y: 0,
+  y: canvas.height / 2 - 40,
   w: 80,
   h: 80
 };
 
-let pupazzi = [];
-let regali = [];
-let palline = [];
-let retiLanciate = [];
+/* Oggetti */
+let oggetti = [];      // contiene {type: "snowman"/"gift", x, y, w, h, speed}
+let proiettili = [];   // palline
+let rete = null;       // singola rete attiva
 
-let indicePallina = 0;
+/* ===============================================
+   GENERA OGGETTI (regali + snowman)
+================================================= */
+function generaOggetto() {
+  const tipo = Math.random() < 0.5 ? "snowman" : "gift";
 
-let score = 0;
-let lives = 3;
-let running = false;
-
-/* ======================================================
-   FUNZIONI DI SPAWN
-====================================================== */
-let spawnSnowmanTimer = 0;
-let spawnGiftTimer = 0;
-
-function spawnSnowman() {
-  pupazzi.push({
-    x: canvas.width + 30,
-    y: Math.random() * (canvas.height - 120),
-    w: 90,
-    h: 90,
-    speed: 2.2
+  oggetti.push({
+    type: tipo,
+    x: canvas.width + 40,
+    y: babbo.y + 10, // LINEA UNICA
+    w: tipo === "snowman" ? 65 : 50,
+    h: tipo === "snowman" ? 65 : 50,
+    speed: 2
   });
 }
+setInterval(() => { if (running) generaOggetto(); }, 900);
 
-function spawnGift() {
-  regali.push({
-    x: canvas.width + 30,
-    y: Math.random() * (canvas.height - 120),
-    w: 60,
-    h: 60,
-    speed: 2.2
-  });
-}
-
-/* ======================================================
-   SPARA: PALLINE ROTANTI + CATAPULTA
-====================================================== */
+/* ===============================================
+   SPARO (palline)
+================================================= */
 document.getElementById("btnSpara").addEventListener("click", () => {
+  if (!running) return;
 
-  let img = proiettiliImg[indicePallina];
-  indicePallina = (indicePallina + 1) % proiettiliImg.length;
+  const img = pallineImgs[pallinaIndex];
+  pallinaIndex = (pallinaIndex + 1) % pallineImgs.length;
 
-  palline.push({
-    x: babbo.x + babbo.w,
-    y: babbo.y + babbo.h/2 - 20,
-    w: 40,
-    h: 40,
-    speed: 7,
-    rot: 0,
-    img: img
-  });
-});
-
-/* ======================================================
-   USA RETE → lancia rete.png ridotta al 50%
-====================================================== */
-document.getElementById("btnRete").addEventListener("click", () => {
-  if (document.getElementById("btnRete").disabled) return;
-
-  let scale = 0.5;
-
-  retiLanciate.push({
+  proiettili.push({
     x: babbo.x + babbo.w,
     y: babbo.y + 20,
-    w: imgRete.width * scale,
-    h: imgRete.height * scale,
-    speed: 4
+    w: 35,
+    h: 35,
+    speed: 6,
+    img: img,
+    angle: 0
   });
-
-  document.getElementById("btnRete").disabled = true;
-  document.getElementById("btnRete").classList.remove("enabled");
 });
 
-/* ======================================================
-   COLLISIONE
-====================================================== */
-function coll(a,b) {
+/* ===============================================
+   ATTIVA RETE
+================================================= */
+document.getElementById("btnRete").addEventListener("click", () => {
+  if (!running || rete !== null) return;
+
+  rete = {
+    x: babbo.x + babbo.w,
+    y: babbo.y,
+    w: 70,
+    h: 70,
+    speed: 4
+  };
+
+  /* Disattivo il pulsante */
+  const btn = document.getElementById("btnRete");
+  btn.classList.remove("enabled");
+  btn.disabled = true;
+});
+
+/* ===============================================
+   COLLISIONI RECT
+================================================= */
+function rectHit(a, b) {
   return (
     a.x < b.x + b.w &&
     a.x + a.w > b.x &&
@@ -429,139 +393,214 @@ function coll(a,b) {
   );
 }
 
-/* ======================================================
-   GAME LOOP
-====================================================== */
+/* ===============================================
+   UPDATE DEL GIOCO
+================================================= */
 function updateGame() {
   if (!running) return;
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  /* Babbo centrato */
-  babbo.y = canvas.height/2 - babbo.h/2;
+  /* Babbo */
   ctx.drawImage(imgBabbo, babbo.x, babbo.y, babbo.w, babbo.h);
 
   /* ----------------------------------------------
-     Spawn pupazzi e regali
-  ---------------------------------------------- */
-  spawnSnowmanTimer++;
-  if (spawnSnowmanTimer > 80) {
-    spawnSnowman();
-    spawnSnowmanTimer = 0;
-  }
+     OGGETTI IN ARRIVO
+     (snowman + gift)
+  ----------------------------------------------- */
+  oggetti.forEach((o, i) => {
+    o.x -= o.speed;
 
-  spawnGiftTimer++;
-  if (spawnGiftTimer > 200) {
-    spawnGift();
-    spawnGiftTimer = 0;
-  }
+    if (o.type === "snowman")
+      ctx.drawImage(imgSnowman, o.x, o.y, o.w, o.h);
+    else
+      ctx.drawImage(imgGift, o.x, o.y, o.w, o.h);
 
-  /* ----------------------------------------------
-     Pupazzi
-  ---------------------------------------------- */
-  pupazzi.forEach((p, pi) => {
-    p.x -= p.speed;
-    ctx.drawImage(imgSnowman, p.x, p.y, p.w, p.h);
-
-    /* Hitbox ridotta */
-    let box = {
-      x: p.x + 10,
-      y: p.y + 10,
-      w: p.w - 20,
-      h: p.h - 20
-    };
-
-    /* Collisione con Babbo */
-    if (coll(babbo, box)) {
+    /* Snowman tocca Babbo → -1 vita */
+    if (o.type === "snowman" && rectHit(o, babbo)) {
+      oggetti.splice(i, 1);
       lives--;
-      pupazzi.splice(pi,1);
+      updateHUD();
       if (lives <= 0) return gameOver();
     }
-  });
 
-  /* ----------------------------------------------
-     Regali → abilita rete
-  ---------------------------------------------- */
-  regali.forEach((g, gi) => {
-    g.x -= g.speed;
-    ctx.drawImage(imgGift, g.x, g.y, g.w, g.h);
+    /* Babbo cattura regalo → +50 */
+    if (o.type === "gift" && rectHit(o, babbo)) {
+      oggetti.splice(i, 1);
+      score += 50;
+      updateHUD();
 
-    if (coll(babbo, g)) {
-      regali.splice(gi,1);
-      document.getElementById("btnRete").disabled = false;
-      document.getElementById("btnRete").classList.add("enabled");
+      /* abilito rete */
+      const btn = document.getElementById("btnRete");
+      btn.disabled = false;
+      btn.classList.add("enabled");
     }
+
+    /* elimina fuori schermo */
+    if (o.x + o.w < 0) oggetti.splice(i, 1);
   });
 
   /* ----------------------------------------------
-     Palline (catapulta + rotazione)
-  ---------------------------------------------- */
-  palline.forEach((p, pi) => {
+     PROIETTILI (PALLINE)
+  ----------------------------------------------- */
+  proiettili.forEach((p, pi) => {
     p.x += p.speed;
-    p.rot += 0.2;
+    p.angle += 0.2;
 
     ctx.save();
     ctx.translate(p.x + p.w/2, p.y + p.h/2);
-    ctx.rotate(p.rot);
+    ctx.rotate(p.angle);
     ctx.drawImage(p.img, -p.w/2, -p.h/2, p.w, p.h);
     ctx.restore();
 
-    pupazzi.forEach((snow, si) => {
-      let box = {
-        x: snow.x + 10,
-        y: snow.y + 10,
-        w: snow.w - 20,
-        h: snow.h - 20
-      };
+    /* Collisioni */
+    oggetti.forEach((o, oi) => {
+      if (rectHit(p, o)) {
 
-      if (coll({x:p.x,y:p.y,w:p.w,h:p.h}, box)) {
-        score += 50;
-        pupazzi.splice(si,1);
-        palline.splice(pi,1);
+        if (o.type === "snowman") {
+          /* Snowman sparato → +15 */
+          score += 15;
+        } else {
+          /* Pacco sparato → -5 */
+          score -= 5;
+          if (score < 0) score = 0;
+        }
+
+        updateHUD();
+
+        oggetti.splice(oi, 1);
+        proiettili.splice(pi, 1);
       }
     });
+
+    if (p.x > canvas.width + 50)
+      proiettili.splice(pi, 1);
   });
 
   /* ----------------------------------------------
-     RETE LANCIA (come un proiettile)
-  ---------------------------------------------- */
-  retiLanciate.forEach((r, ri) => {
-    r.x += r.speed;
-    ctx.drawImage(imgRete, r.x, r.y, r.w, r.h);
+     RETE (SINGOLO PROIETTILE)
+  ----------------------------------------------- */
+  if (rete) {
+    rete.x += rete.speed;
+    ctx.drawImage(imgRete, rete.x, rete.y, rete.w, rete.h);
 
-    pupazzi.forEach((snow, si) => {
-      let box = {
-        x: snow.x + 10,
-        y: snow.y + 10,
-        w: snow.w - 20,
-        h: snow.h - 20
-      };
+    oggetti.forEach((o, oi) => {
+      if (rectHit(rete, o)) {
 
-      if (coll(r, box)) {
-        pupazzi.splice(si,1);
-        retiLanciate.splice(ri,1);
+        if (o.type === "gift") {
+          /* rete prende regalo → +50 */
+          score += 50;
+        } else {
+          /* rete cattura snowman → -1 vita */
+          lives--;
+          if (lives < 0) lives = 0;
+          if (lives <= 0) return gameOver();
+        }
+
+        updateHUD();
+
+        oggetti.splice(oi, 1);
+        rete = null;
       }
     });
-  });
 
-  /* ----------------------------------------------
-     TESTO PUNTEGGIO E VITE
-  ---------------------------------------------- */
-  ctx.fillStyle = "white";
-  ctx.font = "20px Ubuntu";
-  ctx.fillText("Punteggio: " + score, 20, 30);
-  ctx.fillText("❤️ " + lives, 20, 60);
+    /* rete esce dallo schermo */
+    if (rete && rete.x > canvas.width + 40)
+      rete = null;
+  }
 
   requestAnimationFrame(updateGame);
 }
-</script>
 
 
 
-  <script>
-/* ======================================================
-   GAME OVER → MOSTRA POPUP E SALVA SU FIREBASE
-====================================================== */
+
+
+
+
+
+
+
+<script>
+/* ============================================================
+   COUNTDOWN (VERSIONE FIXATA — ANIMAZIONE CORRETTA)
+============================================================ */
+function startCountdown(callback) {
+  const layer = document.getElementById("countdown");
+  const number = document.getElementById("countdown-number");
+
+  let n = 3;
+  layer.style.display = "flex";
+
+  // FORZO IL RESTART ANIMAZIONE
+  number.classList.remove("countdown-number");
+  void number.offsetWidth;
+  number.classList.add("countdown-number");
+
+  number.textContent = n;
+
+  const timer = setInterval(() => {
+    n--;
+
+    // riavvio animazione OGNI SECONDO
+    number.classList.remove("countdown-number");
+    void number.offsetWidth;
+    number.classList.add("countdown-number");
+
+    if (n > 0) {
+      number.textContent = n;
+    } else {
+      number.textContent = "VIA!";
+      setTimeout(() => {
+        clearInterval(timer);
+        layer.style.display = "none";
+        callback();
+      }, 600);
+    }
+  }, 1000);
+}
+
+/* ============================================================
+   AVVIO GIOCO
+============================================================ */
+function avviaGioco() {
+  document.getElementById("start-screen").style.display = "none";
+  canvas.style.display = "block";
+  running = true;
+  updateGame();
+}
+
+document.getElementById("btn-start").addEventListener("click", () => {
+  startCountdown(avviaGioco);
+});
+
+/* ============================================================
+   CLASSIFICA TOP 10 — FIREBASE
+============================================================ */
+function caricaClassifica() {
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+  db.ref("punteggi/giorno3")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap => {
+      const arr = [];
+      snap.forEach(c => arr.push(c.val()));
+
+      arr.sort((a,b) => b.punti - a.punti);
+
+      arr.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
+        table.appendChild(tr);
+      });
+    });
+}
+
+/* ============================================================
+   GAME OVER
+============================================================ */
 function gameOver() {
   running = false;
 
@@ -569,7 +608,7 @@ function gameOver() {
   document.getElementById("messaggio").textContent =
     `Hai totalizzato ${score} punti!`;
 
-  /* Salva punteggio su Firebase → giorno3 */
+  // SALVA SU FIREBASE
   db.ref("punteggi/giorno3").push({
     nome: nomeMascherato,
     punti: score,
@@ -579,86 +618,18 @@ function gameOver() {
   caricaClassifica();
 }
 
-/* ======================================================
-   CLASSIFICA TOP 10 → FIREBASE
-====================================================== */
-function caricaClassifica() {
-  const table = document.getElementById("score-table");
-  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
-
-  db.ref("punteggi/giorno3")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value", snap => {
-      let arr = [];
-      snap.forEach(child => arr.push(child.val()));
-
-      arr.sort((a,b) => b.punti - a.punti);
-
-      arr.forEach(record => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${record.nome}</td><td>${record.punti}</td>`;
-        table.appendChild(tr);
-      });
-    });
-}
-
-/* ======================================================
-   COUNTDOWN COME GIORNO 2
-====================================================== */
-function startCountdown(callback) {
-  const layer = document.getElementById("countdown");
-  const number = document.getElementById("countdown-number");
-
-  let n = 3;
-  layer.style.display = "flex";
-  number.textContent = n;
-
-  const timer = setInterval(() => {
-    n--;
-    if (n > 0) {
-      number.textContent = n;
-    } else {
-      number.textContent = "VIA!";
-      setTimeout(() => {
-        clearInterval(timer);
-        layer.style.display = "none";
-        callback();
-      }, 500);
-    }
-  }, 1000);
-}
-
-/* ======================================================
-   AVVIA GIOCO
-====================================================== */
-function avviaGioco() {
-  document.getElementById("start-screen").style.display = "none";
-  canvas.style.display = "block";
-
-  running = true;
-  updateGame();
-}
-
-/* ======================================================
-   BOTTONE "INIZIA"
-====================================================== */
-document.getElementById("btn-start").addEventListener("click", () => {
-  startCountdown(avviaGioco);
-});
-
-/* ======================================================
-   BOTTONE "CLASSIFICA"
-====================================================== */
+/* ============================================================
+   PULSANTE CLASSIFICA (start screen)
+============================================================ */
 document.getElementById("btn-top10").addEventListener("click", () => {
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
   caricaClassifica();
 });
 
-/* ======================================================
-   RICOMINCIA
-====================================================== */
+/* ============================================================
+   RIPROVA
+============================================================ */
 document.getElementById("retry-btn").addEventListener("click", () => {
   location.reload();
 });
