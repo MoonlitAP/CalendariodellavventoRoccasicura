@@ -13,7 +13,6 @@
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
-/* GENERALE */
 body {
   margin: 0;
   background-color: #7b0412;
@@ -25,48 +24,46 @@ body {
 
 h1 {
   color: #ffd700;
-  margin-top: 10px;
+  margin-top: 15px;
   font-size: 2rem;
 }
 
 /* HUD */
 #hud {
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 1.4rem;
   font-weight: bold;
 }
 
-/* CANVAS */
+/* CANVAS WRAPPER */
 .canvas-wrapper {
   width: 100%;
   max-width: 520px;
-  margin: 10px auto;
+  margin: 12px auto;
+  position: relative;
 }
 
 #gameCanvas {
   width: 100%;
   aspect-ratio: 5 / 3;
-  background: url("./img/rocca.png") center center / cover no-repeat;
   border: 2px solid #ffd700;
-  border-radius: 12px;
+  border-radius: 14px;
   display: none;
-  position: relative;
-  overflow: hidden;
+  background: black;
 }
 
-/* Nebbia soft */
-#gameCanvas::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  filter: blur(4px) brightness(0.90);
-  opacity: 0.85;
-  z-index: 0;
+/* NEVE sopra canvas */
+.neve {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
 }
-#gameCanvas * { position: relative; z-index: 2; }
 
-/* BOTTONI AFFIANCATI */
+/* BOTTONI */
 .controls {
   margin-top: 12px;
   display: flex;
@@ -91,14 +88,12 @@ h1 {
 #btnRete {
   background: white;
   color: #7b0412;
-  opacity: 1;
   border: 3px solid #ffd700;
 }
 
 #btnSpara {
   background: #ffd700;
   color: #7b0412;
-  box-shadow: 0 0 10px rgba(255,215,0,0.6);
 }
 
 /* START SCREEN */
@@ -118,8 +113,8 @@ h1 {
   background: #fffaf2;
   padding: 25px;
   border-radius: 20px;
-  width: 90%;
-  max-width: 450px;
+  width: 92%;
+  max-width: 460px;
   border: 2px solid #ffd700;
   color: #400000;
   text-align: center;
@@ -161,6 +156,13 @@ h1 {
   font-weight: bold;
   color: #ffd700;
   text-shadow: 0 0 20px black;
+  animation: zoom 1s ease;
+}
+
+@keyframes zoom {
+  0% { opacity: 0; transform: scale(0.4); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
 }
 
 /* END SCREEN */
@@ -172,7 +174,6 @@ h1 {
   display: none;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(4px);
   z-index: 9999;
 }
 
@@ -197,40 +198,6 @@ th, td {
   border-bottom: 1px solid #d7bb5f;
   text-align: center;
 }
-
-/* TORNA AL CALENDARIO */
-.calendario-btn {
-  display: inline-block;
-  background: #7b0412 !important;
-  padding: 12px 28px;
-  margin-top: 12px;
-  border-radius: 30px;
-  font-weight: bold;
-  color: white !important;
-  text-decoration: none;
-  font-size: 1.2rem;
-}
-
-.calendario-btn:hover {
-  background: #ffd700 !important;
-  color: #400000 !important;
-}
-
-/* ❄️ NEVE */
-.snowflake {
-  position: absolute;
-  font-size: 8px;
-  color: white;
-  pointer-events: none;
-  user-select: none;
-  z-index: 2000;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  from { transform: translateY(-10px); opacity: 1; }
-  to { transform: translateY(100vh); opacity: 0; }
-}
 </style>
 </head>
 
@@ -246,7 +213,10 @@ th, td {
   <canvas id="gameCanvas"></canvas>
 </div>
 
-<!-- BOTTONI -->
+<!-- NEVE -->
+<canvas id="snow" class="neve"></canvas>
+
+<!-- CONTROLLI -->
 <div class="controls">
   <button id="btnRete" class="btn">🕸 PRENDI IL REGALO</button>
   <button id="btnSpara" class="btn">🎯 SPARA!</button>
@@ -263,8 +233,8 @@ th, td {
     <p style="text-align:left;">
     🎁 <b>Pacco catturato</b> → <b>+50 punti</b><br>
     ☃️ <b>Snowman sparato</b> → <b>+15 punti</b><br>
-    💥 <b>Pacco colpito da sparo</b> → <b>-5 punti</b><br>
-    🕸 <b>Snowman catturato con la rete</b> → <b>-1 vita</b><br>
+    💥 <b>Pacco colpito</b> → <b>-5 punti</b><br>
+    🕸 <b>Snowman catturato con rete</b> → <b>-1 vita</b><br>
     ☃️➡️🎅 <b>Snowman tocca Babbo</b> → <b>-1 vita</b>
     </p>
 
@@ -273,42 +243,38 @@ th, td {
   </div>
 </div>
 
-<!-- COUNTDOWN -->
-<div id="countdown">
-  <div id="countdown-number" class="countdown-number">3</div>
-</div>
 
 <!-- END SCREEN -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
     <h3>🏆 Top 10 Globale</h3>
-
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
     </table>
-
-    <button id="retry-btn" class="start-btn" style="background:#d41e1e;">🔄 Riprova</button>
-    <a href="../calendario.html" class="calendario-btn">⬅ Torna al Calendario</a>
+    <button id="retry-btn" class="start-btn" style="background:#d41e1e;width:80%;">🔄 Riprova</button>
+    <a href="../calendario.html" class="start-btn" style="width:80%;background:#ffd700;color:#400000;">⬅ Torna al Calendario</a>
   </div>
 </div>
 
 <script>
-/* FIREBASE INIT */
+/* =====================
+   FIREBASE INIT
+===================== */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "calendarioroccasicura"
 });
-
 const db = firebase.database();
 
-/* Nome mascherato */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
 const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-/* CANVAS */
+/* =====================
+   CANVAS
+===================== */
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -321,7 +287,9 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* IMMAGINI */
+/* =====================
+   IMMAGINI
+===================== */
 const imgBabbo = new Image();
 imgBabbo.src = "./img/babbo_3.png";
 
@@ -334,247 +302,325 @@ imgGift.src = "./img/gift.png";
 const imgRete = new Image();
 imgRete.src = "./img/rete.png";
 
-const palline = [
+const sfondo = new Image();
+sfondo.src = "./img/rocca.png";
+
+const pallineImgs = [
   "./img/b1.png",
   "./img/b2.png",
   "./img/b3.png"
-];
-let pallineImgs = [];
-palline.forEach(src => { const i = new Image(); i.src = src; pallineImgs.push(i); });
+].map(src => {
+  const i = new Image();
+  i.src = src;
+  return i;
+});
 let pallinaIndex = 0;
 
-/* GAME VARS */
+/* =====================
+   VARIABILI
+===================== */
 let running = false;
-let score = 0;
 let lives = 3;
+let score = 0;
+
+let babbo = { x: 40, y: 200, w: 80, h: 80 };
+let oggetti = [];
+let proiettili = [];
+let rete = null;
 
 function updateHUD() {
   document.getElementById("hud").textContent = `❤️ ${lives} | ⭐ ${score}`;
 }
 
-/* Babbo */
-let babbo = { x: 40, y: canvas.height/2-40, w: 80, h: 80 };
-
-/* Oggetti */
-let oggetti = [];
-let proiettili = [];
-let rete = null;
-
-/* GENERA OGGETTI IN LINEA */
-setInterval(() => {
+/* =====================
+   GENERA OGGETTI
+===================== */
+function generaOggetto() {
   if (!running) return;
+
   const tipo = Math.random() < 0.5 ? "snowman" : "gift";
+
   oggetti.push({
     type: tipo,
     x: canvas.width + 40,
-    y: babbo.y + 10,
-    w: tipo==="snowman"?65:50,
-    h: tipo==="snowman"?65:50,
+    y: canvas.height * 0.55,
+    w: tipo === "snowman" ? 65 : 50,
+    h: tipo === "snowman" ? 65 : 50,
     speed: 2
   });
-}, 900);
+}
+setInterval(generaOggetto, 1100);
 
-/* SPARA */
+/* =====================
+   CONTROLLI
+===================== */
 document.getElementById("btnSpara").addEventListener("click", () => {
   if (!running) return;
-  const img = pallineImgs[pallinaIndex];
-  pallinaIndex = (pallinaIndex+1) % pallineImgs.length;
+
   proiettili.push({
     x: babbo.x + babbo.w,
-    y: babbo.y + 20,
-    w: 35, h: 35,
+    y: babbo.y + 25,
+    w: 35,
+    h: 35,
     speed: 6,
-    img: img,
+    img: pallineImgs[pallinaIndex],
     angle: 0
   });
+
+  pallinaIndex = (pallinaIndex + 1) % pallineImgs.length;
 });
 
-/* RETE SEMPRE ATTIVA */
 document.getElementById("btnRete").addEventListener("click", () => {
   if (!running) return;
-  rete = { x: babbo.x + babbo.w, y: babbo.y, w: 70, h: 70, speed: 4 };
+
+  rete = {
+    x: babbo.x + babbo.w,
+    y: babbo.y,
+    w: 70,
+    h: 70,
+    speed: 4
+  };
 });
 
-/* COLLISION */
-function hit(a,b){
-  return a.x < b.x+b.w &&
-         a.x+a.w > b.x &&
-         a.y < b.y+b.h &&
-         a.y+a.h > b.y;
+/* =====================
+   COLLISIONI SAFE
+===================== */
+function hit(a, b) {
+  if (!a || !b) return false;
+  return (
+    a.x < b.x + b.w &&
+    a.x + a.w > b.x &&
+    a.y < b.y + b.h &&
+    a.y + a.h > b.y
+  );
 }
 
-/* UPDATE GAME */
-function updateGame(){
-  if(!running) return;
+/* =====================
+   GAME LOOP
+===================== */
+function updateGame() {
+  if (!running) return;
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.drawImage(imgBabbo,babbo.x,babbo.y,babbo.w,babbo.h);
+  /* Sfondo */
+  ctx.drawImage(sfondo, 0, 0, canvas.width, canvas.height);
+
+  /* Babbo */
+  ctx.drawImage(imgBabbo, babbo.x, babbo.y, babbo.w, babbo.h);
 
   /* OGGETTI */
-  oggetti.forEach((o,i)=>{
+  oggetti.forEach((o, i) => {
     o.x -= o.speed;
 
-    if(o.type==="snowman") ctx.drawImage(imgSnowman,o.x,o.y,o.w,o.h);
-    else ctx.drawImage(imgGift,o.x,o.y,o.w,o.h);
+    if (o.type === "snowman")
+      ctx.drawImage(imgSnowman, o.x, o.y, o.w, o.h);
+    else
+      ctx.drawImage(imgGift, o.x, o.y, o.w, o.h);
 
-    if(o.type==="snowman" && hit(o,babbo)){
-      oggetti.splice(i,1);
-      lives--;
+    if (hit(babbo, o)) {
+      if (o.type === "snowman") {
+        lives--;
+      } else {
+        score += 50;
+      }
+      oggetti.splice(i, 1);
       updateHUD();
-      if(lives<=0) return gameOver();
+      if (lives <= 0) return gameOver();
     }
 
-    if(o.type==="gift" && hit(o,babbo)){
-      oggetti.splice(i,1);
-      score+=50;
-      updateHUD();
-    }
-
-    if(o.x+o.w<0) oggetti.splice(i,1);
+    if (o.x < -100) oggetti.splice(i, 1);
   });
 
   /* PROIETTILI */
-  proiettili.forEach((p,pi)=>{
-    p.x+=p.speed;
-    p.angle+=0.2;
+  proiettili.forEach((p, pi) => {
+    p.x += p.speed;
+    p.angle += 0.2;
 
     ctx.save();
-    ctx.translate(p.x+p.w/2, p.y+p.h/2);
+    ctx.translate(p.x + p.w/2, p.y + p.h/2);
     ctx.rotate(p.angle);
     ctx.drawImage(p.img, -p.w/2, -p.h/2, p.w, p.h);
     ctx.restore();
 
-    oggetti.forEach((o,oi)=>{
-      if(hit(p,o)){
+    oggetti.forEach((o, oi) => {
+      if (hit(p, o)) {
+        if (o.type === "snowman") score += 15;
+        else score -= 5;
+        if (score < 0) score = 0;
 
-        if(o.type==="snowman") score+=15;
-        else score-=5;
-
-        if(score<0) score=0;
+        oggetti.splice(oi, 1);
+        proiettili.splice(pi, 1);
         updateHUD();
-
-        oggetti.splice(oi,1);
-        proiettili.splice(pi,1);
       }
     });
 
-    if(p.x>canvas.width+50) proiettili.splice(pi,1);
+    if (p.x > canvas.width + 50) proiettili.splice(pi, 1);
   });
 
   /* RETE */
-  if(rete){
-    rete.x+=rete.speed;
-    ctx.drawImage(imgRete,rete.x,rete.y,rete.w,rete.h);
+  if (rete) {
+    rete.x += rete.speed;
+    ctx.drawImage(imgRete, rete.x, rete.y, rete.w, rete.h);
 
-    oggetti.forEach((o,oi)=>{
-      if(hit(rete,o)){
-        if(o.type==="gift") score+=50;
-        else {
-          lives--;
-          if(lives<=0) return gameOver();
-        }
+    oggetti.forEach((o, oi) => {
+      if (hit(rete, o)) {
+        if (o.type === "gift") score += 50;
+        else lives--;
+
+        oggetti.splice(oi, 1);
+        rete = null;
         updateHUD();
-        oggetti.splice(oi,1);
-        rete=null;
+        if (lives <= 0) return gameOver();
       }
     });
 
-    if(rete && rete.x>canvas.width+40) rete=null;
+    if (rete && rete.x > canvas.width + 50) rete = null;
   }
 
   requestAnimationFrame(updateGame);
 }
 
-/* COUNTDOWN */
-function startCountdown(callback){
-  const layer=document.getElementById("countdown");
-  const num=document.getElementById("countdown-number");
-  let n=3;
-  layer.style.display="flex";
-  num.textContent=n;
-  const timer=setInterval(()=>{
+/* =====================
+   COUNTDOWN
+===================== */
+function startCountdown(cb) {
+  const layer = document.getElementById("countdown");
+  const num = document.getElementById("countdown-number");
+
+  let n = 3;
+  layer.style.display = "flex";
+  num.textContent = n;
+  num.classList.add("countdown-number");
+
+  const timer = setInterval(() => {
     n--;
-    num.classList.remove("countdown-number"); void num.offsetWidth;
+    num.classList.remove("countdown-number");
+    void num.offsetWidth;
     num.classList.add("countdown-number");
-    if(n>0) num.textContent=n;
-    else{
-      num.textContent="VIA!";
-      setTimeout(()=>{clearInterval(timer); layer.style.display="none"; callback();},600);
+
+    if (n > 0) {
+      num.textContent = n;
+    } else {
+      num.textContent = "VIA!";
+      setTimeout(() => {
+        clearInterval(timer);
+        layer.style.display = "none";
+        cb();
+      }, 600);
     }
-  },1000);
+  }, 1000);
 }
 
-/* AVVIO */
-function avviaGioco(){
-  document.getElementById("start-screen").style.display="none";
-  canvas.style.display="block";
-  running=true;
+/* =====================
+   START GAME
+===================== */
+function avviaGioco() {
+  document.getElementById("start-screen").style.display = "none";
+  canvas.style.display = "block";
+  running = true;
   updateGame();
 }
 
-document.getElementById("btn-start").addEventListener("click",()=>{
+document.getElementById("btn-start").addEventListener("click", () => {
   startCountdown(avviaGioco);
 });
 
-/* CLASSIFICA */
-function caricaClassifica(){
-  const table=document.getElementById("score-table");
-  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+/* =====================
+   CLASSIFICA
+===================== */
+function caricaClassifica() {
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
   db.ref("punteggi/giorno3")
     .orderByChild("punti")
     .limitToLast(10)
-    .once("value",snap=>{
-      const arr=[];
-      snap.forEach(c=>arr.push(c.val()));
-      arr.sort((a,b)=>b.punti-a.punti);
-      arr.forEach(r=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${r.nome}</td><td>${r.punti}</td>`;
+    .once("value", snap => {
+      let arr = [];
+      snap.forEach(c => arr.push(c.val()));
+      arr.sort((a,b) => b.punti - a.punti);
+
+      arr.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
         table.appendChild(tr);
       });
     });
 }
 
-document.getElementById("btn-top10").addEventListener("click",()=>{
-  document.getElementById("start-screen").style.display="none";
-  document.getElementById("fine").style.display="flex";
-  caricaClassifica();
-});
-
-/* GAME OVER */
-function gameOver(){
-  running=false;
-  document.getElementById("fine").style.display="flex";
-  document.getElementById("messaggio").textContent=`Hai totalizzato ${score} punti!`;
+function gameOver() {
+  running = false;
+  document.getElementById("fine").style.display = "flex";
+  document.getElementById("messaggio").textContent =
+    `Hai totalizzato ${score} punti!`;
 
   db.ref("punteggi/giorno3").push({
     nome: nomeMascherato,
-    punti: Number(score),
+    punti: score,
     timestamp: Date.now()
   });
 
   caricaClassifica();
 }
 
-/* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click",()=>location.reload());
+document.getElementById("btn-top10").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+  caricaClassifica();
+});
 
-/* NEVE */
-function creaNeve(){
-  if(!running) return;
-  const f=document.createElement("div");
-  f.className="snowflake";
-  f.textContent="❄";
-  f.style.left=Math.random()*window.innerWidth+"px";
-  f.style.top="-20px";
-  const dur=4+Math.random()*3;
-  f.style.animationDuration=dur+"s";
-  document.body.appendChild(f);
-  setTimeout(()=>f.remove(),dur*1000);
+document.getElementById("retry-btn").addEventListener("click", () => {
+  location.reload();
+});
+
+/* =====================
+   NEVE ANIMATA
+===================== */
+const snow = document.getElementById("snow");
+const sctx = snow.getContext("2d");
+
+function resizeSnow() {
+  snow.width = window.innerWidth;
+  snow.height = window.innerHeight;
 }
-setInterval(()=>{if(running)creaNeve();},160+Math.random()*80);
+resizeSnow();
+window.addEventListener("resize", resizeSnow);
+
+let flakes = [];
+
+function createFlake() {
+  flakes.push({
+    x: Math.random() * snow.width,
+    y: -10,
+    r: Math.random() * 2 + 1,
+    s: Math.random() * 1 + 0.5
+  });
+}
+
+setInterval(createFlake, 120);
+
+function updateSnow() {
+  sctx.clearRect(0,0,snow.width,snow.height);
+
+  flakes.forEach((f,i) => {
+    f.y += f.s;
+    sctx.fillStyle = "white";
+    sctx.beginPath();
+    sctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    sctx.fill();
+    if (f.y > snow.height) flakes.splice(i,1);
+  });
+
+  requestAnimationFrame(updateSnow);
+}
+updateSnow();
 </script>
+
+<!-- COUNTDOWN -->
+<div id="countdown">
+  <div id="countdown-number"></div>
+</div>
 
 </body>
 </html>
