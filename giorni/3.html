@@ -55,7 +55,7 @@ h1 {
   overflow: hidden;
 }
 
-/* EFFETTO NEVE / BLUR DELICATO */
+/* BLUR DELICATO */
 #gameCanvas::before {
   content: "";
   position: absolute;
@@ -66,7 +66,7 @@ h1 {
   z-index: 0;
 }
 
-/* Tutto ciò che è dentro il canvas sopra al blur */
+/* Fa sì che gli elementi restino sopra allo sfondo */
 #gameCanvas * {
   position: relative;
   z-index: 2;
@@ -150,7 +150,7 @@ h1 {
   color: #400000;
 }
 
-/* COUNTDOWN */
+/* COUNTDOWN overlay */
 #countdown {
   position: fixed;
   inset: 0;
@@ -160,7 +160,6 @@ h1 {
   align-items: center;
   z-index: 9999;
 }
-
 .countdown-number {
   font-size: 6rem;
   font-weight: bold;
@@ -169,6 +168,7 @@ h1 {
   animation: zoomFade 1s ease forwards;
 }
 
+/* COUNTDOWN ANIMATION */
 @keyframes zoomFade {
   0% { opacity: 0; transform: scale(0.4); }
   30% { opacity: 1; transform: scale(1); }
@@ -205,6 +205,23 @@ th, td {
   padding: 8px;
   border-bottom: 1px solid #d7bb5f;
   text-align: center;
+}
+
+/* ❄ NEVE SOPRA AL CANVAS */
+.snowflake {
+  position: fixed;
+  top: -10px;
+  font-size: 10px;
+  color: white;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2000;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  from { transform: translateY(-10px); opacity: 1; }
+  to { transform: translateY(100vh); opacity: 0; }
 }
 </style>
 </head>
@@ -267,13 +284,14 @@ th, td {
   </div>
 </div>
 
+<!-- SCRIPT DI GIOCO -->
 <script>
 /* FIREBASE */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "calendarioroccasicura"
+  projectId: "calendarioroccasicура"
 });
 const db = firebase.database();
 
@@ -286,7 +304,6 @@ const nomeMascherato =
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-/* Resize */
 function resizeCanvas() {
   const w = Math.min(window.innerWidth - 20, 520);
   const h = Math.floor(w * 0.6);
@@ -302,7 +319,7 @@ const imgSnowman = new Image(); imgSnowman.src = "./img/snowman.png";
 const imgGift = new Image(); imgGift.src = "./img/gift.png";
 const imgRete = new Image(); imgRete.src = "./img/rete.png";
 
-const pallineSrc = ["./img/b1.png","./img/b2.png","./img/b3.png"];
+const pallineSrc = ["./img/b1.png", "./img/b2.png", "./img/b3.png"];
 let palline = [];
 pallineSrc.forEach(s => { const i=new Image(); i.src=s; palline.push(i); });
 
@@ -321,11 +338,11 @@ function updateHUD(){
 let babbo = { x:40, y:canvas.height/2 - 40, w:80, h:80 };
 
 /* Oggetti */
-let oggetti = []; 
+let oggetti = [];
 let proiettili = [];
 let rete = null;
 
-/* GENERA OGGETTI su UNA SOLA LINEA */
+/* GENERA OGGETTI su UNA RIGA */
 function generaOggetto(){
   const tipo = Math.random() < 0.5 ? "snowman" : "gift";
   oggetti.push({
@@ -368,8 +385,9 @@ document.getElementById("btnRete").addEventListener("click", ()=>{
   };
 });
 
-/* COLLISIONE */
+/* COLLISIONS */
 function hit(a,b){
+  if(!a || !b) return false;
   return (
     a.x < b.x + b.w &&
     a.x + a.w > b.x &&
@@ -378,7 +396,7 @@ function hit(a,b){
   );
 }
 
-/* GAME LOOP */
+/* GAME LOOP — FIXED */
 function updateGame(){
   if (!running) return;
 
@@ -386,30 +404,37 @@ function updateGame(){
   ctx.drawImage(imgBabbo, babbo.x, babbo.y, babbo.w, babbo.h);
 
   /* OGGETTI */
-  oggetti.forEach((o,i)=>{
+  for(let i = oggetti.length - 1; i >= 0; i--){
+    const o = oggetti[i];
     o.x -= o.speed;
 
     ctx.drawImage(o.type==="snowman" ? imgSnowman : imgGift,
                   o.x, o.y, o.w, o.h);
 
+    /* Snowman tocca babbo */
     if(o.type==="snowman" && hit(o,babbo)){
       oggetti.splice(i,1);
       lives--;
       updateHUD();
-      if(lives<=0) return gameOver();
+      if(lives <= 0) return gameOver();
+      continue;
     }
 
+    /* Pacco catturato */
     if(o.type==="gift" && hit(o,babbo)){
       oggetti.splice(i,1);
       score += 50;
       updateHUD();
+      continue;
     }
 
     if(o.x + o.w < 0) oggetti.splice(i,1);
-  });
+  }
 
   /* PROIETTILI */
-  proiettili.forEach((p,pi)=>{
+  for(let pi = proiettili.length - 1; pi >= 0; pi--){
+    const p = proiettili[pi];
+
     p.x += p.speed;
     p.angle += 0.2;
 
@@ -419,27 +444,30 @@ function updateGame(){
     ctx.drawImage(p.img, -p.w/2, -p.h/2, p.w, p.h);
     ctx.restore();
 
-    oggetti.forEach((o,oi)=>{
+    for(let oi = oggetti.length - 1; oi >= 0; oi--){
+      const o = oggetti[oi];
       if(hit(p,o)){
-        if(o.type==="snowman") score+=15;
-        else score-=5;
-        if(score<0) score=0;
-        updateHUD();
+        if(o.type==="snowman") score += 15;
+        else score -= 5;
+        if(score < 0) score = 0;
 
+        updateHUD();
         oggetti.splice(oi,1);
         proiettili.splice(pi,1);
+        break;
       }
-    });
+    }
 
     if(p.x > canvas.width + 50) proiettili.splice(pi,1);
-  });
+  }
 
   /* RETE */
   if(rete){
     rete.x += rete.speed;
     ctx.drawImage(imgRete, rete.x, rete.y, rete.w, rete.h);
 
-    oggetti.forEach((o,oi)=>{
+    for(let oi = oggetti.length - 1; oi >= 0; oi--){
+      const o = oggetti[oi];
       if(hit(rete,o)){
         if(o.type==="gift") score+=50;
         else {
@@ -447,13 +475,14 @@ function updateGame(){
           if(lives<=0) return gameOver();
         }
         updateHUD();
-
         oggetti.splice(oi,1);
         rete=null;
+        break;
       }
-    });
+    }
 
-    if(rete && rete.x > canvas.width + 40) rete = null;
+    if(rete && rete.x > canvas.width + 40)
+      rete = null;
   }
 
   requestAnimationFrame(updateGame);
@@ -538,6 +567,26 @@ function gameOver(){
 
   caricaClassifica();
 }
+
+/* NEVE CADENTE */
+function creaNeve() {
+  if (!running) return;
+
+  const f = document.createElement("div");
+  f.className = "snowflake";
+  f.textContent = "❄";
+
+  f.style.left = Math.random() * window.innerWidth + "px";
+  f.style.animationDuration = (4 + Math.random()*3) + "s";
+
+  document.body.appendChild(f);
+
+  setTimeout(() => f.remove(), 8000);
+}
+
+setInterval(() => {
+  if (running) creaNeve();
+}, 160 + Math.random()*100);
 
 /* BOTTONI */
 document.getElementById("btn-top10").addEventListener("click",()=>{
