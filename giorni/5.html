@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🎅 Giorno 5 – Babbo Natale raccogli i regali!</title>
+
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #7b0412;
+  font-family: 'Ubuntu', sans-serif;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+  height: 100vh;
+}
+
+h1 {
+  color: #ffd700;
+  margin-top: 10px;
+}
+
+/* CANVAS */
+canvas {
+  display: none;
+  margin: 0 auto;
+  background: url("../img/gioco1_sfondo.png") center/cover no-repeat;
+  border: 3px solid #f5d97c;
+  border-radius: 10px;
+  touch-action: none;
+}
+
+/* INFO BAR */
+.info {
+  display: none;
+  width: 100%;
+  padding: 10px 0;
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid #f5d97c;
+  font-size: 1.2em;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+}
+
+/* POPUP FINALE */
+#fine {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.classifica-box {
+  background: #fffaf2;
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 450px;
+  border: 2px solid #ffd700;
+  color: #400000;
+  animation: popup .4s ease-out;
+}
+
+@keyframes popup {
+  from { transform: scale(.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  color: #fff;
+  background: #7b0412;
+  transition: .3s;
+}
+.btn:hover {
+  background: #ffd700;
+  color: #000;
+}
+
+table {
+  width: 100%;
+  margin-top: 15px;
+}
+th, td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #d7bb5f;
+}
+
+/* MENU INIZIALE */
+#start-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.60);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.start-box {
+  background: #fffaf2;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  border: 2px solid #ffd700;
+  color: #400000;
+  text-align: center;
+}
+
+.start-btn {
+  width: 80%;
+  margin: 10px auto;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 1.1em;
+  cursor: pointer;
+  background: #7b0412;
+  color: white;
+  border: none;
+}
+.start-btn:hover {
+  background: #ffd700;
+  color: black;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎅 Giorno 5 – Babbo Natale raccogli i regali!</h1>
+
+<!-- MENU INIZIALE -->
+<div id="start-screen">
+  <div class="start-box">
+    <h2>🎄 Inizia il Gioco!</h2>
+    <p>Muovi Babbo Natale a destra e sinistra<br> e raccogli più regali possibile evitando le bombe.</p>
+
+    <button id="btn-start" class="start-btn">▶️ INIZIA GIOCO</button>
+    <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA GLOBALE</button>
+  </div>
+</div>
+
+<canvas id="game"></canvas>
+<div id="info" class="info">🎁 Punteggio: 0 | ⏱️ 60s</div>
+
+<!-- POPUP CLASSIFICA -->
+<div id="fine">
+  <div class="classifica-box">
+    <h2 id="messaggio"></h2>
+    <h3>🏆 Top 10 Globale</h3>
+
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
+
+    <button id="retry-btn" class="btn" style="background:#d41e1e;">🔄 Riprova</button>
+    <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
+  </div>
+</div>
+
+<script>
+/* ========================================= */
+/* 🔥 FIREBASE */
+/* ========================================= */
+firebase.initializeApp({
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+});
+
+const db = firebase.database();
+
+/* ========================================= */
+/* 👤 NOME MASCHERATO */
+/* ========================================= */
+const nomeReale = localStorage.getItem("utente") || "Ospite";
+const nomeMascherato =
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+
+/* ========================================= */
+/* 🎮 CANVAS */
+/* ========================================= */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  if (W < 700) {
+    canvas.width = W - 20;
+    canvas.height = H * 0.70;
+  } else {
+    canvas.width = 900;
+    canvas.height = 520;
+  }
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+/* ========================================= */
+/* 🎅 SANTA */
+/* ========================================= */
+const santa = {
+  x: 100,
+  y: canvas.height - 120,
+  w: 70,
+  h: 90,
+  vy: 0,
+  jumping: false,
+  speed: 12
+};
+
+const santaImg = new Image();
+santaImg.src = "../img/babbo.png";
+
+const giftImg = new Image();
+giftImg.src = "../img/gift.png";
+
+const bombImg = new Image();
+bombImg.src = "../img/bomba.png";
+
+let objects = [];
+const keys = {};
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup",   e => keys[e.key] = false);
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    e.preventDefault();
+    jump();
+  }
+});
+
+/* TOUCH + MOUSE */
+canvas.addEventListener("mousedown", jump);
+canvas.addEventListener("touchstart", jump);
+
+canvas.addEventListener("mousemove", e => {
+  if (e.buttons > 0) {
+    const r = canvas.getBoundingClientRect();
+    santa.x = e.clientX - r.left - santa.w/2;
+  }
+});
+
+canvas.addEventListener("touchmove", e => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  santa.x = e.touches[0].clientX - r.left - santa.w/2;
+}, { passive:false });
+
+/* SALTO */
+function jump() {
+  if (!santa.jumping) {
+    santa.vy = -15;
+    santa.jumping = true;
+  }
+}
+
+/* TIMER */
+let score = 0;
+let timeLeft = 60;
+
+function updateTimer() {
+  const interval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      endGame();
+    }
+  }, 1000);
+}
+
+/* SPAWN */
+function spawnObject() {
+  const isBomb = Math.random() < 0.25;
+
+  const obj = {
+    x: Math.random() * (canvas.width - 40),
+    y: canvas.height - 160 - Math.random()*100,
+    size: 40,
+    type: isBomb ? "bomb" : "gift",
+    fade: false
+  };
+
+  objects.push(obj);
+
+  setTimeout(() => {
+    obj.fade = true;
+    setTimeout(() => {
+      objects = objects.filter(o => o !== obj);
+    }, 300);
+  }, 2000);
+}
+
+let spawnInterval = null;
+
+/* MOVIMENTO */
+function moveSanta() {
+  if (keys["ArrowLeft"])  santa.x -= santa.speed;
+  if (keys["ArrowRight"]) santa.x += santa.speed;
+
+  santa.y += santa.vy;
+  santa.vy += 0.6;
+
+  if (santa.y > canvas.height - 120) {
+    santa.y = canvas.height - 120;
+    santa.vy = 0;
+    santa.jumping = false;
+  }
+
+  if (santa.x < 0) santa.x = 0;
+  if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
+}
+
+/* COLLISIONI */
+function checkCollisions() {
+  objects.forEach(o => {
+    if (
+      santa.x < o.x + o.size &&
+      santa.x + santa.w > o.x &&
+      santa.y < o.y + o.size &&
+      santa.y + santa.h > o.y
+    ) {
+      objects = objects.filter(x => x !== o);
+      if (o.type === "gift") score += 10;
+      else score -= 5;
+    }
+  });
+}
+
+/* DISEGNO */
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
+
+  objects.forEach(o => {
+    ctx.globalAlpha = o.fade ? 0.5 : 1;
+    ctx.drawImage(
+      o.type === "gift" ? giftImg : bombImg,
+      o.x, o.y, o.size, o.size
+    );
+    ctx.globalAlpha = 1;
+  });
+
+  document.getElementById("info").textContent =
+    `🎁 ${nomeMascherato} | Punti: ${score} | ⏱️ ${timeLeft}s`;
+}
+
+/* LOOP */
+function gameLoop() {
+  moveSanta();
+  checkCollisions();
+  draw();
+
+  if (timeLeft > 0) requestAnimationFrame(gameLoop);
+}
+
+/* FINE GIOCO */
+function endGame() {
+  canvas.style.display = "none";
+  document.getElementById("info").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+
+  document.getElementById("messaggio").textContent =
+    `🎉 Bravo ${nomeMascherato}! Hai totalizzato ${score} punti!`;
+
+  salvaOnline(nomeMascherato, score);
+}
+
+/* SALVATAGGIO */
+function salvaOnline(nome, punti) {
+  const ref = db.ref("punteggi/giorno5").push();
+  ref.set({
+    nome,
+    punti: Number(punti),
+    timestamp: Date.now()
+  }).then(() => caricaClassifica());
+}
+
+/* CARICA TOP10 */
+function caricaClassifica() {
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+  db.ref("punteggi/giorno5")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap => {
+      let list = [];
+
+      snap.forEach(child => {
+        const val = child.val();
+        list.push({
+          nome: val.nome,
+          punti: Number(val.punti)
+        });
+      });
+
+      list.sort((a,b) => b.punti - a.punti);
+
+      list.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.nome}</td><td>${row.punti}</td>`;
+        table.appendChild(tr);
+      });
+    });
+}
+
+document.getElementById("btn-start").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
+  canvas.style.display = "block";
+  document.getElementById("info").style.display = "block";
+
+  spawnInterval = setInterval(spawnObject, 1300);
+  updateTimer();
+  gameLoop();
+});
+
+document.getElementById("btn-top10").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+  caricaClassifica();
+});
+
+document.getElementById("retry-btn").addEventListener("click", () => location.reload());
+</script>
+
+<!-- COUNTER DEV -->
+<script src="https://cdn.counter.dev/script.js"
+        data-id="9d666b79-dc20-433b-8015-ac699700813e"
+        data-utcoffset="1"></script>
+
+</body>
+</html>
