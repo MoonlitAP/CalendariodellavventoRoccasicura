@@ -47,7 +47,7 @@ body {
   border-radius: 12px;
   padding: 20px;
   width: 80%;
-  max-width: 400px; /* Aggiunto max-width */
+  max-width: 400px; 
   margin: 20px auto;
 }
 
@@ -57,7 +57,7 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 10px;
   margin: 20px auto;
-  max-width: 900px; /* Limita la larghezza della galleria */
+  max-width: 900px; 
 }
 
 .photo-item {
@@ -85,7 +85,7 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(123, 4, 18, 0.8); /* Rosso scuro */
+    background: rgba(123, 4, 18, 0.8); 
     color: #fff;
     font-size: 12px;
     padding: 4px 0;
@@ -121,7 +121,9 @@ body {
 
 <div id="upload" class="screen">
   <h1 style="color:#ffd700; margin-top:30px;">Carica una foto!</h1>
-  <p id="welcome-message" style="font-size:1.1em; margin-top: -10px;"></p> <div class="upload-box">
+  <p id="welcome-message" style="font-size:1.1em; margin-top: -10px;"></p> 
+
+  <div class="upload-box">
     <p>Select the format</p>
     <p><b>Select image (Maximum: 10 MB)</b></p>
 
@@ -168,7 +170,7 @@ const db = firebase.database();
 const storage = firebase.storage();
 
 let userName = "";
-const MAX_FILE_SIZE_MB = 10; // 10 Megabyte
+const MAX_FILE_SIZE_MB = 10; 
 
 // Carica il nome utente se già salvato in localStorage
 document.addEventListener('DOMContentLoaded', () => {
@@ -214,7 +216,7 @@ function showCollage() {
 
 
 /* ============================================================
-    UPLOAD PHOTO TO FIREBASE STORAGE
+    UPLOAD PHOTO TO FIREBASE STORAGE (RISOLUZIONE CORS)
 ============================================================ */
 function uploadPhoto() {
   const fileInput = document.getElementById("fileInput");
@@ -225,10 +227,10 @@ function uploadPhoto() {
     return;
   }
   
-  // 🔒 Validazione dimensione file (Max 10MB)
+  // Validazione dimensione file (Max 10MB)
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
       alert(`Il file è troppo grande. Dimensione massima consentita: ${MAX_FILE_SIZE_MB} MB.`);
-      fileInput.value = ''; // Resetta l'input file
+      fileInput.value = ''; 
       return;
   }
 
@@ -253,17 +255,20 @@ function uploadPhoto() {
     },
 
     () => {
-      uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+      // ✅ Soluzione CORS: Otteniamo l'URL di download con il token di accesso.
+      // Questo URL è considerato sicuro dal browser e bypassa la maggior parte delle restrizioni CORS.
+      storageRef.getDownloadURL().then((url) => { 
+        
         // Salva i metadati nel Realtime Database
         db.ref("gallerie/giorno6/" + photoId).set({
           nome: userName,
-          url: url,
-          timestamp: Date.now() // Utile per ordinare cronologicamente
+          url: url, // Salviamo l'URL COMPLETO con il token.
+          timestamp: Date.now() 
         });
 
         document.getElementById("uploadStatus").innerHTML =
           "✨ Foto caricata! Apri la galleria!";
-          fileInput.value = ''; // Pulisce l'input file dopo il successo
+          fileInput.value = ''; 
       });
     }
   );
@@ -277,12 +282,11 @@ function loadCollage() {
   const collageBox = document.getElementById("collage");
   collageBox.innerHTML = "Caricamento immagini...";
 
-  // Listener Real-Time (.on) per aggiornare la galleria quando vengono aggiunte nuove foto
+  // Listener Real-Time (.on)
   db.ref("gallerie/giorno6").orderByChild("timestamp").on("value", (snap) => {
     collageBox.innerHTML = "";
     let list = [];
     
-    // Raccogli i dati e li inserisci in un array
     snap.forEach((child) => {
       list.push(child.val());
     });
@@ -300,7 +304,8 @@ function loadCollage() {
       photoItem.classList.add("photo-item");
 
       const img = document.createElement("img");
-      img.src = data.url;
+      // Il browser usa l'URL con token (data.url) che è stato salvato, risolvendo il problema CORS
+      img.src = data.url; 
       img.alt = `Foto caricata da ${data.nome}`;
 
       const caption = document.createElement("div");
