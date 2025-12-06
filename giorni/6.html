@@ -8,7 +8,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- FIREBASE (COMPAT SDK) -->
+<!-- FIREBASE COMPAT SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
@@ -51,55 +51,51 @@ body {
   margin: 20px auto;
 }
 
-/* COLLAGE GRID */
+/* COLLAGE A COLONNA – FOTO GRANDI 4:3 */
 #collage {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
   margin: 20px auto;
-  max-width: 900px;
+  max-width: 600px;
+  width: 90%;
 }
 
 .photo-item {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  position: relative;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.15);
 }
 
 .photo-item img {
   width: 100%;
-  height: 130px;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  border: 3px solid #ffd9a0;
-  border-radius: 8px;
-  transition: transform 0.3s;
-}
-
-.photo-item:hover img {
-    transform: scale(1.05);
+  border-radius: 10px;
+  border: 4px solid #ffd9a0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
 .caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(123, 4, 18, 0.8);
-    color: #fff;
-    font-size: 12px;
-    padding: 4px 0;
-    font-weight: bold;
-    text-align: center;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(123, 4, 18, 0.85);
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  padding: 5px 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- INTRO SCREEN -->
+<!-- INTRO -->
 <div id="intro" class="screen active">
   <h1 style="color:#ffd700; margin-top:40px;">🎄 6 dicembre – Adesso iniziamo!</h1>
 
@@ -120,7 +116,7 @@ body {
 
 
 
-<!-- UPLOAD SCREEN -->
+<!-- UPLOAD -->
 <div id="upload" class="screen">
   <h1 style="color:#ffd700; margin-top:30px;">Carica una foto!</h1>
   <p id="welcome-message" style="font-size:1.1em; margin-top:-10px;"></p>
@@ -129,7 +125,8 @@ body {
     <p>Select the format</p>
     <p><b>Select image (Maximum: 10 MB)</b></p>
 
-    <input type="file" id="fileInput" accept="image/*" style="margin-top:10px; font-size:16px;">
+    <input type="file" id="fileInput" accept="image/*"
+      style="margin-top:10px; font-size:16px;">
   </div>
 
   <div id="uploadStatus" style="margin-top:20px; font-size:18px;"></div>
@@ -140,7 +137,7 @@ body {
 
 
 
-<!-- COLLAGE SCREEN -->
+<!-- COLLAGE -->
 <div id="collageScreen" class="screen">
   <h1 style="color:#ffd700; margin-top:20px;">✨ Galleria del 6 dicembre ✨</h1>
   <p style="margin-top:-10px;">La magia cresce con ogni foto caricata! 📸🔴</p>
@@ -149,6 +146,7 @@ body {
 
   <button class="btn" onclick="goToUploadFromCollage()">CARICA UN'ALTRA FOTO</button>
 </div>
+
 
 
 <script>
@@ -164,8 +162,8 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
+
 let userName = "";
 
 
@@ -178,7 +176,8 @@ function goToUpload() {
     return;
   }
 
-  document.getElementById("welcome-message").textContent = `Ciao, ${userName}! Pronto per caricare.`;
+  document.getElementById("welcome-message").textContent =
+    `Ciao, ${userName}! Pronto per caricare.`;
 
   document.getElementById("intro").classList.remove("active");
   document.getElementById("upload").classList.add("active");
@@ -196,7 +195,8 @@ function showCollage() {
 }
 
 
-/* PHOTO UPLOAD → BASE64 COMPRESSO */
+
+/* UPLOAD + COMPRESS BASE64 */
 function uploadPhoto() {
   const file = document.getElementById("fileInput").files[0];
   if (!file) {
@@ -214,8 +214,6 @@ function uploadPhoto() {
     img.src = event.target.result;
 
     img.onload = function() {
-
-      /* Compress */
       const canvas = document.createElement("canvas");
       const MAX_WIDTH = 600;
       const scale = MAX_WIDTH / img.width;
@@ -241,6 +239,7 @@ function uploadPhoto() {
     };
   };
 }
+
 
 
 /* LOAD COLLAGE */
