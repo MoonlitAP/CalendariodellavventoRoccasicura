@@ -10,9 +10,10 @@
 
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage-compat.js"></script>
 
 <style>
+/* ... (MANTENERE TUTTO LO STILE) ... */
 body {
   margin: 0;
   padding: 0;
@@ -104,7 +105,7 @@ body {
 
   <p style="width:85%; margin:0 auto; font-size:18px;">
     Un tocco di rosso che brilla come il cuore del Natale.<br>
-    Seleziona la tua foto rossa! 📸🔴
+    Indossa qualcosa di rosso, oppure fotografa un oggetto rosso… e carica la tua foto! 📸🔴
   </p>
 
   <p style="margin-top:20px; font-size:22px;">🔴🔴🔴🔴🔴🔴🔴🔴</p>
@@ -120,25 +121,20 @@ body {
 
 
 <div id="upload" class="screen">
-  <h1 style="color:#ffd700; margin-top:30px;">Seleziona la tua foto!</h1>
+  <h1 style="color:#ffd700; margin-top:30px;">Carica una foto!</h1>
   <p id="welcome-message" style="font-size:1.1em; margin-top: -10px;"></p> 
 
   <div class="upload-box">
-    <p>Seleziona immagine (Massimo: 10 MB)</p>
-    
+    <p>Select the format</p>
+    <p><b>Select image (Maximum: 10 MB)</b></p>
+
     <input type="file" id="fileInput" accept="image/*"
-      style="margin-top:10px; font-size:16px;" onchange="previewFile()">
-    
-    <div style="margin-top: 15px;">
-        <img id="imagePreview" src="" alt="Anteprima Immagine" 
-             style="max-width: 100%; max-height: 200px; display: none; border: 2px solid #ffd9a0; border-radius: 8px;">
-    </div>
+      style="margin-top:10px; font-size:16px;">
   </div>
 
   <div id="uploadStatus" style="margin-top:20px; font-size:18px;"></div>
-  
-  <button class="btn" onclick="alert('La funzione di condivisione è disattivata. Visualizza la galleria per vedere le foto condivise tramite link.');">CARICA FOTO</button> 
-  
+
+  <button class="btn" onclick="uploadPhoto()">CARICA</button>
   <button class="btn" style="background:#ffd9a0;" onclick="showCollage()">VAI ALLA GALLERIA</button>
 </div>
 
@@ -150,7 +146,7 @@ body {
 
   <div id="collage"></div>
 
-  <button class="btn" onclick="goToUploadFromCollage()">SELEZIONA UN'ALTRA FOTO</button>
+  <button class="btn" onclick="goToUploadFromCollage()">CARICA UN'ALTRA FOTO</button>
 </div>
 
 
@@ -164,6 +160,7 @@ const firebaseConfig = {
   authDomain: "calendarioroccasicura.firebaseapp.com",
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com", // Importante per lo Storage
   messagingSenderId: "38731898044",
   appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
 };
@@ -171,8 +168,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database();
+const storage = firebase.storage(); // Inizializza lo Storage
 
 let userName = "";
+const MAX_FILE_SIZE_MB = 10; 
 
 // Carica il nome utente se già salvato in localStorage
 document.addEventListener('DOMContentLoaded', () => {
@@ -197,8 +196,8 @@ function goToUpload() {
   // Salva il nome utente per sessioni future
   localStorage.setItem("utente", userName); 
 
-  // Aggiorna il messaggio di benvenuto
-  document.getElementById("welcome-message").textContent = `Ciao, ${userName}! Seleziona la tua foto.`;
+  // Aggiorna il messaggio di benvenuto nella schermata di upload
+  document.getElementById("welcome-message").textContent = `Ciao, ${userName}! Pronti per caricare.`;
   
   // Navigazione
   document.getElementById("intro").classList.remove("active");
@@ -208,12 +207,6 @@ function goToUpload() {
 function goToUploadFromCollage() {
     document.getElementById("collageScreen").classList.remove("active");
     document.getElementById("upload").classList.add("active");
-    
-    // Pulisci lo stato precedente
-    document.getElementById('imagePreview').src = "";
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('fileInput').value = '';
-    document.getElementById("uploadStatus").innerHTML = "";
 }
 
 function showCollage() {
@@ -224,47 +217,67 @@ function showCollage() {
 
 
 /* ============================================================
-    PREVIEW LOCALE SENZA SALVATAGGIO
+    UPLOAD PHOTO A FIREBASE STORAGE (Versione Funzionante con token)
 ============================================================ */
-function previewFile() {
-  const preview = document.getElementById('imagePreview');
-  const fileInput = document.getElementById('fileInput');
+function uploadPhoto() {
+  const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
 
   if (!file) {
-     preview.src = "";
-     preview.style.display = 'none';
-     document.getElementById("uploadStatus").innerHTML = "";
-     return;
+    alert("Seleziona una foto!");
+    return;
   }
-
-  // Controlla la dimensione del file
-  const MAX_FILE_SIZE_MB = 10; 
+  
+  // Validazione dimensione file (Max 10MB)
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
       alert(`Il file è troppo grande. Dimensione massima consentita: ${MAX_FILE_SIZE_MB} MB.`);
-      fileInput.value = '';
-      preview.src = "";
-      preview.style.display = 'none';
-      document.getElementById("uploadStatus").innerHTML = "File troppo grande.";
+      fileInput.value = ''; 
       return;
   }
-  
-  // Se la dimensione è ok, carica l'anteprima
-  const reader = new FileReader();
-  
-  reader.onloadend = function () {
-    preview.src = reader.result;
-    preview.style.display = 'block';
-    document.getElementById("uploadStatus").innerHTML = "Anteprima caricata correttamente!";
-  }
 
-  // Trasforma il file in un URL locale
-  reader.readAsDataURL(file); 
+  // Se Storage NON è attivo, questo punto fallirà con errore di servizio disabilitato.
+  document.getElementById("uploadStatus").innerHTML = "Caricamento in corso…";
+
+  // Genera una chiave univoca sia per il database che per lo storage
+  const photoId = db.ref().push().key; 
+  const storageRef = storage.ref("foto/giorno6/" + photoId + ".jpg");
+  const uploadTask = storageRef.put(file);
+
+  uploadTask.on(
+    "state_changed",
+    (snapshot) => {
+      let p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      document.getElementById("uploadStatus").innerHTML = "Caricamento: " + Math.round(p) + "%";
+    },
+
+    (error) => {
+      alert("Errore nel caricamento! Controlla se il servizio Storage è attivo.");
+      console.log(error);
+      document.getElementById("uploadStatus").innerHTML = "Caricamento fallito.";
+    },
+
+    () => {
+      // ✅ Otteniamo l'URL di download con il token di accesso.
+      storageRef.getDownloadURL().then((url) => { 
+        
+        // Salva i metadati nel Realtime Database
+        db.ref("gallerie/giorno6/" + photoId).set({
+          nome: userName,
+          url: url, // Salviamo l'URL COMPLETO con il token.
+          timestamp: Date.now() 
+        });
+
+        document.getElementById("uploadStatus").innerHTML =
+          "✨ Foto caricata! Apri la galleria!";
+          fileInput.value = ''; 
+      });
+    }
+  );
 }
 
 
 /* ============================================================
-    LOAD COLLAGE (legge ancora i dati esistenti)
+    LOAD COLLAGE
 ============================================================ */
 function loadCollage() {
   const collageBox = document.getElementById("collage");
@@ -292,6 +305,7 @@ function loadCollage() {
       photoItem.classList.add("photo-item");
 
       const img = document.createElement("img");
+      // Il browser usa l'URL con token (data.url) che è stato salvato.
       img.src = data.url; 
       img.alt = `Foto caricata da ${data.nome}`;
 
