@@ -33,8 +33,19 @@ body {
   color: #7b0412;
   border: none;
   cursor: pointer;
-  margin-top: 20px;
+  margin: 20px;
   font-size: 18px;
+}
+
+/* UPLOAD */
+.upload-box {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid #ffd9a0;
+  border-radius: 12px;
+  padding: 20px;
+  width: 80%;
+  max-width: 400px;
+  margin: 20px auto;
 }
 
 /* COLLAGE */
@@ -66,14 +77,11 @@ body {
   margin-top: -10px;
 }
 
-/* ===== LIGHTBOX ===== */
+/* LIGHTBOX */
 #lightbox {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.9);
+  inset: 0;
+  background: rgba(0,0,0,0.92);
   display: none;
   align-items: center;
   justify-content: center;
@@ -90,13 +98,13 @@ body {
 
 #lightbox p {
   color: #fff;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 #closeLightbox {
   position: absolute;
-  top: 20px;
-  right: 25px;
+  top: 18px;
+  right: 22px;
   font-size: 30px;
   color: #ffd700;
   cursor: pointer;
@@ -106,11 +114,32 @@ body {
 
 <body>
 
-<!-- COLLAGE -->
-<div class="screen active">
+<!-- UPLOAD SCREEN -->
+<div id="upload" class="screen active">
+  <h1 style="color:#ffd700">📸 Carica la tua foto</h1>
+  <p>Mostra il tuo albero di Natale 🎄</p>
+
+  <div class="upload-box">
+    <input type="text" id="username" placeholder="Il tuo nome"
+      style="padding:10px; width:90%; border-radius:8px; border:none; font-size:16px;"><br><br>
+
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <div id="uploadStatus"></div>
+
+  <button class="btn" onclick="uploadPhoto()">CARICA</button>
+  <button class="btn" onclick="showGallery()">VAI ALLA GALLERIA</button>
+</div>
+
+<!-- GALLERY SCREEN -->
+<div id="gallery" class="screen">
   <h1 style="color:#ffd700">✨ Galleria dell’8 dicembre ✨</h1>
   <p>Ogni albero racconta una storia 🎄</p>
+
   <div id="collage"></div>
+
+  <button class="btn" onclick="backToUpload()">CARICA UN’ALTRA FOTO</button>
 </div>
 
 <!-- LIGHTBOX -->
@@ -130,22 +159,68 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function openLightbox(src, name) {
-  document.getElementById("lightboxImg").src = src;
-  document.getElementById("lightboxName").textContent = name;
-  document.getElementById("lightbox").style.display = "flex";
+function showGallery() {
+  upload.classList.remove("active");
+  gallery.classList.add("active");
+  loadCollage();
 }
 
-function closeLightbox() {
-  document.getElementById("lightbox").style.display = "none";
+function backToUpload() {
+  gallery.classList.remove("active");
+  upload.classList.add("active");
+}
+
+function uploadPhoto() {
+  const name = username.value.trim();
+  const file = fileInput.files[0];
+  if (!name || !file) {
+    alert("Inserisci nome e foto");
+    return;
+  }
+
+  uploadStatus.textContent = "Caricamento…";
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+
+  reader.onload = () => {
+    const img = new Image();
+    img.src = reader.result;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const MAX = 600;
+      const scale = MAX / img.width;
+      canvas.width = MAX;
+      canvas.height = img.height * scale;
+
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const base64 = canvas.toDataURL("image/jpeg", 0.7);
+
+      db.ref("gallerie/giorno8").push({
+        nome: name,
+        base64,
+        timestamp: Date.now()
+      });
+
+      uploadStatus.textContent = "✅ Foto caricata!";
+      fileInput.value = "";
+    };
+  };
 }
 
 function loadCollage() {
-  const collage = document.getElementById("collage");
-  db.ref("gallerie/giorno8").orderByChild("timestamp").on("value", snap => {
+  collage.innerHTML = "";
+  db.ref("gallerie/giorno8").orderByChild("timestamp").on("value", s => {
     collage.innerHTML = "";
-    snap.forEach(s => {
-      const d = s.val();
+    let list = [];
+    s.forEach(c => list.push(c.val()));
+    list.reverse();
+
+    list.forEach(d => {
+      const box = document.createElement("div");
+      box.className = "photo-item";
 
       const img = document.createElement("img");
       img.src = d.base64;
@@ -155,13 +230,22 @@ function loadCollage() {
       cap.className = "caption";
       cap.textContent = d.nome;
 
-      collage.appendChild(img);
-      collage.appendChild(cap);
+      box.appendChild(img);
+      box.appendChild(cap);
+      collage.appendChild(box);
     });
   });
 }
 
-loadCollage();
+function openLightbox(src, name) {
+  lightboxImg.src = src;
+  lightboxName.textContent = name;
+  lightbox.style.display = "flex";
+}
+
+function closeLightbox() {
+  lightbox.style.display = "none";
+}
 </script>
 
 </body>
