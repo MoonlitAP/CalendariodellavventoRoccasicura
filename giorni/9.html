@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>😈 Giorno 9 – Código Grinch</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:#ffd9a0;
+  text-align:center;
+}
+
+/* GRINCH */
+#grinch-box img{
+  width:140px;
+  margin-top:20px;
+}
+
+/* CODE BOX */
+.code-row{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:12px 0;
+}
+.code-cell{
+  width:45px;
+  height:55px;
+  border:3px solid #ffd9a0;
+  border-radius:8px;
+  font-size:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.2);
+}
+.fixed{
+  background:#ffd700;
+  color:#7b0412;
+  font-weight:bold;
+}
+
+/* KEYPAD */
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  width:240px;
+  margin:20px auto;
+}
+.keypad button{
+  padding:16px;
+  font-size:20px;
+  border-radius:10px;
+  border:none;
+  background:#fff3e0;
+  color:#7b0412;
+  font-weight:bold;
+}
+.confirm{
+  grid-column:span 3;
+  background:#ffd700!important;
+}
+
+/* MESSAGES */
+#msg{
+  min-height:40px;
+  margin-top:10px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="color:#ffd700;">😈 Código Grinch!</h1>
+
+<!-- GRINCH -->
+<div id="grinch-box">
+  <img src="imgrinch.png" alt="Grinch">
+</div>
+
+<p>🔒 Codice segreto del Grinch</p>
+<div class="code-row" id="grinchCode"></div>
+
+<p>👉 Il tuo tentativo</p>
+<div class="code-row" id="userCode"></div>
+
+<div id="msg"></div>
+
+<!-- KEYPAD -->
+<div class="keypad" id="pad"></div>
+
+<script>
+/* STATE */
+let grinchSecret = genCode();
+let userSecret = genCode();
+let current = "";
+let grinchKnown = [null,null,null,null];
+
+/* INIT UI */
+createCells("grinchCode");
+createCells("userCode");
+createPad();
+
+/* FUNCTIONS */
+function genCode(){
+  return Math.floor(1000 + Math.random()*9000).toString();
+}
+
+function createCells(id){
+  const box=document.getElementById(id);
+  box.innerHTML="";
+  for(let i=0;i<4;i++){
+    const c=document.createElement("div");
+    c.className="code-cell";
+    c.textContent="_";
+    box.appendChild(c);
+  }
+}
+
+function updateCells(id,values){
+  const cells=document.getElementById(id).children;
+  for(let i=0;i<4;i++){
+    if(values[i]){
+      cells[i].textContent=values[i];
+      cells[i].classList.add("fixed");
+    }else{
+      cells[i].textContent="_";
+    }
+  }
+}
+
+function createPad(){
+  for(let i=1;i<=9;i++) pad.appendChild(key(i));
+  pad.appendChild(key(0));
+  const ok=document.createElement("button");
+  ok.textContent="OK";
+  ok.className="confirm";
+  ok.onclick=confirmGuess;
+  pad.appendChild(ok);
+}
+
+function key(n){
+  const b=document.createElement("button");
+  b.textContent=n;
+  b.onclick=()=>addDigit(n);
+  return b;
+}
+
+function addDigit(n){
+  if(current.length<4){
+    current+=n;
+    renderUser();
+  }
+}
+
+function renderUser(){
+  const cells=userCode.children;
+  for(let i=0;i<4;i++){
+    cells[i].textContent=current[i] || "_";
+  }
+}
+
+function confirmGuess(){
+  if(current.length!==4) return;
+
+  let correct=0;
+  for(let i=0;i<4;i++){
+    if(current[i]===grinchSecret[i]){
+      grinchKnown[i]=current[i];
+      correct++;
+    }
+  }
+
+  updateCells("grinchCode",grinchKnown);
+
+  if(correct>0){
+    msg.textContent=`✅ ${correct} cifra/e fissata/e`;
+  }else{
+    msg.textContent="❌ Nessuna cifra corretta";
+  }
+
+  if(grinchKnown.join("")===grinchSecret){
+    alert("🎉 Hai battuto il Grinch!");
+    location.reload();
+  }
+
+  current="";
+  renderUser();
+}
+</script>
+
+</body>
+</html>
