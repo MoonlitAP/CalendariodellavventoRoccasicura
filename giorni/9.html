@@ -3,22 +3,20 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- ✅ BLOCCO ZOOM iOS / ANDROID -->
+<!-- BLOCCO ZOOM MOBILE -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title> Giorno 9 – codice Grinch</title>
+<title> Giorno 9 – Codice Grinch</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-/* ✅ BLOCCO DOUBLE TAP + SELEZIONE */
 html, body {
   margin:0;
   padding:0;
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  overscroll-behavior: none;
 }
 
 body{
@@ -30,13 +28,12 @@ body{
 
 h1{color:#ffd700;}
 
-/* GRINCH */
 #grinch-box{
   font-size:70px;
   margin:20px 0;
 }
 
-/* CODE BOX */
+/* CODE */
 .code-row{
   display:flex;
   justify-content:center;
@@ -86,6 +83,25 @@ h1{color:#ffd700;}
   min-height:30px;
   font-weight:bold;
 }
+
+/* SEGRETO */
+#secretModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.75);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+#secretBox{
+  background:#7b0412;
+  border:3px solid #ffd700;
+  border-radius:14px;
+  padding:22px;
+  width:85%;
+  max-width:360px;
+}
 </style>
 </head>
 
@@ -104,73 +120,77 @@ h1{color:#ffd700;}
 <p style="font-size:14px;">🎄 = cifra giusta fissata</p>
 <div id="msg"></div>
 
-<!-- KEYPAD -->
 <div class="keypad" id="pad"></div>
 
-<script>
-/* =======================
-   STATO GIOCO
-======================= */
-let grinchSecret = genCode();               // codice segreto
-let grinchKnown  = [null,null,null,null];   // cifre scoperte sopra
-let userLocked   = [null,null,null,null];   // cifre bloccate sotto
-let current      = ["_","_","_","_"];       // input attuale
+<!-- SEGRETO FINALE -->
+<div id="secretModal">
+  <div id="secretBox">
+    <h2>🎄 Il segreto del Grinch</h2>
+    <p style="line-height:1.6;">
+      Il Grinch pensava che il Natale<br>
+      fosse solo numeri, regali e rumore.<br><br>
 
-/* =======================
-   INIT UI
-======================= */
+      Ma oggi ha capito una cosa importante:<br>
+      🎄 il Natale vive nei piccoli gesti,<br>
+      nel tempo che dedichiamo agli altri,<br>
+      nelle parole che non diciamo mai.<br><br>
+
+      ✨ Hai già scritto la tua lettera<br>
+      a Babbo Natale?<br>
+      Non per chiedere… ma per donare ❤️
+    </p>
+    <button class="confirm" onclick="location.reload()">CHIUDI</button>
+  </div>
+</div>
+
+<script>
+/* STATO */
+let grinchSecret = genCode();
+let userLocked = [null,null,null,null];
+let current = ["_","_","_","_"];
+
+/* INIT */
 createCells("grinchCode");
 createCells("userCode");
 createPad();
 renderUser();
 
-/* =======================
-   FUNZIONI BASE
-======================= */
+/* FUNZIONI */
 function genCode(){
   return Math.floor(1000 + Math.random()*9000).toString();
 }
 
 function createCells(id){
-  const box = document.getElementById(id);
-  box.innerHTML = "";
+  const box=document.getElementById(id);
   for(let i=0;i<4;i++){
-    const c = document.createElement("div");
-    c.className = "code-cell";
-    c.textContent = "_";
+    const c=document.createElement("div");
+    c.className="code-cell";
+    c.textContent="_";
     box.appendChild(c);
   }
 }
 
-/* =======================
-   TASTIERA
-======================= */
 function createPad(){
   for(let i=1;i<=9;i++) pad.appendChild(key(i));
   pad.appendChild(key(0));
-
-  const ok = document.createElement("button");
-  ok.textContent = "OK";
-  ok.className = "confirm";
-  ok.onclick = confirmGuess;
+  const ok=document.createElement("button");
+  ok.textContent="OK";
+  ok.className="confirm";
+  ok.onclick=confirmGuess;
   pad.appendChild(ok);
 }
 
 function key(n){
-  const b = document.createElement("button");
-  b.textContent = n;
-  b.onclick = () => addDigit(n);
+  const b=document.createElement("button");
+  b.textContent=n;
+  b.onclick=()=>addDigit(n);
   return b;
 }
 
-/* =======================
-   INSERIMENTO CIFRE
-======================= */
 function addDigit(n){
-  // inserisce solo nella prima casella libera non bloccata
   for(let i=0;i<4;i++){
-    if(userLocked[i] === null && current[i] === "_"){
-      current[i] = n;
+    if(userLocked[i]===null && current[i]==="_"){
+      current[i]=n;
       break;
     }
   }
@@ -178,56 +198,38 @@ function addDigit(n){
 }
 
 function renderUser(){
-  const cells = userCode.children;
+  const cells=userCode.children;
   for(let i=0;i<4;i++){
-    if(userLocked[i] !== null){
-      cells[i].textContent = userLocked[i];
+    if(userLocked[i]!==null){
+      cells[i].textContent=userLocked[i];
       cells[i].classList.add("fixed");
     }else{
-      cells[i].textContent = current[i];
-      cells[i].classList.remove("fixed");
+      cells[i].textContent=current[i];
     }
   }
 }
 
-/* =======================
-   CONFERMA TENTATIVO
-======================= */
 function confirmGuess(){
-  if(current.includes("_")) return;
-
-  let newlyFixed = 0;
+  for(let i=0;i<4;i++){
+    if(userLocked[i]===null && current[i]==="_") return;
+  }
 
   for(let i=0;i<4;i++){
-    if(current[i] === grinchSecret[i]){
-      grinchKnown[i] = current[i];
-      userLocked[i]  = current[i];
-      newlyFixed++;
-
-      const cell = grinchCode.children[i];
-      cell.textContent = current[i] + " 🎄";
+    if(current[i]===grinchSecret[i]){
+      userLocked[i]=current[i];
+      const cell=grinchCode.children[i];
+      cell.textContent=current[i]+" 🎄";
       cell.classList.add("fixed");
     }
   }
 
-  msg.textContent = newlyFixed
-    ? `🎄 ${newlyFixed} cifra/e fissata/e`
-    : "❌ Nessuna cifra corretta";
-
-  // reset solo celle libere
   for(let i=0;i<4;i++){
-    if(userLocked[i] === null){
-      current[i] = "_";
-    }
+    if(userLocked[i]===null) current[i]="_";
   }
   renderUser();
 
-  // vittoria
-  if(userLocked.join("") === grinchSecret){
-    setTimeout(()=>{
-      alert("🎁 Il Grinch ha scoperto il vero Natale!");
-      location.reload();
-    },300);
+  if(userLocked.join("")===grinchSecret){
+    document.getElementById("secretModal").style.display="flex";
   }
 }
 </script>
