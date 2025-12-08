@@ -17,23 +17,21 @@ body{
   text-align:center;
 }
 
-/* GRINCH PLACE */
-#grinch-placeholder{
+/* GRINCH */
+#grinch{
   width:140px;
   height:140px;
-  margin:20px auto 10px;
+  margin:20px auto;
   border-radius:50%;
   background:rgba(0,0,0,0.25);
   border:4px solid #ffd700;
   display:flex;
   align-items:center;
   justify-content:center;
-}
-#grinch-placeholder img{
-  width:120px;
+  font-size:70px;
 }
 
-/* CODE BOX */
+/* CODE */
 .code-row{
   display:flex;
   justify-content:center;
@@ -76,11 +74,11 @@ body{
 }
 .confirm{
   grid-column:span 3;
-  background:#ffd700 !important;
+  background:#ffd700!important;
 }
 
-/* POPUP */
-#resultModal{
+/* POPUP BASE */
+.modal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.75);
@@ -89,15 +87,17 @@ body{
   justify-content:center;
   z-index:1000;
 }
-#resultBox{
+.modal-box{
   background:#7b0412;
   border:3px solid #ffd700;
   border-radius:14px;
   padding:20px;
   width:85%;
-  max-width:320px;
+  max-width:350px;
 }
-#resultRow{
+
+/* RESULT CELLS */
+.result-row{
   display:flex;
   justify-content:center;
   gap:10px;
@@ -122,10 +122,7 @@ body{
 
 <h1 style="color:#ffd700">😈 Código Grinch!</h1>
 
-<!-- GRINCH (BASE64 IMAGE) -->
-<div id="grinch-placeholder">
-  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAxAqADASIAAhEBAxEB/8QAHAAAAQQDAQAAAAAAAAAAAAAABgEDBAUCBwAI/8QAPhAAAgIBAwIDBQYEBgMAAAECEQADBBIhBTFBUQYiYXGBEzKRoRQjQlJywdEVM0KS8CPxJENzgpKi/8QAGAEAAwEBAAAAAAAAAAAAAAACAwQBBQD/xAAnEQACAgICAgIDAQAAAAAAAAAAAQIRAxIhBBMxQVEUImFxkf/aAAwDAQACEQMRAD8A+qooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z">
-</div>
+<div id="grinch">😈</div>
 
 <p>🔒 Codice segreto del Grinch</p>
 <div class="code-row" id="grinchCode"></div>
@@ -135,18 +132,35 @@ body{
 
 <div class="keypad" id="pad"></div>
 
-<!-- POPUP -->
-<div id="resultModal">
-  <div id="resultBox">
+<!-- RISULTATO -->
+<div id="resultModal" class="modal">
+  <div class="modal-box">
     <h2>🎄 Risultato tentativo</h2>
-    <div id="resultRow"></div>
+    <div class="result-row" id="resultRow"></div>
     <p id="resultMsg"></p>
     <button class="confirm" onclick="closeResult()">CONTINUA</button>
   </div>
 </div>
 
+<!-- SEGRETO -->
+<div id="secretModal" class="modal">
+  <div class="modal-box">
+    <h2>🎁 Il segreto del Grinch…</h2>
+    <p style="line-height:1.5;">
+      Il Grinch per anni ha odiato il Natale.<br>
+      Credeva fossero solo regali e confusione.<br><br>
+      Ma oggi ha capito una cosa importante:<br>
+      il Natale vive nei piccoli gesti,<br>
+      nel tempo che dedichiamo agli altri.<br><br>
+      ✨ Hai già scritto la tua lettera a Babbo Natale?<br>
+      Non per chiedere… ma per donare ❤️
+    </p>
+    <button class="confirm" onclick="location.reload()">CHIUDI</button>
+  </div>
+</div>
+
 <script>
-let grinchSecret = genCode();
+let grinchSecret = Math.floor(1000 + Math.random()*9000).toString();
 let grinchKnown = [null,null,null,null];
 let current="";
 
@@ -155,29 +169,13 @@ createCells("grinchCode");
 createCells("userCode");
 createPad();
 
-/* FUNCTIONS */
-function genCode(){
-  return Math.floor(1000 + Math.random()*9000).toString();
-}
-
 function createCells(id){
   const box=document.getElementById(id);
-  box.innerHTML="";
   for(let i=0;i<4;i++){
     const c=document.createElement("div");
     c.className="code-cell";
     c.textContent="_";
     box.appendChild(c);
-  }
-}
-
-function updateCells(){
-  const cells=grinchCode.children;
-  for(let i=0;i<4;i++){
-    if(grinchKnown[i]){
-      cells[i].textContent=grinchKnown[i];
-      cells[i].classList.add("fixed");
-    }
   }
 }
 
@@ -222,26 +220,30 @@ function confirmGuess(){
     const c=document.createElement("div");
     c.className="result-cell";
     if(current[i]===grinchSecret[i]){
-      c.textContent=current[i]+"✅";
+      c.textContent=current[i]+" ✅";
       c.classList.add("ok");
       grinchKnown[i]=current[i];
+      grinchCode.children[i].textContent=current[i];
+      grinchCode.children[i].classList.add("fixed");
       fixed++;
     }else{
-      c.textContent=current[i]+"❌";
+      c.textContent=current[i]+" ❌";
       c.classList.add("no");
     }
     resultRow.appendChild(c);
   }
 
-  updateCells();
   resultMsg.textContent = fixed
-    ? `✅ ${fixed} cifra/e corretta/e fissata/e`
+    ? `✅ ${fixed} cifra/e corretta/e`
     : "❌ Nessuna cifra corretta";
 
   resultModal.style.display="flex";
 
   if(grinchKnown.join("")===grinchSecret){
-    setTimeout(()=>alert("🎉 Hai battuto il Grinch!"),300);
+    setTimeout(()=>{
+      closeResult();
+      secretModal.style.display="flex";
+    },600);
   }
 
   current="";
