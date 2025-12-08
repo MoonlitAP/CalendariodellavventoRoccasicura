@@ -3,120 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Giorno 9 – Código Grinch</title>
+
+<title>😈 Giorno 9 – Código Grinch!</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body{
-  margin:0;
-  font-family:'Ubuntu',sans-serif;
-  background:#7b0412;
-  color:#ffd9a0;
-  text-align:center;
+body {
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  background: #7b0412;
+  color: #ffd9a0;
+  text-align: center;
 }
 
-/* HEADER */
-h1{color:#ffd700;}
-
-/* GRINCH PLACEHOLDER */
-#grinch{
-  width:140px;height:140px;
-  margin:20px auto;
-  border-radius:50%;
-  background:rgba(0,0,0,0.25);
-  border:4px solid #ffd700;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:70px;
+/* GRINCH BOX */
+#grinch-placeholder {
+  width: 140px;
+  height: 140px;
+  margin: 20px auto 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 4px solid #ffd700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#grinch-placeholder img {
+  width: 120px;
 }
 
 /* CODE BOX */
-.code-row{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:12px 0;
+.code-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0;
 }
-.code-cell{
-  width:45px;height:55px;
-  border:3px solid #ffd9a0;
-  border-radius:8px;
-  font-size:26px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,0.25);
+.code-cell {
+  width: 45px;
+  height: 55px;
+  border: 3px solid #ffd9a0;
+  border-radius: 8px;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
 }
-.fixed{
-  background:#ffd700;
-  color:#7b0412;
-  font-weight:bold;
+.fixed {
+  background: #ffd700;
+  color: #7b0412;
+  font-weight: bold;
 }
 
 /* KEYPAD */
-.keypad{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  width:240px;
-  margin:20px auto;
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 240px;
+  margin: 20px auto;
 }
-.keypad button{
-  padding:16px;
-  font-size:20px;
-  border-radius:10px;
-  border:none;
-  background:#fff3e0;
-  color:#7b0412;
-  font-weight:bold;
+.keypad button {
+  padding: 16px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  background: #fff3e0;
+  color: #7b0412;
+  font-weight: bold;
 }
-.confirm{
-  grid-column:span 3;
-  background:#ffd700!important;
+.confirm {
+  grid-column: span 3;
+  background: #ffd700 !important;
 }
 
 /* SEGRETO FINALE */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.75);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
+#secretModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
-.modal-box{
-  background:#7b0412;
-  border:3px solid #ffd700;
-  border-radius:14px;
-  padding:22px;
-  width:85%;
-  max-width:360px;
+#secretBox {
+  background: #7b0412;
+  border: 3px solid #ffd700;
+  border-radius: 14px;
+  padding: 20px;
+  width: 85%;
+  max-width: 360px;
 }
 </style>
 </head>
 
 <body>
 
-<h1> Código Grinch!</h1>
+<h1 style="color:#ffd700">😈 Código Grinch!</h1>
 
-<div id="grinch">🎄</div>
+<!-- GRINCH IMMAGINE -->
+<div id="grinch-placeholder">
+  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAxAqADASIAAhEBAxEB/8QAHAAAAQQDAQAAAAAAAAAAAAAABgEDBAUCBwAI/8QAPhAAAgIBAwIDBQYEBgMAAAECEQADBBIhBTFBUQYiYXGBEzKRoRQjQlJywdEVM0KS8CPxJENzgpKi/8QAGAEAAwEBAAAAAAAAAAAAAAACAwQBBQD/xAAnEQACAgICAgIDAQAAAAAAAAAAAQIRAxIhBBMxQVEUImFxkf/aAAwDAQACEQMRAD8A+qooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z">
+</div>
 
 <p>🔒 Codice segreto del Grinch</p>
 <div class="code-row" id="grinchCode"></div>
 
 <p>👉 Il tuo tentativo</p>
 <div class="code-row" id="userCode"></div>
-
 <p style="font-size:14px;opacity:0.9;">🎄 = cifra al posto giusto</p>
 
 <div class="keypad" id="pad"></div>
 
 <!-- SEGRETO -->
-<div id="secretModal" class="modal">
-  <div class="modal-box">
+<div id="secretModal">
+  <div id="secretBox">
     <h2>🎁 Il segreto del Grinch</h2>
     <p style="line-height:1.5;">
       Il Grinch pensava che il Natale<br>
@@ -134,10 +138,10 @@ h1{color:#ffd700;}
 </div>
 
 <script>
-let grinchSecret = Math.floor(1000 + Math.random()*9000).toString();
-let grinchKnown = [null,null,null,null];
-let userLocked = [null,null,null,null];
-let current = ["_","_","_","_"];
+let grinchSecret = Math.floor(1000 + Math.random() * 9000).toString();
+let grinchKnown = [null, null, null, null];
+let userLocked = [null, null, null, null];
+let current = ["_", "_", "_", "_"];
 
 /* INIT */
 createCells("grinchCode");
@@ -145,37 +149,37 @@ createCells("userCode");
 createPad();
 renderUser();
 
-/* FUNCTIONS */
-function createCells(id){
-  const box=document.getElementById(id);
-  for(let i=0;i<4;i++){
-    const c=document.createElement("div");
-    c.className="code-cell";
-    c.textContent="_";
+/* FUNZIONI */
+function createCells(id) {
+  const box = document.getElementById(id);
+  for (let i = 0; i < 4; i++) {
+    const c = document.createElement("div");
+    c.className = "code-cell";
+    c.textContent = "_";
     box.appendChild(c);
   }
 }
 
-function createPad(){
-  for(let i=1;i<=9;i++) pad.appendChild(key(i));
+function createPad() {
+  for (let i = 1; i <= 9; i++) pad.appendChild(key(i));
   pad.appendChild(key(0));
-  const ok=document.createElement("button");
-  ok.textContent="OK";
-  ok.className="confirm";
-  ok.onclick=confirmGuess;
+  const ok = document.createElement("button");
+  ok.textContent = "OK";
+  ok.className = "confirm";
+  ok.onclick = confirmGuess;
   pad.appendChild(ok);
 }
 
-function key(n){
-  const b=document.createElement("button");
-  b.textContent=n;
-  b.onclick=()=>addDigit(n);
+function key(n) {
+  const b = document.createElement("button");
+  b.textContent = n;
+  b.onclick = () => addDigit(n);
   return b;
 }
 
-function addDigit(n){
-  for(let i=0;i<4;i++){
-    if(userLocked[i] === null && current[i] === "_"){
+function addDigit(n) {
+  for (let i = 0; i < 4; i++) {
+    if (userLocked[i] === null && current[i] === "_") {
       current[i] = n;
       break;
     }
@@ -183,44 +187,46 @@ function addDigit(n){
   renderUser();
 }
 
-function renderUser(){
+function renderUser() {
   const cells = userCode.children;
-  for(let i=0;i<4;i++){
-    if(userLocked[i] !== null){
-      cells[i].textContent = userLocked[i];
+  for (let i = 0; i < 4; i++) {
+    if (userLocked[i] !== null) {
+      cells[i].textContent = userLocked[i] + "🎄";
       cells[i].classList.add("fixed");
-    }else{
+    } else {
       cells[i].textContent = current[i];
       cells[i].classList.remove("fixed");
     }
   }
 }
 
-function confirmGuess(){
-  if(current.includes("_")) return;
+function confirmGuess() {
+  if (current.includes("_")) return;
 
-  for(let i=0;i<4;i++){
-    if(current[i] === grinchSecret[i]){
+  for (let i = 0; i < 4; i++) {
+    if (current[i] === grinchSecret[i]) {
       grinchKnown[i] = current[i];
       userLocked[i] = current[i];
 
       const gCell = grinchCode.children[i];
-      gCell.textContent = current[i];
+      gCell.textContent = current[i] + "🎄";
       gCell.classList.add("fixed");
     }
   }
 
   // reset solo celle libere
-  for(let i=0;i<4;i++){
-    if(userLocked[i] === null){
+  for (let i = 0; i < 4; i++) {
+    if (userLocked[i] === null) {
       current[i] = "_";
     }
   }
   renderUser();
 
   // vittoria → segreto
-  if(userLocked.join("") === grinchSecret){
-    setTimeout(()=> secretModal.style.display="flex", 400);
+  if (userLocked.join("") === grinchSecret) {
+    setTimeout(() => {
+      secretModal.style.display = "flex";
+    }, 400);
   }
 }
 </script>
