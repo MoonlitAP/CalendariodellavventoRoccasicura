@@ -6,7 +6,7 @@
 <!-- BLOCCO ZOOM MOBILE -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title> Giorno 9 – Codice Grinch</title>
+<title>Giorno 9 – Codice Grinch</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
@@ -75,10 +75,10 @@ h1{color:#ffd700;}
   font-weight:bold;
 }
 .confirm{
-  grid-column:span 3;
   background:#ffd700!important;
 }
 
+/* MESSAGGI */
 #msg{
   min-height:30px;
   font-weight:bold;
@@ -144,35 +144,42 @@ h1{color:#ffd700;}
 </div>
 
 <script>
-/* STATO */
-let grinchSecret = genCode();
+/* ========= STATO ========= */
+let grinchSecret = genCode();          // codice segreto (stringa)
 let userLocked = [null,null,null,null];
 let current = ["_","_","_","_"];
 
-/* INIT */
+/* ========= INIT ========= */
 createCells("grinchCode");
 createCells("userCode");
 createPad();
 renderUser();
 
-/* FUNZIONI */
+/* ========= FUNZIONI BASE ========= */
 function genCode(){
   return Math.floor(1000 + Math.random()*9000).toString();
 }
 
 function createCells(id){
-  const box=document.getElementById(id);
+  const box = document.getElementById(id);
   for(let i=0;i<4;i++){
-    const c=document.createElement("div");
-    c.className="code-cell";
-    c.textContent="_";
+    const c = document.createElement("div");
+    c.className = "code-cell";
+    c.textContent = "_";
     box.appendChild(c);
   }
 }
 
+/* ========= TASTIERA ========= */
 function createPad(){
   for(let i=1;i<=9;i++) pad.appendChild(key(i));
   pad.appendChild(key(0));
+
+  const del=document.createElement("button");
+  del.textContent="⌫";
+  del.onclick=deleteDigit;
+  pad.appendChild(del);
+
   const ok=document.createElement("button");
   ok.textContent="OK";
   ok.className="confirm";
@@ -187,10 +194,21 @@ function key(n){
   return b;
 }
 
+/* ========= INPUT ========= */
 function addDigit(n){
   for(let i=0;i<4;i++){
     if(userLocked[i]===null && current[i]==="_"){
-      current[i]=n;
+      current[i]=String(n);
+      break;
+    }
+  }
+  renderUser();
+}
+
+function deleteDigit(){
+  for(let i=3;i>=0;i--){
+    if(userLocked[i]===null && current[i]!=="_"){
+      current[i]="_";
       break;
     }
   }
@@ -205,14 +223,18 @@ function renderUser(){
       cells[i].classList.add("fixed");
     }else{
       cells[i].textContent=current[i];
+      cells[i].classList.remove("fixed");
     }
   }
 }
 
+/* ========= CONFERMA ========= */
 function confirmGuess(){
   for(let i=0;i<4;i++){
     if(userLocked[i]===null && current[i]==="_") return;
   }
+
+  let fixed=0;
 
   for(let i=0;i<4;i++){
     if(current[i]===grinchSecret[i]){
@@ -220,8 +242,13 @@ function confirmGuess(){
       const cell=grinchCode.children[i];
       cell.textContent=current[i]+" 🎄";
       cell.classList.add("fixed");
+      fixed++;
     }
   }
+
+  msg.textContent = fixed
+    ? `🎄 ${fixed} cifra/e fissata/e`
+    : "❌ Nessuna cifra corretta";
 
   for(let i=0;i<4;i++){
     if(userLocked[i]===null) current[i]="_";
