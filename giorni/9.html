@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Giorno 9 – Código Grinch!</title>
+<title>😈 Giorno 9 – Código Grinch</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
@@ -17,10 +16,12 @@ body{
   text-align:center;
 }
 
-/* GRINCH */
+/* HEADER */
+h1{color:#ffd700;}
+
+/* GRINCH PLACEHOLDER */
 #grinch{
-  width:140px;
-  height:140px;
+  width:140px;height:140px;
   margin:20px auto;
   border-radius:50%;
   background:rgba(0,0,0,0.25);
@@ -31,7 +32,7 @@ body{
   font-size:70px;
 }
 
-/* CODE */
+/* CODE BOX */
 .code-row{
   display:flex;
   justify-content:center;
@@ -39,8 +40,7 @@ body{
   margin:12px 0;
 }
 .code-cell{
-  width:45px;
-  height:55px;
+  width:45px;height:55px;
   border:3px solid #ffd9a0;
   border-radius:8px;
   font-size:26px;
@@ -77,7 +77,7 @@ body{
   background:#ffd700!important;
 }
 
-/* POPUP BASE */
+/* SEGRETO FINALE */
 .modal{
   position:fixed;
   inset:0;
@@ -85,42 +85,22 @@ body{
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:1000;
+  z-index:999;
 }
 .modal-box{
   background:#7b0412;
   border:3px solid #ffd700;
   border-radius:14px;
-  padding:20px;
+  padding:22px;
   width:85%;
-  max-width:350px;
+  max-width:360px;
 }
-
-/* RESULT CELLS */
-.result-row{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:15px 0;
-}
-.result-cell{
-  width:45px;
-  height:55px;
-  border-radius:8px;
-  font-size:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-}
-.ok{background:#ffd700;color:#7b0412;}
-.no{background:#444;color:#fff;}
 </style>
 </head>
 
 <body>
 
-<h1 style="color:#ffd700"> Código Grinch!</h1>
+<h1>😈 Código Grinch!</h1>
 
 <div id="grinch">🎄</div>
 
@@ -130,29 +110,23 @@ body{
 <p>👉 Il tuo tentativo</p>
 <div class="code-row" id="userCode"></div>
 
-<div class="keypad" id="pad"></div>
+<p style="font-size:14px;opacity:0.9;">🎄 = cifra al posto giusto</p>
 
-<!-- RISULTATO -->
-<div id="resultModal" class="modal">
-  <div class="modal-box">
-    <h2>🎄 Risultato tentativo</h2>
-    <div class="result-row" id="resultRow"></div>
-    <p id="resultMsg"></p>
-    <button class="confirm" onclick="closeResult()">CONTINUA</button>
-  </div>
-</div>
+<div class="keypad" id="pad"></div>
 
 <!-- SEGRETO -->
 <div id="secretModal" class="modal">
   <div class="modal-box">
-    <h2>🎁 Il segreto del Grinch…</h2>
+    <h2>🎁 Il segreto del Grinch</h2>
     <p style="line-height:1.5;">
-      Il Grinch per anni ha odiato il Natale.<br>
-      Credeva fossero solo regali e confusione.<br><br>
-      Ma oggi ha capito una cosa importante:<br>
-      il Natale vive nei piccoli gesti,<br>
-      nel tempo che dedichiamo agli altri.<br><br>
-      ✨ Hai già scritto la tua lettera a Babbo Natale?<br>
+      Il Grinch pensava che il Natale<br>
+      fosse solo numeri, regali e rumore.<br><br>
+      Ma oggi ha capito qualcosa di importante:<br>
+      🎄 il Natale vive nei piccoli gesti,<br>
+      nel tempo che dedichiamo agli altri,<br>
+      nelle parole che non diciamo mai.<br><br>
+      ✨ Hai già scritto la tua lettera<br>
+      a Babbo Natale?<br>
       Non per chiedere… ma per donare ❤️
     </p>
     <button class="confirm" onclick="location.reload()">CHIUDI</button>
@@ -162,13 +136,16 @@ body{
 <script>
 let grinchSecret = Math.floor(1000 + Math.random()*9000).toString();
 let grinchKnown = [null,null,null,null];
-let current="";
+let userLocked = [null,null,null,null];
+let current = ["_","_","_","_"];
 
 /* INIT */
 createCells("grinchCode");
 createCells("userCode");
 createPad();
+renderUser();
 
+/* FUNCTIONS */
 function createCells(id){
   const box=document.getElementById(id);
   for(let i=0;i<4;i++){
@@ -197,61 +174,54 @@ function key(n){
 }
 
 function addDigit(n){
-  if(current.length<4){
-    current+=n;
-    renderUser();
+  for(let i=0;i<4;i++){
+    if(userLocked[i] === null && current[i] === "_"){
+      current[i] = n;
+      break;
+    }
   }
+  renderUser();
 }
 
 function renderUser(){
-  const cells=userCode.children;
+  const cells = userCode.children;
   for(let i=0;i<4;i++){
-    cells[i].textContent=current[i] || "_";
+    if(userLocked[i] !== null){
+      cells[i].textContent = userLocked[i];
+      cells[i].classList.add("fixed");
+    }else{
+      cells[i].textContent = current[i];
+      cells[i].classList.remove("fixed");
+    }
   }
 }
 
 function confirmGuess(){
-  if(current.length!==4) return;
-
-  resultRow.innerHTML="";
-  let fixed=0;
+  if(current.includes("_")) return;
 
   for(let i=0;i<4;i++){
-    const c=document.createElement("div");
-    c.className="result-cell";
-    if(current[i]===grinchSecret[i]){
-      c.textContent=current[i]+" ✅";
-      c.classList.add("ok");
-      grinchKnown[i]=current[i];
-      grinchCode.children[i].textContent=current[i];
-      grinchCode.children[i].classList.add("fixed");
-      fixed++;
-    }else{
-      c.textContent=current[i]+" ❌";
-      c.classList.add("no");
+    if(current[i] === grinchSecret[i]){
+      grinchKnown[i] = current[i];
+      userLocked[i] = current[i];
+
+      const gCell = grinchCode.children[i];
+      gCell.textContent = current[i];
+      gCell.classList.add("fixed");
     }
-    resultRow.appendChild(c);
   }
 
-  resultMsg.textContent = fixed
-    ? `✅ ${fixed} cifra/e corretta/e`
-    : "❌ Nessuna cifra corretta";
-
-  resultModal.style.display="flex";
-
-  if(grinchKnown.join("")===grinchSecret){
-    setTimeout(()=>{
-      closeResult();
-      secretModal.style.display="flex";
-    },600);
+  // reset solo celle libere
+  for(let i=0;i<4;i++){
+    if(userLocked[i] === null){
+      current[i] = "_";
+    }
   }
-
-  current="";
   renderUser();
-}
 
-function closeResult(){
-  resultModal.style.display="none";
+  // vittoria → segreto
+  if(userLocked.join("") === grinchSecret){
+    setTimeout(()=> secretModal.style.display="flex", 400);
+  }
 }
 </script>
 
