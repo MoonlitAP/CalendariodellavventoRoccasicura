@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+
+<title>🎄 Giorno 8 – L’Albero di Natale</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- FIREBASE COMPAT SDK -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Ubuntu", sans-serif;
+  background-color: #7b0412;
+  color: #ffd9a0;
+  text-align: center;
+}
+
+/* SCREENS */
+.screen { display: none; }
+.active { display: block; }
+
+/* BUTTON */
+.btn {
+  background: #fff3e0;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-weight: bold;
+  color: #7b0412;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 18px;
+}
+.btn:hover { background: #ffe2bf; }
+
+/* UPLOAD BOX */
+.upload-box {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid #ffd9a0;
+  border-radius: 12px;
+  padding: 20px;
+  width: 80%;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+/* COLLAGE A COLONNA – FOTO GRANDI 4:3 */
+#collage {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin: 20px auto;
+  max-width: 600px;
+  width: 90%;
+}
+
+.photo-item {
+  position: relative;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.15);
+}
+
+.photo-item img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 4px solid #ffd9a0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.caption {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(123, 4, 18, 0.85);
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  padding: 6px 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <h1 style="color:#ffd700; margin-top:40px;">🎄 8 dicembre – L’Albero di Natale</h1>
+
+  <p style="width:85%; margin:20px auto; font-size:18px; line-height:1.5;">
+    L’8 dicembre segna ufficialmente l’inizio del Natale ✨<br><br>
+    È il giorno in cui, per tradizione, si prepara l’albero,  
+    si accendono le luci e la casa si riempie di magia 🎅🎁<br><br>
+    L’albero diventa il cuore delle nostre giornate:  
+    un simbolo di attesa, condivisione e sogni da appendere ramo dopo ramo.
+  </p>
+
+  <p style="font-size:20px;">🎄✨🎄✨🎄✨🎄</p>
+
+  <div style="margin-top:30px;">
+    <input id="username" placeholder="Inserisci il tuo nome"
+      style="padding:10px; border-radius:8px; width:70%; border:none; font-size:18px;">
+  </div>
+
+  <button class="btn" onclick="goToUpload()">CONTINUA</button>
+</div>
+
+<!-- UPLOAD -->
+<div id="upload" class="screen">
+  <h1 style="color:#ffd700; margin-top:30px;">📸 Carica la tua foto</h1>
+  <p id="welcome-message" style="font-size:1.1em; margin-top:-10px;"></p>
+
+  <div class="upload-box">
+    <p><b>Fotografa il tuo albero di Natale</b></p>
+    <p>Luci, addobbi, dettagli o momenti speciali 🎄</p>
+
+    <input type="file" id="fileInput" accept="image/*"
+      style="margin-top:10px; font-size:16px;">
+  </div>
+
+  <div id="uploadStatus" style="margin-top:20px; font-size:18px;"></div>
+
+  <button class="btn" onclick="uploadPhoto()">CARICA</button>
+  <button class="btn" style="background:#ffd9a0;" onclick="showCollage()">VAI ALLA GALLERIA</button>
+</div>
+
+<!-- COLLAGE -->
+<div id="collageScreen" class="screen">
+  <h1 style="color:#ffd700; margin-top:20px;">✨ Galleria dell’8 dicembre ✨</h1>
+  <p style="margin-top:-10px;">Ogni albero racconta una storia 🎄</p>
+
+  <div id="collage"></div>
+
+  <button class="btn" onclick="goToUploadFromCollage()">CARICA UN’ALTRA FOTO</button>
+</div>
+
+<script>
+/* FIREBASE INIT */
+const firebaseConfig = {
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let userName = "";
+
+/* NAVIGATION */
+function goToUpload() {
+  userName = document.getElementById("username").value.trim();
+  if (!userName) {
+    alert("Inserisci il tuo nome");
+    return;
+  }
+  document.getElementById("welcome-message").textContent =
+    `Ciao ${userName}! Mostraci il tuo albero 🎄`;
+  intro.classList.remove("active");
+  upload.classList.add("active");
+}
+
+function goToUploadFromCollage() {
+  collageScreen.classList.remove("active");
+  upload.classList.add("active");
+}
+
+function showCollage() {
+  upload.classList.remove("active");
+  collageScreen.classList.add("active");
+  loadCollage();
+}
+
+/* UPLOAD + COMPRESS */
+function uploadPhoto() {
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Seleziona una foto!");
+    return;
+  }
+
+  uploadStatus.textContent = "Caricamento in corso…";
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+
+  reader.onload = () => {
+    const img = new Image();
+    img.src = reader.result;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const MAX_WIDTH = 600;
+      const scale = MAX_WIDTH / img.width;
+
+      canvas.width = MAX_WIDTH;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const base64 = canvas.toDataURL("image/jpeg", 0.7);
+      const id = db.ref().push().key;
+
+      db.ref("gallerie/giorno8/" + id).set({
+        nome: userName,
+        base64,
+        timestamp: Date.now()
+      });
+
+      uploadStatus.textContent = "✨ Foto caricata!";
+      fileInput.value = "";
+    };
+  };
+}
+
+/* LOAD COLLAGE */
+function loadCollage() {
+  collage.innerHTML = "Caricamento…";
+
+  db.ref("gallerie/giorno8").orderByChild("timestamp").on("value", snap => {
+    collage.innerHTML = "";
+    let data = [];
+    snap.forEach(s => data.push(s.val()));
+    data.reverse();
+
+    if (!data.length) {
+      collage.innerHTML = "<p>Nessuna foto ancora… 🎄</p>";
+      return;
+    }
+
+    data.forEach(d => {
+      const box = document.createElement("div");
+      box.className = "photo-item";
+
+      const img = document.createElement("img");
+      img.src = d.base64;
+
+      const cap = document.createElement("div");
+      cap.className = "caption";
+      cap.textContent = d.nome;
+
+      box.appendChild(img);
+      box.appendChild(cap);
+      collage.appendChild(box);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
