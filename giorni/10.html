@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+
+<!-- BLOCCO ZOOM -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>🐭 Giorno 10 – Caccia al Topo</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:#ffd9a0;
+  text-align:center;
+  touch-action:manipulation;
+  user-select:none;
+}
+
+h1{color:#ffd700;margin-top:10px;}
+
+#info{
+  display:flex;
+  justify-content:space-around;
+  margin:10px auto;
+  font-weight:bold;
+}
+
+#field{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  max-width:330px;
+  margin:25px auto;
+}
+
+.hole{
+  background:#3b0a10;
+  border-radius:50%;
+  height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:42px;
+}
+
+button{
+  margin-top:15px;
+  padding:10px 24px;
+  border:none;
+  border-radius:20px;
+  background:#ffd700;
+  color:#7b0412;
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* POPUP FINALE */
+#fine{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+.classifica-box{
+  background:#fffaf2;
+  padding:25px;
+  border-radius:20px;
+  width:90%;
+  max-width:420px;
+  border:2px solid #ffd700;
+  color:#400000;
+}
+table{
+  width:100%;
+  margin-top:15px;
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #d7bb5f;
+}
+.btn-row{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-top:20px;
+}
+.btn-small{
+  padding:10px 20px;
+  border-radius:25px;
+  border:none;
+  background:#b30d0d;
+  color:white;
+  font-weight:bold;
+}
+.btn-small:hover{
+  background:#ffd700;
+  color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🐭 Caccia al Topo!</h1>
+<p>Tocca il topo 🐭 (+1)<br>Trova la stella ⭐ (+5)</p>
+
+<div id="info">
+  <div>⏱ <span id="time">20</span>s</div>
+  <div>⭐ <span id="score">0</span></div>
+</div>
+
+<div id="field"></div>
+
+<button onclick="startGame()">INIZIA</button>
+
+<!-- POPUP -->
+<div id="fine">
+  <div class="classifica-box">
+    <h2 id="fine-msg"></h2>
+    <h3>🏆 Top 10 – Caccia al Topo</h3>
+
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
+
+    <div class="btn-row">
+      <button class="btn-small" onclick="location.reload()">🔄 Riprova</button>
+      <a href="../calendario.html" class="btn-small">⬅ Calendario</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* FIREBASE */
+firebase.initializeApp({
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+});
+const db = firebase.database();
+
+/* NOME MASCHERATO */
+const real = localStorage.getItem("utente") || "Ospite";
+const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
+
+/* GIOCO */
+let score=0;
+let time=20;
+let timer,spawn;
+let active=-1;
+
+/* CREA CAMPO */
+for(let i=0;i<6;i++){
+  const h=document.createElement("div");
+  h.className="hole";
+  h.onclick=()=>hit(i);
+  field.appendChild(h);
+}
+
+function startGame(){
+  score=0;
+  time=20;
+  scoreEl.textContent=score;
+  timeEl.textContent=time;
+
+  clearInterval(timer);
+  clearInterval(spawn);
+
+  timer=setInterval(()=>{
+    time--;
+    timeEl.textContent=time;
+    if(time<=0) endGame();
+  },1000);
+
+  spawn=setInterval(showItem,900);
+}
+
+function showItem(){
+  clearField();
+  active=Math.floor(Math.random()*6);
+  field.children[active].textContent=Math.random()<0.65 ? "🐭" : "⭐";
+}
+
+function hit(i){
+  if(i!==active) return;
+  if(field.children[i].textContent==="🐭") score+=1;
+  if(field.children[i].textContent==="⭐") score+=5;
+  scoreEl.textContent=score;
+  clearField();
+  active=-1;
+}
+
+function clearField(){
+  [...field.children].forEach(h=>h.textContent="");
+}
+
+function endGame(){
+  clearInterval(timer);
+  clearInterval(spawn);
+  clearField();
+
+  fine.style.display="flex";
+  fineMsg.innerHTML=`🐭 Hai totalizzato <b>${score}</b> punti!`;
+
+  db.ref("punteggi/giorno10").push({
+    nome:user,
+    punti:Number(score),
+    timestamp:Date.now()
+  }).then(loadTop10);
+}
+
+function loadTop10(){
+  const table=document.getElementById("score-table");
+  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+
+  db.ref("punteggi/giorno10")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap=>{
+      let list=[];
+      snap.forEach(c=>list.push(c.val()));
+      list.sort((a,b)=>b.punti-a.punti);
+      list.forEach(r=>{
+        table.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+      });
+    });
+}
+
+/* shortcut */
+const scoreEl=document.getElementById("score");
+const timeEl=document.getElementById("time");
+const fineMsg=document.getElementById("fine-msg");
+const fine=document.getElementById("fine");
+</script>
+
+</body>
+</html>
