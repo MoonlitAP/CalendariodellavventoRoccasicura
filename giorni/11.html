@@ -9,9 +9,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
-
 <style>
 html,body{
   margin:0;
@@ -20,12 +17,15 @@ html,body{
   background:#7b0412;
   color:white;
   text-align:center;
-  touch-action:manipulation;
+  overflow-x:hidden;
 }
 
 h1{color:#ffd700;margin:10px 0;}
 
 canvas{
+  width:100%;
+  max-width:900px;
+  height:300px;
   background:url("img/paese.jpg") repeat-x;
   background-size:cover;
   border:3px solid #ffd700;
@@ -72,7 +72,6 @@ button:hover{background:#ffd700;color:#000;}
   justify-content:center;
   align-items:center;
 }
-
 .box{
   background:#fffaf0;
   color:#400;
@@ -92,9 +91,9 @@ button:hover{background:#ffd700;color:#000;}
 <div id="panel">
   <p>
     👆 Tocca per saltare<br>
+    ⬆ SPACE / FRECCIA SU = Salta (PC)<br>
     🟫 Evita i blocchi<br>
-    ⭐ Prendi le stelle (+5)<br>
-    💥 Un errore = Game Over
+    ⭐ Prendi le stelle (+5)
   </p>
   <button id="start">▶️ INIZIA</button>
 </div>
@@ -113,107 +112,128 @@ button:hover{background:#ffd700;color:#000;}
 </div>
 
 <script>
-firebase.initializeApp({
-  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
-  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
-});
-const db = firebase.database();
-
+/* -----------------------------
+   CANVAS E FISICA DI GIOCO
+------------------------------ */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth < 700 ? window.innerWidth-20 : 900;
-canvas.height = 400;
+canvas.width = window.innerWidth < 900 ? window.innerWidth : 900;
+canvas.height = 300;
 
 const mario = new Image(); mario.src="img/babbo_mario.png";
 const block = new Image(); block.src="img/blocco.png";
 const star  = new Image(); star.src="img/stella.png";
 
-let mY = 280, vy = 0, onGround = true;
-let blocks=[], stars=[];
-let score=0, playing=false;
+let mY = 200, vy = 0;
+let onGround = true;
 
+let blocks = [];
+let stars = [];
+let score = 0;
+let playing = false;
+
+/* VELOCITÀ DIVERSA MOBILE / PC */
+let SPEED = window.innerWidth < 700 ? 4 : 5;
+
+/* -----------------------------
+   FUNZIONI
+------------------------------ */
+
+function jump(){
+  if(onGround){
+    vy = -13; /* più reattivo */
+    onGround = false;
+  }
+}
+
+/* SALTA CON CLICK, SPACE, FRECCIA SU, CLICK DESTRO */
+canvas.addEventListener("click",jump);
+window.addEventListener("keydown",e=>{
+  if(e.code==="Space" || e.code==="ArrowUp") jump();
+});
+window.addEventListener("contextmenu",e=>{
+  e.preventDefault();
+  jump();
+});
+
+/* SPAWN OGGETTI */
 function spawnBlock(){
-  blocks.push({x:canvas.width,y:290});
+  blocks.push({x:canvas.width, y:230});
 }
 function spawnStar(){
-  stars.push({x:canvas.width,y:220});
+  stars.push({x:canvas.width, y:150});
 }
 
+/* LOOP */
 function update(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  vy += 0.6;
+  /* Gravità */
+  vy += 0.5;
   mY += vy;
-  if(mY > 280){ mY=280; vy=0; onGround=true; }
 
-  ctx.drawImage(mario,80,mY,70,70);
+  if(mY > 200){
+    mY = 200;
+    vy = 0;
+    onGround = true;
+  }
 
+  /* Disegna Babbo Mario */
+  ctx.drawImage(mario,70,mY,70,70);
+
+  /* Blocchi */
   blocks.forEach(b=>{
-    b.x -= 6;
+    b.x -= SPEED;
     ctx.drawImage(block,b.x,b.y,60,60);
 
-    if(b.x<130 && b.x+50>80 && mY+60>b.y){
+    /* Collisione */
+    if(b.x < 120 && b.x+50 > 70 && mY+60 > b.y){
       endGame();
     }
   });
 
+  /* Stelle */
   stars.forEach(s=>{
-    s.x -= 6;
+    s.x -= SPEED;
     ctx.drawImage(star,s.x,s.y,40,40);
-    if(s.x<120 && s.x+30>80 && mY+40>s.y){
-      score+=5;
-      s.collected=true;
+
+    if(s.x < 120 && s.x+30 > 70 && mY+40 > s.y){
+      score += 5;
+      s.hit = true;
     }
   });
 
-  blocks = blocks.filter(b=>b.x>-80);
-  stars  = stars.filter(s=>!s.collected && s.x>-40);
+  blocks = blocks.filter(b=>b.x>-70);
+  stars  = stars.filter(s=>!s.hit && s.x>-40);
 
-  document.getElementById("info").textContent=`⭐ ${score}`;
+  document.getElementById("info").textContent = `⭐ ${score}`;
 
-  if(playing) requestAnimationFrame(update);
+  playing && requestAnimationFrame(update);
 }
 
-canvas.addEventListener("click",()=>{
-  if(onGround){
-    vy = -12;
-    onGround=false;
-  }
-});
-
+/* -----------------------------
+   GAME OVER
+------------------------------ */
 function endGame(){
-  playing=false;
+  playing = false;
   document.getElementById("game").style.display="none";
   document.getElementById("info").style.display="none";
   document.getElementById("fine").style.display="flex";
   document.getElementById("msgFinale").innerHTML=`⭐ Punti: <b>${score}</b>`;
-
-  db.ref("punteggi/giorno11").push({
-    nome:"Giocatore",
-    punti:score,
-    time:Date.now()
-  });
-
-  db.ref("punteggi/giorno11").orderByChild("punti").limitToLast(10).once("value",snap=>{
-    let rows="<tr><th>Nome</th><th>Punti</th></tr>";
-    let arr=[];
-    snap.forEach(s=>arr.push(s.val()));
-    arr.reverse().forEach(r=>{
-      rows+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
-    });
-    document.getElementById("tabella").innerHTML=rows;
-  });
 }
 
+/* -----------------------------
+   START
+------------------------------ */
 document.getElementById("start").onclick=()=>{
   document.getElementById("panel").style.display="none";
   canvas.style.display="block";
   document.getElementById("info").style.display="block";
-  playing=true;
+  playing = true;
 
-  setInterval(()=>playing&&spawnBlock(),1600);
-  setInterval(()=>playing&&spawnStar(),2000);
+  setInterval(()=>playing && spawnBlock(), 1600);
+  setInterval(()=>playing && spawnStar(), 2300);
 
   update();
 };
