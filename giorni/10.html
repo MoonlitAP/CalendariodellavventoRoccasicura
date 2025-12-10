@@ -74,8 +74,6 @@ h1{color:#ffd700;}
   font-size:42px;
 }
 
-.star{font-size:42px;}
-
 #fine{
   position:fixed;
   inset:0;
@@ -98,13 +96,6 @@ h1{color:#ffd700;}
 
 table{width:100%; margin-top:10px;}
 th,td{padding:8px; border-bottom:1px solid #d7bb5f;}
-
-.btn-row{
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  margin-top:20px;
-}
 </style>
 </head>
 
@@ -112,37 +103,34 @@ th,td{padding:8px; border-bottom:1px solid #d7bb5f;}
 
 <h1>🐭 Caccia al Topo!</h1>
 
-<!-- PRE-START PANEL -->
+<!-- PRE-INIZIO -->
 <div id="panel">
   <h2>🎄 Come si gioca</h2>
   <p>
-    🐭 Tocca il topo → <b>+1 punto</b><br>
-    ⭐ Trova la stella → <b>+5 punti</b><br><br>
-    ⏳ Tempo: 20 secondi<br>
-    🎯 Più punti fai, più sali in classifica!
+    🐭 Tocca il topo → +1<br>
+    ⭐ Trova la stella → +5<br><br>
+    ⏳ Tempo: 20 secondi
   </p>
-
   <button class="btn" onclick="startGame()">▶️ INIZIA</button>
-  <button class="btn" style="background:#b8860b;" onclick="openTop10()">🏆 CLASSIFICA</button>
+  <button class="btn" style="background:#b8860b" onclick="openTop10()">🏆 CLASSIFICA</button>
 </div>
 
-<!-- GAME -->
 <div id="field"></div>
-<div id="info">⭐ <span id="score">0</span> | ⏳ <span id="time">20</span>s</div>
 
-<!-- FINE / CLASSIFICA -->
+<div id="info">
+  ⭐ <span id="score">0</span> |
+  ⏳ <span id="time">20</span>s
+</div>
+
+<!-- FINE -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="fine-msg"></h2>
-    <h3>🏆 Top 10 – Caccia al Topo</h3>
+    <h3>🏆 Top 10 – Giorno 10</h3>
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
     </table>
-
-    <div class="btn-row">
-      <button class="btn" onclick="location.reload()">🔄 Riprova</button>
-      <a href="../calendario.html" class="btn">⬅ Calendario</a>
-    </div>
+    <button class="btn" onclick="location.reload()">🔄 Riprova</button>
   </div>
 </div>
 
@@ -150,18 +138,24 @@ th,td{padding:8px; border-bottom:1px solid #d7bb5f;}
 /* FIREBASE */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
-  authDomain: "calendarioroccasicura.firebaseapp.com",
-  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "calendarioroccasicura"
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
 });
 const db = firebase.database();
 
 const real = localStorage.getItem("utente") || "Ospite";
 const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
 
-/* GAME VARS */
-let score=0, time=20, active=-1, timer, spawn;
-const field=document.getElementById("field");
+/* ELEMENTI */
+const scoreEl = document.getElementById("score");
+const timeEl  = document.getElementById("time");
+const fineMsg = document.getElementById("fine-msg");
+const table   = document.getElementById("score-table");
+const field   = document.getElementById("field");
+const info    = document.getElementById("info");
+const panel   = document.getElementById("panel");
+
+/* VARIABILI */
+let score=0, time=20, active=-1, timer, spawner;
 
 /* CREA BUCHE */
 for(let i=0;i<6;i++){
@@ -179,11 +173,12 @@ function startGame(){
   timeEl.textContent=20;
 
   timer=setInterval(()=>{
-    time--; timeEl.textContent=time;
+    time--;
+    timeEl.textContent=time;
     if(time<=0) endGame();
   },1000);
 
-  spawn=setInterval(showItem,800);
+  spawner=setInterval(showItem,800);
 }
 
 function showItem(){
@@ -194,8 +189,7 @@ function showItem(){
 
 function hit(i){
   if(i!==active) return;
-  const v=field.children[i].textContent;
-  score += (v==="⭐")?5:1;
+  score += field.children[i].textContent==="⭐" ? 5 : 1;
   scoreEl.textContent=score;
   clearField();
 }
@@ -206,12 +200,12 @@ function clearField(){
 
 function endGame(){
   clearInterval(timer);
-  clearInterval(spawn);
+  clearInterval(spawner);
   info.style.display="none";
   fine.style.display="flex";
   fineMsg.innerHTML=`🎄 Hai fatto <b>${score}</b> punti!`;
 
-  db.ref("punteggi/giorno4").push({
+  db.ref("punteggi/giorno10").push({
     nome:user,
     punti:score,
     timestamp:Date.now()
@@ -219,8 +213,8 @@ function endGame(){
 }
 
 function loadTop10(){
-  scoreTable.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
-  db.ref("punteggi/giorno4")
+  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+  db.ref("punteggi/giorno10")
     .orderByChild("punti")
     .limitToLast(10)
     .once("value",snap=>{
@@ -228,7 +222,7 @@ function loadTop10(){
       snap.forEach(c=>list.push(c.val()));
       list.sort((a,b)=>b.punti-a.punti);
       list.forEach(r=>{
-        scoreTable.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+        table.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
       });
     });
 }
@@ -236,15 +230,9 @@ function loadTop10(){
 function openTop10(){
   panel.style.display="none";
   fine.style.display="flex";
-  fineMsg.textContent="🏆 Classifica generale";
+  fineMsg.textContent="🏆 Classifica Giorno 10";
   loadTop10();
 }
-
-/* SHORTCUT */
-const scoreEl=score;
-const timeEl=time;
-const fineMsg=document.getElementById("fine-msg");
-const scoreTable=document.getElementById("score-table");
 </script>
 
 </body>
