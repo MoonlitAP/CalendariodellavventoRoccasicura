@@ -180,13 +180,6 @@ body, html {
 
 <body>
 
-
-
-
-
-
-
-
 <!-- ===== START SCREEN ===== -->
 <div id="start-screen">
     <h1 class="titolo">🎹 Giorno 12 – Piano Tiles di Natale</h1>
@@ -206,7 +199,7 @@ body, html {
 <div id="game-area">
     <div id="hud">
         <div class="hud-item">❤️ Vite: <span id="vite">3</span></div>
-        <div class="hud-item">⏳ Tempo: <span id="timer">30</span>s</div>
+        <div class="hud-item">⏳ Tempo: <span id="timer">0</span>s</div>
         <div class="hud-item">🎯 Punti: <span id="punti">0</span></div>
     </div>
 
@@ -215,11 +208,11 @@ body, html {
 
 <!-- ===== GAME OVER ===== -->
 <div id="gameover-screen">
-    <h2>GAME OVER</h2>
+    <h2>FINE LIVELLO</h2>
     <p>Punteggio: <span id="final-score">0</span></p>
 
     <div class="nickname-box">
-        <input type="text" id="nickname" placeholder="Inserisci il tuo nome">
+        <input type="text" id="nickname" placeholder="Il tuo nome">
         <button id="save-score">Salva Punteggio</button>
     </div>
 
@@ -234,11 +227,10 @@ body, html {
     <button id="back-btn">Indietro</button>
 </div>
 
-<!-- AUDIO -->
+<!-- ===== AUDIO ===== -->
 <audio id="song" preload="auto">
     <source src="audio/canzone.mp3" type="audio/mpeg">
 </audio>
-
 
 <!-- ===== FIREBASE LOADER ===== -->
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
@@ -253,24 +245,39 @@ body, html {
 
 
 
-/* ================================
-   FIREBASE CONFIG
-================================ */
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================
+   🔥 FIREBASE CONFIG (COMPAT MODE)
+========================================== */
+
 const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "XXX",
-    appId: "XXX"
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.firebasestorage.app",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ================================
-   VARIABILI PRINCIPALI
-================================ */
+/* ==========================================
+   🎮 VARIABILI DEL GIOCO
+========================================== */
+
 let canvas = document.getElementById("game-canvas");
 let ctx = canvas.getContext("2d");
 
@@ -281,21 +288,23 @@ let tileHeight = 160;
 
 let vite = 3;
 let punti = 0;
-let tempo = 30;
 let livelloSelezionato = null;
-let isGameRunning = false;
+let beatmap = [];
+let beatIndex = 0;
+let startTime = null;
 
-let beatmap = [];       // Viene caricata dal livello scelto
-let beatIndex = 0;      // Evento corrente
-let startTime = null;   // Per sincronizzare la musica
+let isGameRunning = false;
+let fallSpeed = 5;
+
+let timerInterval = null;
+let tempo = 0;   // timer NON termina il gioco
+
 let song = document.getElementById("song");
 
-let fallSpeed = 4;      // Cambia in base al livello
-let timerInterval = null;
+/* ==========================================
+   🔄 MOSTRA/NASCONDI SCREEN
+========================================== */
 
-/* ================================
-   MOSTRARE / NASCONDERE SCHERMATE
-================================ */
 function showScreen(id) {
     document.getElementById("start-screen").style.display = "none";
     document.getElementById("game-area").style.display = "none";
@@ -305,9 +314,10 @@ function showScreen(id) {
     document.getElementById(id).style.display = "block";
 }
 
-/* ================================
-   AVVIO DEL GIOCO
-================================ */
+/* ==========================================
+   ▶️ AVVIO LIVELLO
+========================================== */
+
 document.querySelectorAll(".level-btn").forEach(btn => {
     btn.addEventListener("click", () => {
         livelloSelezionato = btn.dataset.level;
@@ -318,17 +328,18 @@ document.querySelectorAll(".level-btn").forEach(btn => {
         if (livelloSelezionato === "ultra") fallSpeed = 9;
 
         caricaBeatmap(livelloSelezionato);
-
         startGame();
     });
 });
 
 function startGame() {
+
+    // reset variabili
     vite = 3;
     punti = 0;
-    tempo = 30;
     beatIndex = 0;
     tiles = [];
+    tempo = 0;
     startTime = null;
 
     document.getElementById("vite").textContent = vite;
@@ -337,22 +348,34 @@ function startGame() {
 
     showScreen("game-area");
 
+    // AUDIO FIX (per evitare AbortError)
     song.currentTime = 0;
-    song.play();
+    song.play().catch(()=>{});
 
+    // Timer che NON termina il gioco
     timerInterval = setInterval(() => {
-        tempo--;
+        tempo++;
         document.getElementById("timer").textContent = tempo;
-        if (tempo <= 0) endGame();
     }, 1000);
 
     isGameRunning = true;
     requestAnimationFrame(update);
 }
 
-/* ================================
-   CREA UNA NUOVA TILE
-================================ */
+/* ==========================================
+   🎵 FINE LIVELLO QUANDO FINISCE LA MUSICA
+========================================== */
+
+song.onended = () => {
+    if (isGameRunning) {
+        endLevel(); // NON è game over, è fine brano
+    }
+};
+
+/* ==========================================
+   🎹 CREA TILE
+========================================== */
+
 function creaTile(col) {
     tiles.push({
         x: col * tileWidth,
@@ -361,28 +384,30 @@ function creaTile(col) {
     });
 }
 
-/* ================================
-   UPDATE PRINCIPALE
-================================ */
+/* ==========================================
+   🧠 UPDATE PRINCIPALE (GAME LOOP)
+========================================== */
+
 function update(timestamp) {
 
     if (!startTime) startTime = timestamp;
-    let elapsed = (timestamp - startTime) / 1000; // in secondi
+    let elapsed = (timestamp - startTime) / 1000;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    /* EVENTI DELLA BEATMAP BASATI SUL TEMPO */
+    // BEATMAP EVENTI
     while (beatIndex < beatmap.length && beatmap[beatIndex].time <= elapsed) {
-        createBeatEvent(beatmap[beatIndex]);
+        let evt = beatmap[beatIndex];
+        evt.cols.forEach(col => creaTile(col));
         beatIndex++;
     }
 
-    /* DISEGNARE LE TILE */
+    // MOVE + DRAW TILES
     for (let i = 0; i < tiles.length; i++) {
         let t = tiles[i];
         t.y += fallSpeed;
 
-        // Disegno piastrella rosso/oro
+        // TILE RED + GOLD
         ctx.fillStyle = "#b3001b";
         ctx.fillRect(t.x, t.y, tileWidth, tileHeight);
 
@@ -390,7 +415,7 @@ function update(timestamp) {
         ctx.lineWidth = 4;
         ctx.strokeRect(t.x, t.y, tileWidth, tileHeight);
 
-        // TOCCO A TERRA NON TAPPATO → PERDI VITA
+        // NON TAPPATA E ESCE DALLO SCHERMO → -1 VITA
         if (!t.tapped && t.y > canvas.height) {
             vite--;
             document.getElementById("vite").textContent = vite;
@@ -398,7 +423,7 @@ function update(timestamp) {
             i--;
 
             if (vite <= 0) {
-                endGame();
+                endLevel();  // fine livello per vite finite
                 return;
             }
         }
@@ -407,18 +432,10 @@ function update(timestamp) {
     if (isGameRunning) requestAnimationFrame(update);
 }
 
-/* ================================
-   CREAZIONE DI EVENTI DELLA BEATMAP
-================================ */
-function createBeatEvent(evt) {
-    for (let col of evt.cols) {
-        creaTile(col);
-    }
-}
+/* ==========================================
+   👆 TAP SU TILE
+========================================== */
 
-/* ================================
-   TAP SULLE TILE
-================================ */
 canvas.addEventListener("click", (e) => {
 
     let rect = canvas.getBoundingClientRect();
@@ -442,27 +459,31 @@ canvas.addEventListener("click", (e) => {
     }
 });
 
-/* ================================
-   FINE DEL GIOCO
-================================ */
-function endGame() {
+/* ==========================================
+   🏁 FINE LIVELLO
+========================================== */
+
+function endLevel() {
     isGameRunning = false;
     song.pause();
     clearInterval(timerInterval);
 
     document.getElementById("final-score").textContent = punti;
-
     showScreen("gameover-screen");
 }
 
-/* ================================
-   SALVATAGGIO IN FIREBASE
-================================ */
+/* ==========================================
+   💾 SALVA PUNTEGGIO PER LIVELLO
+========================================== */
+
 document.getElementById("save-score").addEventListener("click", () => {
+
     let name = document.getElementById("nickname").value.trim();
     if (name === "") return;
 
-    db.ref("giorno12").push({
+    let path = "giorno12_" + livelloSelezionato; // es: giorno12_easy
+
+    db.ref(path).push({
         nickname: name,
         punti: punti
     });
@@ -470,46 +491,52 @@ document.getElementById("save-score").addEventListener("click", () => {
     alert("Punteggio salvato!");
 });
 
-/* ================================
-   MOSTRARE TOP 10
-================================ */
+/* ==========================================
+   🏆 MOSTRARE TOP 10 PER LIVELLO
+========================================== */
+
 document.getElementById("top10-btn").addEventListener("click", () => {
+
     showScreen("top10-screen");
 
-    db.ref("giorno12")
-        .orderByChild("punti")
-        .limitToLast(10)
-        .once("value", snap => {
-            let arr = [];
-            snap.forEach(s => arr.push(s.val()));
-            arr.reverse();
+    let path = "giorno12_" + livelloSelezionato;
 
-            let lista = document.getElementById("classifica");
-            lista.innerHTML = "";
+    db.ref(path)
+      .orderByChild("punti")
+      .limitToLast(10)
+      .once("value", snap => {
 
-            arr.forEach(p => {
-                let li = document.createElement("li");
-                li.textContent = p.nickname + " — " + p.punti;
-                lista.appendChild(li);
-            });
+        let arr = [];
+        snap.forEach(s => arr.push(s.val()));
+        arr.reverse(); // punteggi maggiori in alto
+
+        let lista = document.getElementById("classifica");
+        lista.innerHTML = "";
+
+        arr.forEach(p => {
+            let li = document.createElement("li");
+            li.textContent = `${p.nickname} — ${p.punti}`;
+            lista.appendChild(li);
         });
+    });
 });
 
 document.getElementById("back-btn").addEventListener("click", () => {
     showScreen("gameover-screen");
 });
 
-/* ================================
-   RICOMINCIA
-================================ */
+/* ==========================================
+   🔄 RICOMINCIA
+========================================== */
+
 document.getElementById("restart-btn").addEventListener("click", () => {
     location.reload();
 });
 
-/* ================================
-   FUNZIONE CHE CARICA LA BEATMAP
-   (LE BEATMAP ARRIVERANNO NELLE PROSSIME PARTI)
-================================ */
+/* ==========================================
+   📦 CARICA BEATMAP CORRETTA (arriva in PARTE 3/4)
+========================================== */
+
 function caricaBeatmap(level) {
     if (level === "easy") beatmap = beatmap_easy;
     if (level === "medium") beatmap = beatmap_medium;
@@ -524,89 +551,60 @@ function caricaBeatmap(level) {
 
 
 
-/* ==========================================
-      BEATMAP FACILE – alternato morbido
-      (1 tile per beat, nessun doppio)
-========================================== */
+
+
+
+
+
+
+/* ============================================================
+      🎵 BEATMAP EASY – Alternato morbido (1 tile per beat)
+============================================================ */
 
 let beatmap_easy = [];
 
-/* Funzione generica per costruire pattern */
-function aggiungiAlternato(inizio, fine, bpm) {
+/* Alternato: colonna 0 → 1 → 2 → 1 → ripete */
+function easyAlternato(inizio, fine, bpm) {
+
+    let seq = [0, 1, 2, 1];
+    let index = 0;
+
     let beatTime = 60 / bpm;
     let t = inizio;
-    let seq = [0,1,2,1]; // colonne: 1→2→3→2 (0-based)
-
-    let index = 0;
 
     while (t <= fine) {
         beatmap_easy.push({
             time: parseFloat(t.toFixed(3)),
             cols: [seq[index]]
         });
-
-        t += beatTime;
         index = (index + 1) % seq.length;
+        t += beatTime;
     }
 }
 
-/* ============ STRUTTURA CANZONE ============ */
-/*
-Castle on the Hill – schema approssimato:
-0:00 – 0:15  intro
-0:15 – 0:45  strofa 1
-0:45 – 1:15  pre-chorus
-1:15 – 1:45  ritornello
-1:45 – 2:15  strofa 2
-2:15 – 2:45  pre-chorus
-2:45 – 3:15  ritornello
-3:15 – 3:45  bridge
-3:45 – 4:00  ritornello finale
-*/
-
 let BPM_easy = 135;
 
-/* Intro */
-aggiungiAlternato(0.00, 15.00, BPM_easy);
-
-/* Strofa 1 */
-aggiungiAlternato(15.00, 45.00, BPM_easy);
-
-/* Pre-chorus */
-aggiungiAlternato(45.00, 75.00, BPM_easy);
-
-/* Ritornello 1 */
-aggiungiAlternato(75.00, 105.00, BPM_easy);
-
-/* Strofa 2 */
-aggiungiAlternato(105.00, 135.00, BPM_easy);
-
-/* Pre-chorus 2 */
-aggiungiAlternato(135.00, 165.00, BPM_easy);
-
-/* Ritornello 2 */
-aggiungiAlternato(165.00, 195.00, BPM_easy);
-
-/* Bridge */
-aggiungiAlternato(195.00, 225.00, BPM_easy);
-
-/* Ritornello finale */
-aggiungiAlternato(225.00, 240.00, BPM_easy);
+/* Struttura completa del brano */
+easyAlternato(0, 15, BPM_easy);      // intro
+easyAlternato(15, 45, BPM_easy);     // strofa 1
+easyAlternato(45, 75, BPM_easy);     // pre-chorus
+easyAlternato(75, 105, BPM_easy);    // ritornello
+easyAlternato(105, 135, BPM_easy);   // strofa 2
+easyAlternato(135, 165, BPM_easy);   // pre-chorus 2
+easyAlternato(165, 195, BPM_easy);   // ritornello 2
+easyAlternato(195, 225, BPM_easy);   // bridge
+easyAlternato(225, 240, BPM_easy);   // ritornello finale
 
 
 
-
-
-
-
-/* ==========================================
-      BEATMAP MEDIO – dinamico 1–2 per beat
-========================================== */
+/* ============================================================
+      🎵 BEATMAP MEDIUM – 1–2 tile per beat
+============================================================ */
 
 let beatmap_medium = [];
 
-/* Pattern generator BASE (una tile) */
-function aggiungiSingolo(inizio, fine, bpm, seq=[0,1,2,1]) {
+/* Singolo: una tile */
+function medSingolo(inizio, fine, bpm, seq=[0,2,1,2]) {
     let beatTime = 60 / bpm;
     let t = inizio;
     let index = 0;
@@ -616,14 +614,13 @@ function aggiungiSingolo(inizio, fine, bpm, seq=[0,1,2,1]) {
             time: parseFloat(t.toFixed(3)),
             cols: [seq[index]]
         });
-
-        t += beatTime;
         index = (index + 1) % seq.length;
+        t += beatTime;
     }
 }
 
-/* Pattern generator con DOPPI */
-function aggiungiDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
+/* Doppio: due tile simultanee */
+function medDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
     let beatTime = 60 / bpm;
     let t = inizio;
     let index = 0;
@@ -633,65 +630,56 @@ function aggiungiDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
             time: parseFloat(t.toFixed(3)),
             cols: seq[index]
         });
-
-        t += beatTime;
         index = (index + 1) % seq.length;
+        t += beatTime;
     }
 }
 
-/* ====== STRUTTURA CANZONE MEDIUM ====== */
-
 let BPM_med = 135;
 
-/* INTRO — solo singoli */
-aggiungiSingolo(0.00, 15.00, BPM_med);
-
-/* STROFA 1 — singolo con qualche doppio leggero */
-aggiungiSingolo(15.00, 30.00, BPM_med);
-aggiungiDoppio(30.00, 45.00, BPM_med);
-
-/* PRE-CHORUS — aumenta ritmo, mix singoli + doppi */
-aggiungiDoppio(45.00, 60.00, BPM_med);
-aggiungiSingolo(60.00, 75.00, BPM_med);
-
-/* RITORNELLO 1 — parte più dinamica */
-aggiungiDoppio(75.00, 90.00, BPM_med);
-aggiungiSingolo(90.00, 105.00, BPM_med);
-
-/* STROFA 2 — ritorna più leggero */
-aggiungiSingolo(105.00, 120.00, BPM_med);
-aggiungiDoppio(120.00, 135.00, BPM_med);
-
-/* PRE-CHORUS 2 — di nuovo ritmo crescente */
-aggiungiDoppio(135.00, 150.00, BPM_med);
-aggiungiSingolo(150.00, 165.00, BPM_med);
-
-/* RITORNELLO 2 — sezione forte */
-aggiungiDoppio(165.00, 180.00, BPM_med);
-aggiungiSingolo(180.00, 195.00, BPM_med);
-
-/* BRIDGE — rilassamento */
-aggiungiSingolo(195.00, 210.00, BPM_med);
-aggiungiDoppio(210.00, 225.00, BPM_med);
-
-/* RITORNELLO FINALE */
-aggiungiDoppio(225.00, 240.00, BPM_med);
+/* MEDIO – Struttura del brano completa */
+medSingolo(0, 15, BPM_med);           // intro
+medSingolo(15, 30, BPM_med);          // strofa 1A
+medDoppio(30, 45, BPM_med);           // strofa 1B
+medDoppio(45, 60, BPM_med);           // pre-chorus A
+medSingolo(60, 75, BPM_med);          // pre-chorus B
+medDoppio(75, 90, BPM_med);           // ritornello A
+medSingolo(90, 105, BPM_med);         // ritornello B
+medSingolo(105, 120, BPM_med);        // strofa 2A
+medDoppio(120, 135, BPM_med);         // strofa 2B
+medDoppio(135, 150, BPM_med);         // pre-chorus 2A
+medSingolo(150, 165, BPM_med);        // pre-chorus 2B
+medDoppio(165, 180, BPM_med);         // ritornello 2A
+medSingolo(180, 195, BPM_med);        // ritornello 2B
+medSingolo(195, 210, BPM_med);        // bridge A
+medDoppio(210, 225, BPM_med);         // bridge B
+medDoppio(225, 240, BPM_med);         // ritornello finale
 
 
 
 
 
 
-/* ==========================================
-      BEATMAP DIFFICILE – stile Magic Tiles Hard
-      1–2–3 tiles per beat, tripli nei ritornelli
-========================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+      🎵 BEATMAP HARD – 1/2/3 tiles, tripli nei ritornelli
+============================================================ */
 
 let beatmap_hard = [];
 
-/* === GENERATORI DI PATTERN === */
-
-/* Pattern singolo veloce */
+/* Singolo veloce */
 function hardSingolo(inizio, fine, bpm, seq=[0,2,1,2]) {
     let beatTime = 60 / bpm;
     let t = inizio;
@@ -707,7 +695,7 @@ function hardSingolo(inizio, fine, bpm, seq=[0,2,1,2]) {
     }
 }
 
-/* Pattern doppi energici */
+/* Doppio energico */
 function hardDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
     let beatTime = 60 / bpm;
     let t = inizio;
@@ -723,7 +711,7 @@ function hardDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
     }
 }
 
-/* Pattern triplo per ritornelli (hard mode) */
+/* Triplo completo (tutte le colonne) */
 function hardTriplo(inizio, fine, bpm) {
     let beatTime = 60 / bpm;
     let t = inizio;
@@ -731,68 +719,42 @@ function hardTriplo(inizio, fine, bpm) {
     while (t <= fine) {
         beatmap_hard.push({
             time: parseFloat(t.toFixed(3)),
-            cols: [0,1,2]   // tutte e 3 le colonne
+            cols: [0,1,2]
         });
         t += beatTime;
     }
 }
 
-/* === STRUTTURA CANZONE HARD === */
-
 let BPM_hard = 135;
 
-/* INTRO – singolo tecnico */
-hardSingolo(0.00, 15.00, BPM_hard);
-
-/* STROFA 1 – singolo + qualche doppio */
-hardSingolo(15.00, 30.00, BPM_hard);
-hardDoppio(30.00, 45.00, BPM_hard);
-
-/* PRE-CHORUS – ritmo aumenta (doppi continui) */
-hardDoppio(45.00, 60.00, BPM_hard);
-
-/* RITORNELLO 1 – TRIPLI !!! */
-hardTriplo(60.00, 75.00, BPM_hard);
-
-/* RITORNO A SINGOLI/DOPPI */
-hardSingolo(75.00, 90.00, BPM_hard);
-hardDoppio(90.00, 105.00, BPM_hard);
-
-/* STROFA 2 – stessa logica */
-hardSingolo(105.00, 120.00, BPM_hard);
-hardDoppio(120.00, 135.00, BPM_hard);
-
-/* PRE-CHORUS 2 – doppi veloci */
-hardDoppio(135.00, 150.00, BPM_hard);
-
-/* RITORNELLO 2 – TRIPLI intensi */
-hardTriplo(150.00, 165.00, BPM_hard);
-
-/* MID-RITORNELLO – mix triplo + doppio */
-hardDoppio(165.00, 180.00, BPM_hard);
-hardTriplo(180.00, 195.00, BPM_hard);
-
-/* BRIDGE – singolo rilassato */
-hardSingolo(195.00, 210.00, BPM_hard);
-
-/* BUILD-UP – doppi crescenti */
-hardDoppio(210.00, 225.00, BPM_hard);
-
-/* RITORNELLO FINALE – TRIPLI FULL POWER */
-hardTriplo(225.00, 240.00, BPM_hard);
+/* HARD – struttura brano */
+hardSingolo(0, 15, BPM_hard);         // intro
+hardSingolo(15, 30, BPM_hard);        // strofa A
+hardDoppio(30, 45, BPM_hard);         // strofa B
+hardDoppio(45, 60, BPM_hard);         // pre-chorus A
+hardTriplo(60, 75, BPM_hard);         // ritornello TRIPLO
+hardSingolo(75, 90, BPM_hard);        // ritornello B
+hardDoppio(90, 105, BPM_hard);        // post-ritornello
+hardSingolo(105, 120, BPM_hard);      // strofa 2A
+hardDoppio(120, 135, BPM_hard);       // strofa 2B
+hardDoppio(135, 150, BPM_hard);       // pre-chorus 2A
+hardTriplo(150, 165, BPM_hard);       // TRIPLO ritornello 2A
+hardDoppio(165, 180, BPM_hard);       // ritornello 2B
+hardTriplo(180, 195, BPM_hard);       // TRIPLO lungo
+hardSingolo(195, 210, BPM_hard);      // bridge A
+hardDoppio(210, 225, BPM_hard);       // bridge B
+hardTriplo(225, 240, BPM_hard);       // rit finale TRIPLO
 
 
 
-/* ==========================================
-      BEATMAP ULTRA – EXPERT MODE
-      1–2–3 tiles, eventi ogni 1/2 beat
-========================================== */
+
+/* ============================================================
+      🎵 BEATMAP ULTRA – mezzo beat, doppi + tripli
+============================================================ */
 
 let beatmap_ultra = [];
 
-/* === GENERATORI ULTRA === */
-
-/* Singolo molto rapido (1 per beat) */
+/* Singolo rapido */
 function ultraSingolo(inizio, fine, bpm, seq=[0,2,1,2,0,1]) {
     let beatTime = 60 / bpm;
     let t = inizio;
@@ -808,9 +770,9 @@ function ultraSingolo(inizio, fine, bpm, seq=[0,2,1,2,0,1]) {
     }
 }
 
-/* Singolo doppio (1 ogni 1/2 beat) */
+/* Mezzo beat (doppia velocità) */
 function ultraMezzoBeat(inizio, fine, bpm, seq=[0,1,2,1,0,2]) {
-    let beatTime = 60 / bpm / 2;  // mezzo beat
+    let beatTime = 60 / bpm / 2;
     let t = inizio;
     let index = 0;
 
@@ -824,7 +786,7 @@ function ultraMezzoBeat(inizio, fine, bpm, seq=[0,1,2,1,0,2]) {
     }
 }
 
-/* Doppi rapidi */
+/* Doppio */
 function ultraDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
     let beatTime = 60 / bpm;
     let t = inizio;
@@ -840,9 +802,9 @@ function ultraDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
     }
 }
 
-/* Tripli (usati nei ritornelli) */
+/* Triplo */
 function ultraTriplo(inizio, fine, bpm) {
-    let beatTime = 60 / bpm / 1.5; // leggermente più frequente
+    let beatTime = 60 / bpm / 1.5;
     let t = inizio;
 
     while (t <= fine) {
@@ -854,54 +816,33 @@ function ultraTriplo(inizio, fine, bpm) {
     }
 }
 
-/* ==========================================
-   STRUTTURA CANZONE — LIVELLO ULTRA
-========================================== */
-
 let BPM_ultra = 135;
 
-/* INTRO — Mezzo beat già subito */
-ultraMezzoBeat(0.00, 15.00, BPM_ultra);
-
-/* STROFA 1 — alternanza veloce */
-ultraSingolo(15.00, 30.00, BPM_ultra);
-ultraDoppio(30.00, 45.00, BPM_ultra);
-
-/* PRE-CHORUS — mezzo beat */
-ultraMezzoBeat(45.00, 60.00, BPM_ultra);
-
-/* RITORNELLO 1 — TRIPLO + MEZZO BEAT */
-ultraTriplo(60.00, 75.00, BPM_ultra);
-
-/* SEZIONE MIXATA */
-ultraDoppio(75.00, 90.00, BPM_ultra);
-ultraMezzoBeat(90.00, 105.00, BPM_ultra);
-
-/* STROFA 2 — singoli veloci */
-ultraSingolo(105.00, 120.00, BPM_ultra);
-ultraDoppio(120.00, 135.00, BPM_ultra);
-
-/* PRE-CHORUS 2 — mezzo beat pieno */
-ultraMezzoBeat(135.00, 150.00, BPM_ultra);
-
-/* RITORNELLO 2 — TRIPLI HARD */
-ultraTriplo(150.00, 165.00, BPM_ultra);
-
-/* MID SECTION — combinazioni */
-ultraDoppio(165.00, 180.00, BPM_ultra);
-ultraMezzoBeat(180.00, 195.00, BPM_ultra);
-
-/* BRIDGE — ritmo rallenta un attimo */
-ultraSingolo(195.00, 210.00, BPM_ultra);
-
-/* BUILD-UP — mezzo beat intenso */
-ultraMezzoBeat(210.00, 225.00, BPM_ultra);
-
-/* RITORNELLO FINALE — TRIPLO CONTINUO */
-ultraTriplo(225.00, 240.00, BPM_ultra);
+/* ULTRA – struttura brano */
+ultraMezzoBeat(0, 15, BPM_ultra);     // intro
+ultraSingolo(15, 30, BPM_ultra);      // strofa A
+ultraDoppio(30, 45, BPM_ultra);       // strofa B
+ultraMezzoBeat(45, 60, BPM_ultra);    // pre-chorus
+ultraTriplo(60, 75, BPM_ultra);       // rit 1 TRIPLO
+ultraDoppio(75, 90, BPM_ultra);
+ultraMezzoBeat(90, 105, BPM_ultra);
+ultraSingolo(105, 120, BPM_ultra);
+ultraDoppio(120, 135, BPM_ultra);
+ultraMezzoBeat(135, 150, BPM_ultra);
+ultraTriplo(150, 165, BPM_ultra);     // rit 2 TRIPLO
+ultraDoppio(165, 180, BPM_ultra);
+ultraMezzoBeat(180, 195, BPM_ultra);
+ultraSingolo(195, 210, BPM_ultra);
+ultraMezzoBeat(210, 225, BPM_ultra);
+ultraTriplo(225, 240, BPM_ultra);     // TRIPLO finale
 
 
+/* ==========================================
+   🔚 CHIUSURA DELLO SCRIPT E HTML
+========================================== */
 
 </script>
 </body>
 </html>
+
+
