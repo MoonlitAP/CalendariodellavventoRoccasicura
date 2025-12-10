@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>🎅 Giorno 11 – Babbo Mario Run</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
+  touch-action:manipulation;
+}
+
+h1{color:#ffd700;margin:10px 0;}
+
+canvas{
+  background:url("img/paese.jpg") repeat-x;
+  background-size:cover;
+  border:3px solid #ffd700;
+  border-radius:14px;
+  display:none;
+  margin:10px auto;
+}
+
+#panel{
+  background:#fffaf0;
+  color:#400;
+  border-radius:16px;
+  border:2px solid #ffd700;
+  margin:20px;
+  padding:20px;
+}
+
+button{
+  padding:14px 30px;
+  border-radius:30px;
+  border:none;
+  font-size:18px;
+  background:#7b0412;
+  color:white;
+  cursor:pointer;
+}
+button:hover{background:#ffd700;color:#000;}
+
+#info{
+  display:none;
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:rgba(0,0,0,.6);
+  padding:8px;
+  font-size:18px;
+}
+
+#fine{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.box{
+  background:#fffaf0;
+  color:#400;
+  border-radius:20px;
+  padding:25px;
+  width:90%;
+  max-width:480px;
+  border:2px solid #ffd700;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎅 Babbo Mario Run!</h1>
+
+<div id="panel">
+  <p>
+    👆 Tocca per saltare<br>
+    🟫 Evita i blocchi<br>
+    ⭐ Prendi le stelle (+5)<br>
+    💥 Un errore = Game Over
+  </p>
+  <button id="start">▶️ INIZIA</button>
+</div>
+
+<canvas id="game"></canvas>
+<div id="info"></div>
+
+<div id="fine">
+  <div class="box">
+    <h2 id="msgFinale"></h2>
+    <h3>🏆 Classifica Giorno 11</h3>
+    <table id="tabella" style="width:100%"></table>
+    <br>
+    <button onclick="location.reload()">🔄 Riprova</button>
+  </div>
+</div>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
+});
+const db = firebase.database();
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth < 700 ? window.innerWidth-20 : 900;
+canvas.height = 400;
+
+const mario = new Image(); mario.src="img/babbo_mario.png";
+const block = new Image(); block.src="img/blocco.png";
+const star  = new Image(); star.src="img/stella.png";
+
+let mY = 280, vy = 0, onGround = true;
+let blocks=[], stars=[];
+let score=0, playing=false;
+
+function spawnBlock(){
+  blocks.push({x:canvas.width,y:290});
+}
+function spawnStar(){
+  stars.push({x:canvas.width,y:220});
+}
+
+function update(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  vy += 0.6;
+  mY += vy;
+  if(mY > 280){ mY=280; vy=0; onGround=true; }
+
+  ctx.drawImage(mario,80,mY,70,70);
+
+  blocks.forEach(b=>{
+    b.x -= 6;
+    ctx.drawImage(block,b.x,b.y,60,60);
+
+    if(b.x<130 && b.x+50>80 && mY+60>b.y){
+      endGame();
+    }
+  });
+
+  stars.forEach(s=>{
+    s.x -= 6;
+    ctx.drawImage(star,s.x,s.y,40,40);
+    if(s.x<120 && s.x+30>80 && mY+40>s.y){
+      score+=5;
+      s.collected=true;
+    }
+  });
+
+  blocks = blocks.filter(b=>b.x>-80);
+  stars  = stars.filter(s=>!s.collected && s.x>-40);
+
+  document.getElementById("info").textContent=`⭐ ${score}`;
+
+  if(playing) requestAnimationFrame(update);
+}
+
+canvas.addEventListener("click",()=>{
+  if(onGround){
+    vy = -12;
+    onGround=false;
+  }
+});
+
+function endGame(){
+  playing=false;
+  document.getElementById("game").style.display="none";
+  document.getElementById("info").style.display="none";
+  document.getElementById("fine").style.display="flex";
+  document.getElementById("msgFinale").innerHTML=`⭐ Punti: <b>${score}</b>`;
+
+  db.ref("punteggi/giorno11").push({
+    nome:"Giocatore",
+    punti:score,
+    time:Date.now()
+  });
+
+  db.ref("punteggi/giorno11").orderByChild("punti").limitToLast(10).once("value",snap=>{
+    let rows="<tr><th>Nome</th><th>Punti</th></tr>";
+    let arr=[];
+    snap.forEach(s=>arr.push(s.val()));
+    arr.reverse().forEach(r=>{
+      rows+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+    });
+    document.getElementById("tabella").innerHTML=rows;
+  });
+}
+
+document.getElementById("start").onclick=()=>{
+  document.getElementById("panel").style.display="none";
+  canvas.style.display="block";
+  document.getElementById("info").style.display="block";
+  playing=true;
+
+  setInterval(()=>playing&&spawnBlock(),1600);
+  setInterval(()=>playing&&spawnStar(),2000);
+
+  update();
+};
+</script>
+
+</body>
+</html>
