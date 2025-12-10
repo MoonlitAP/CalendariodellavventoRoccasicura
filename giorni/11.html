@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- BLOCCO TOTALE ZOOM / DOUBLE TAP iOS -->
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>🎅 Giorno 11 – Babbo Mario Run</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
@@ -25,14 +23,10 @@ html,body{
   touch-action:manipulation;
   -webkit-user-select:none;
   user-select:none;
+  overscroll-behavior:none;
 }
+h1{color:#ffd700;margin:10px 0;}
 
-h1{
-  color:#ffd700;
-  margin:10px 0;
-}
-
-/* CANVAS */
 canvas{
   width:100%;
   max-width:900px;
@@ -41,10 +35,8 @@ canvas{
   border-radius:14px;
   display:none;
   margin:10px auto;
-  background:black;
 }
 
-/* START PANEL */
 #panel{
   background:#fffaf0;
   color:#400;
@@ -63,12 +55,8 @@ button{
   color:white;
   cursor:pointer;
 }
-button:hover{
-  background:#ffd700;
-  color:#000;
-}
+button:hover{background:#ffd700;color:#000;}
 
-/* INFO BAR */
 #info{
   display:none;
   position:fixed;
@@ -77,18 +65,16 @@ button:hover{
   background:rgba(0,0,0,.6);
   padding:8px;
   font-size:18px;
-  z-index:10;
 }
 
-/* FINE / CLASSIFICA */
 #fine{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.75);
+  background:rgba(0,0,0,.7);
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:9999;
+  z-index:999;
 }
 .box{
   background:#fffaf0;
@@ -99,14 +85,8 @@ button:hover{
   max-width:480px;
   border:2px solid #ffd700;
 }
-table{
-  width:100%;
-  margin-top:10px;
-}
-th,td{
-  padding:8px;
-  border-bottom:1px solid #d7bb5f;
-}
+table{width:100%;margin-top:10px;}
+th,td{padding:8px;border-bottom:1px solid #d7bb5f;}
 </style>
 </head>
 
@@ -115,13 +95,13 @@ th,td{
 <h1>🎅 Babbo Mario Run!</h1>
 
 <div id="panel">
-  <p>
-    👆 Tocca per saltare<br>
-    ⬆ SPACE / FRECCIA SU / click destro (PC)<br>
-    ⭐ Prendi le stelle (+5)<br>
-    🏁 Arriva al paese per vincere
-  </p>
-  <button id="start">▶️ INIZIA</button>
+<p>
+👆 Tocca per saltare<br>
+⭐ Stella +10<br>
+🎁 Regalo +50<br>
+🏁 Arriva al paese
+</p>
+<button id="start">▶️ INIZIA</button>
 </div>
 
 <canvas id="game"></canvas>
@@ -134,45 +114,40 @@ th,td{
     <table id="tabella"></table>
     <br>
     <button onclick="location.reload()">🔄 Riprova</button>
-    <a href="../calendario.html">
-      <button>⬅ Calendario</button>
-    </a>
   </div>
 </div>
 
 <script>
-/* ================= FIREBASE ================= */
+/* FIREBASE */
 firebase.initializeApp({
-  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
-  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
+  apiKey:"AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  databaseURL:"https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
 });
 const db = firebase.database();
 
-/* NOME MASCHERATO */
-const real = localStorage.getItem("utente") || "Ospite";
-const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
+const user="Giocatore"+Math.floor(Math.random()*999);
 
 /* CANVAS */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth < 900 ? window.innerWidth : 900;
-canvas.height = 300;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth<900?window.innerWidth:900;
+canvas.height=300;
 
 /* IMMAGINI */
-const mario = new Image(); mario.src="img/babbo_mario.png";
-const block = new Image(); block.src="img/blocco.png";
-const star  = new Image(); star.src="img/stella.png";
-const bgBosco = new Image(); bgBosco.src="img/bosco.jpg";
-const bgPaese = new Image(); bgPaese.src="img/paese.jpg";
+const mario=new Image(); mario.src="img/babbo_mario.png";
+const block=new Image(); block.src="img/blocco.png";
+const star=new Image(); star.src="img/stella.png";
+const gift=new Image(); gift.src="img/gift.png";
+const bgBosco=new Image(); bgBosco.src="img/bosco.jpg";
+const bgPaese=new Image(); bgPaese.src="img/paese.jpg";
 
 /* STATO */
 let mY=200, vy=0, onGround=true;
-let stars=[], score=0;
-let playing=false;
+let blocks=[], stars=[], gifts=[], particles=[];
+let score=0, playing=false;
 let scroll=0;
-
-const SPEED = window.innerWidth < 700 ? 4 : 5;
-const LEVEL_END = 5500;
+const SPEED=4;
+const LEVEL=6000;
 
 /* CONTROLLI */
 function jump(){
@@ -181,102 +156,148 @@ function jump(){
     onGround=false;
   }
 }
-canvas.addEventListener("click", jump);
-window.addEventListener("keydown", e=>{
+canvas.addEventListener("click",jump);
+window.addEventListener("keydown",e=>{
   if(e.code==="Space"||e.code==="ArrowUp") jump();
 });
-window.addEventListener("contextmenu", e=>{
-  e.preventDefault(); jump();
-});
 
-/* SPAWN STELLE */
-function spawnStar(){
-  stars.push({x:canvas.width,y:150});
-}
-
-/* DRAW BACKGROUND */
-function drawBackground(){
-  ctx.drawImage(bgBosco,-scroll*0.3,0,canvas.width*2,canvas.height);
-
-  if(scroll>LEVEL_END-1200){
-    const fade=(scroll-(LEVEL_END-1200))/1200;
-    ctx.globalAlpha=fade;
-    ctx.drawImage(bgPaese,0,0,canvas.width,canvas.height);
-    ctx.globalAlpha=1;
+/* PARTICELLE REGALO */
+function giftEffect(x,y){
+  for(let i=0;i<16;i++){
+    particles.push({
+      x,y,
+      vx:(Math.random()*4-2),
+      vy:(Math.random()*4-3),
+      a:1,
+      s:Math.random()*4+4
+    });
   }
+  particles.push({text:"+50",x,y,a:1,vy:-1.2});
 }
+
+/* SPAWN */
+function spawnBlock(){blocks.push({x:canvas.width,y:230});}
+function spawnStar(){stars.push({x:canvas.width,y:150});}
+function spawnGift(){gifts.push({x:canvas.width,y:170});}
 
 /* LOOP */
 function update(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawBackground();
 
-  vy+=0.5;
-  mY+=vy;
-  if(mY>200){ mY=200; vy=0; onGround=true; }
+  ctx.drawImage(bgBosco,-scroll*0.4,0,canvas.width*2,canvas.height);
+  if(scroll>LEVEL-1200){
+    ctx.globalAlpha=(scroll-(LEVEL-1200))/1200;
+    ctx.drawImage(bgPaese,0,0,canvas.width,canvas.height);
+    ctx.globalAlpha=1;
+  }
+
+  vy+=0.5; mY+=vy;
+  if(mY>200){mY=200;vy=0;onGround=true;}
 
   ctx.drawImage(mario,70,mY,70,70);
+
+  blocks.forEach(b=>{
+    b.x-=SPEED;
+    ctx.drawImage(block,b.x,b.y,60,60);
+    if(b.x<120&&b.x+50>70&&mY+60>b.y){
+      scroll-=40;
+    }
+  });
 
   stars.forEach(s=>{
     s.x-=SPEED;
     ctx.drawImage(star,s.x,s.y,40,40);
-    if(s.x<120 && s.x+30>70 && mY+40>s.y){
-      score+=5;
+    if(s.x<120&&s.x+30>70&&mY+40>s.y){
+      score+=10;
       s.hit=true;
     }
   });
-  stars=stars.filter(s=>!s.hit && s.x>-40);
+
+  gifts.forEach(g=>{
+    g.x-=SPEED;
+    ctx.drawImage(gift,g.x,g.y,42,42);
+    if(g.x<120&&g.x+35>70&&mY+40>g.y){
+      score+=50;
+      giftEffect(g.x+20,g.y+20);
+      g.hit=true;
+    }
+  });
+
+  particles.forEach(p=>{
+    ctx.globalAlpha=p.a;
+    if(p.text){
+      ctx.fillStyle="#ffd700";
+      ctx.font="bold 22px Ubuntu";
+      ctx.fillText(p.text,p.x,p.y);
+      p.y+=p.vy; p.a-=0.03;
+    }else{
+      ctx.fillStyle="#ffd700";
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
+      ctx.fill();
+      p.x+=p.vx; p.y+=p.vy; p.a-=0.04;
+    }
+    ctx.globalAlpha=1;
+  });
+
+  blocks=blocks.filter(b=>b.x>-80);
+  stars=stars.filter(s=>!s.hit&&s.x>-40);
+  gifts=gifts.filter(g=>!g.hit&&g.x>-40);
+  particles=particles.filter(p=>p.a>0);
 
   document.getElementById("info").textContent=`⭐ ${score}`;
   scroll+=SPEED;
 
-  if(scroll>=LEVEL_END){
-    endGame(); return;
-  }
-  playing && requestAnimationFrame(update);
+  if(scroll>=LEVEL){endGame();return;}
+  playing&&requestAnimationFrame(update);
 }
 
 /* FINE */
 function endGame(){
   playing=false;
-  canvas.style.display="none";
-  info.style.display="none";
-  fine.style.display="flex";
-  msgFinale.innerHTML=`🎉 Sei arrivato al paese!<br>⭐ Punti: <b>${score}</b>`;
+  document.getElementById("game").style.display="none";
+  document.getElementById("info").style.display="none";
+  document.getElementById("fine").style.display="flex";
+  document.getElementById("msgFinale").innerHTML=
+    `🎉 Sei arrivato al paese!<br>⭐ Punti: <b>${score}</b>`;
 
   db.ref("punteggi/giorno11").push({
     nome:user,
     punti:score,
-    timestamp:Date.now()
+    t:Date.now()
   }).then(loadTop10);
 }
 
-/* CLASSIFICA */
 function loadTop10(){
-  tabella.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+  const tab=document.getElementById("tabella");
+  tab.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
   db.ref("punteggi/giorno11")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value",snap=>{
-      let list=[];
-      snap.forEach(c=>list.push(c.val()));
-      list.sort((a,b)=>b.punti-a.punti);
-      list.forEach(r=>{
-        tabella.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
-      });
-    });
+   .orderByChild("punti").limitToLast(10)
+   .once("value",snap=>{
+     let a=[];
+     snap.forEach(s=>a.push(s.val()));
+     a.sort((x,y)=>y.punti-x.punti);
+     a.forEach(r=>{
+       tab.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+     });
+   });
 }
 
 /* START */
-start.onclick=()=>{
-  panel.style.display="none";
+document.getElementById("start").onclick=()=>{
+  document.getElementById("panel").style.display="none";
   canvas.style.display="block";
-  info.style.display="block";
+  document.getElementById("info").style.display="block";
   playing=true;
-  setInterval(()=>playing && spawnStar(),2000);
+
+  setInterval(()=>playing&&spawnBlock(),1600);
+  setInterval(()=>playing&&spawnStar(),2000);
+  setInterval(()=>playing&&spawnGift(),3500);
+
   update();
 };
 </script>
 
 </body>
 </html>
+
