@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- ✅ BLOCCO ZOOM iOS DEFINITIVO -->
+<!-- BLOCCO TOTALE ZOOM / DOUBLE TAP iOS -->
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -15,22 +15,16 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
-/* ===== BLOCCO TOTALE DOUBLE TAP ===== */
-html, body {
-  margin: 0;
-  padding: 0;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-  overscroll-behavior: none;
-}
-
-body{
+html,body{
+  margin:0;
+  padding:0;
   font-family:'Ubuntu',sans-serif;
   background:#7b0412;
   color:white;
   text-align:center;
-  overflow-x:hidden;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
 }
 
 h1{
@@ -38,20 +32,19 @@ h1{
   margin:10px 0;
 }
 
-/* ===== CANVAS ===== */
+/* CANVAS */
 canvas{
   width:100%;
   max-width:900px;
   height:300px;
-  background:url("img/paese.jpg") repeat-x;
-  background-size:cover;
   border:3px solid #ffd700;
   border-radius:14px;
   display:none;
   margin:10px auto;
+  background:black;
 }
 
-/* ===== START PANEL ===== */
+/* START PANEL */
 #panel{
   background:#fffaf0;
   color:#400;
@@ -75,7 +68,7 @@ button:hover{
   color:#000;
 }
 
-/* ===== INFO BAR ===== */
+/* INFO BAR */
 #info{
   display:none;
   position:fixed;
@@ -84,13 +77,14 @@ button:hover{
   background:rgba(0,0,0,.6);
   padding:8px;
   font-size:18px;
+  z-index:10;
 }
 
-/* ===== FINE / CLASSIFICA ===== */
+/* FINE / CLASSIFICA */
 #fine{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.7);
+  background:rgba(0,0,0,.75);
   display:none;
   justify-content:center;
   align-items:center;
@@ -105,7 +99,6 @@ button:hover{
   max-width:480px;
   border:2px solid #ffd700;
 }
-
 table{
   width:100%;
   margin-top:10px;
@@ -123,10 +116,10 @@ th,td{
 
 <div id="panel">
   <p>
-    👆 Tocca lo schermo per saltare<br>
+    👆 Tocca per saltare<br>
     ⬆ SPACE / FRECCIA SU / click destro (PC)<br>
-    🟫 Evita i blocchi<br>
-    ⭐ Prendi le stelle (+5)
+    ⭐ Prendi le stelle (+5)<br>
+    🏁 Arriva al paese per vincere
   </p>
   <button id="start">▶️ INIZIA</button>
 </div>
@@ -155,143 +148,132 @@ firebase.initializeApp({
 });
 const db = firebase.database();
 
-/* ===== NOME MASCHERATO ===== */
-const realName = localStorage.getItem("utente") || "Ospite";
-const userName = realName[0] + Math.floor(Math.random()*900+100) + realName.slice(1);
+/* NOME MASCHERATO */
+const real = localStorage.getItem("utente") || "Ospite";
+const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
 
-/* ================= CANVAS ================= */
+/* CANVAS */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-
 canvas.width = window.innerWidth < 900 ? window.innerWidth : 900;
 canvas.height = 300;
 
-/* ===== IMMAGINI ===== */
+/* IMMAGINI */
 const mario = new Image(); mario.src="img/babbo_mario.png";
 const block = new Image(); block.src="img/blocco.png";
 const star  = new Image(); star.src="img/stella.png";
+const bgBosco = new Image(); bgBosco.src="img/bosco.jpg";
+const bgPaese = new Image(); bgPaese.src="img/paese.jpg";
 
-/* ================= STATO GIOCO ================= */
-let mY = 200, vy = 0;
-let onGround = true;
-let blocks = [];
-let stars = [];
-let score = 0;
-let playing = false;
+/* STATO */
+let mY=200, vy=0, onGround=true;
+let stars=[], score=0;
+let playing=false;
+let scroll=0;
 
-/* velocità diversa */
 const SPEED = window.innerWidth < 700 ? 4 : 5;
+const LEVEL_END = 5500;
 
-/* ================= CONTROLLI ================= */
+/* CONTROLLI */
 function jump(){
   if(onGround){
-    vy = -13;
-    onGround = false;
+    vy=-13;
+    onGround=false;
   }
 }
-
 canvas.addEventListener("click", jump);
 window.addEventListener("keydown", e=>{
-  if(e.code==="Space" || e.code==="ArrowUp") jump();
+  if(e.code==="Space"||e.code==="ArrowUp") jump();
 });
 window.addEventListener("contextmenu", e=>{
-  e.preventDefault();
-  jump();
+  e.preventDefault(); jump();
 });
 
-/* ================= SPAWN ================= */
-function spawnBlock(){
-  blocks.push({x:canvas.width, y:230});
-}
+/* SPAWN STELLE */
 function spawnStar(){
-  stars.push({x:canvas.width, y:150});
+  stars.push({x:canvas.width,y:150});
 }
 
-/* ================= LOOP ================= */
+/* DRAW BACKGROUND */
+function drawBackground(){
+  ctx.drawImage(bgBosco,-scroll*0.3,0,canvas.width*2,canvas.height);
+
+  if(scroll>LEVEL_END-1200){
+    const fade=(scroll-(LEVEL_END-1200))/1200;
+    ctx.globalAlpha=fade;
+    ctx.drawImage(bgPaese,0,0,canvas.width,canvas.height);
+    ctx.globalAlpha=1;
+  }
+}
+
+/* LOOP */
 function update(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBackground();
 
-  vy += 0.5;
-  mY += vy;
-  if(mY > 200){
-    mY = 200;
-    vy = 0;
-    onGround = true;
-  }
+  vy+=0.5;
+  mY+=vy;
+  if(mY>200){ mY=200; vy=0; onGround=true; }
 
   ctx.drawImage(mario,70,mY,70,70);
 
-  blocks.forEach(b=>{
-    b.x -= SPEED;
-    ctx.drawImage(block,b.x,b.y,60,60);
-    if(b.x < 120 && b.x+50 > 70 && mY+60 > b.y){
-      endGame();
-    }
-  });
-
   stars.forEach(s=>{
-    s.x -= SPEED;
+    s.x-=SPEED;
     ctx.drawImage(star,s.x,s.y,40,40);
-    if(s.x < 120 && s.x+30 > 70 && mY+40 > s.y){
-      score += 5;
-      s.hit = true;
+    if(s.x<120 && s.x+30>70 && mY+40>s.y){
+      score+=5;
+      s.hit=true;
     }
   });
+  stars=stars.filter(s=>!s.hit && s.x>-40);
 
-  blocks = blocks.filter(b=>b.x>-70);
-  stars = stars.filter(s=>!s.hit && s.x>-40);
+  document.getElementById("info").textContent=`⭐ ${score}`;
+  scroll+=SPEED;
 
-  document.getElementById("info").textContent = `⭐ ${score}`;
-
+  if(scroll>=LEVEL_END){
+    endGame(); return;
+  }
   playing && requestAnimationFrame(update);
 }
 
-/* ================= GAME OVER ================= */
+/* FINE */
 function endGame(){
-  playing = false;
-
-  document.getElementById("game").style.display="none";
-  document.getElementById("info").style.display="none";
-  document.getElementById("fine").style.display="flex";
-
-  document.getElementById("msgFinale").innerHTML =
-    `⭐ Hai totalizzato <b>${score}</b> punti!`;
+  playing=false;
+  canvas.style.display="none";
+  info.style.display="none";
+  fine.style.display="flex";
+  msgFinale.innerHTML=`🎉 Sei arrivato al paese!<br>⭐ Punti: <b>${score}</b>`;
 
   db.ref("punteggi/giorno11").push({
-    nome: userName,
-    punti: Number(score),
-    timestamp: Date.now()
+    nome:user,
+    punti:score,
+    timestamp:Date.now()
   }).then(loadTop10);
 }
 
-/* ================= CLASSIFICA ================= */
+/* CLASSIFICA */
 function loadTop10(){
-  const table = document.getElementById("tabella");
-  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
-
+  tabella.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
   db.ref("punteggi/giorno11")
     .orderByChild("punti")
     .limitToLast(10)
-    .once("value", snap=>{
+    .once("value",snap=>{
       let list=[];
       snap.forEach(c=>list.push(c.val()));
       list.sort((a,b)=>b.punti-a.punti);
       list.forEach(r=>{
-        table.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+        tabella.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
       });
     });
 }
 
-/* ================= START ================= */
-document.getElementById("start").onclick=()=>{
-  document.getElementById("panel").style.display="none";
+/* START */
+start.onclick=()=>{
+  panel.style.display="none";
   canvas.style.display="block";
-  document.getElementById("info").style.display="block";
-  playing = true;
-
-  setInterval(()=>playing && spawnBlock(), 1700);
-  setInterval(()=>playing && spawnStar(), 2300);
-
+  info.style.display="block";
+  playing=true;
+  setInterval(()=>playing && spawnStar(),2000);
   update();
 };
 </script>
