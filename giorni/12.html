@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- ✅ BLOCCO ZOOM MOBILE -->
+<!-- BLOCCO ZOOM iOS / ANDROID -->
 <meta name="viewport"
   content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -104,10 +104,11 @@ th,td{
 
 <div id="panel">
   <p>
-    👆 Tocca o clicca per saltare<br>
-    ⌨️ Spazio da PC<br>
-    🚗 Evita le macchine<br>
-    ⭐ Prendi le stelle (+5)
+    👆 Tocca / clicca per saltare<br>
+    ⌨️ SPACE da PC<br>
+    🚗 Gli ostacoli NON fanno morire<br>
+    ⭐ Prendi stelle (+5)<br>
+    🎯 Arriva al Paese!
   </p>
   <button id="start">▶️ INIZIA</button>
 </div>
@@ -143,9 +144,9 @@ canvas.width = window.innerWidth < 700 ? window.innerWidth-20 : 900;
 canvas.height = 420;
 
 /* IMMAGINI */
-const bg = new Image(); bg.src = "img/paese.jpg";
+const bgBosco = new Image(); bgBosco.src = "img/bosco.jpg";
+const bgPaese = new Image(); bgPaese.src = "img/paese.jpg";
 const mario = new Image(); mario.src = "img/babbo_mario.png";
-const block = new Image(); block.src = "img/blocco.png";
 const star  = new Image(); star.src  = "img/stella.png";
 const car1  = new Image(); car1.src  = "img/car1.png";
 const car2  = new Image(); car2.src  = "img/car2.png";
@@ -157,7 +158,34 @@ let stars = [];
 let score = 0;
 let playing = false;
 let scroll = 0;
-const levelLength = 5000;
+let speed = 5;
+let hitTimer = 0;
+const levelLength = 6000;
+
+/* NEVE */
+let snowflakes = [];
+for(let i=0;i<80;i++){
+  snowflakes.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*2+1,
+    s: Math.random()*0.5+0.3
+  });
+}
+
+function drawSnow(){
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  snowflakes.forEach(f=>{
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    ctx.fill();
+    f.y += f.s;
+    if(f.y > canvas.height){
+      f.y = -5;
+      f.x = Math.random()*canvas.width;
+    }
+  });
+}
 
 /* INPUT */
 canvas.addEventListener("click", jump);
@@ -174,7 +202,7 @@ function jump(){
 
 /* SPAWN */
 function spawnObstacle(){
-  const img = Math.random() > 0.5 ? car1 : car2;
+  const img = Math.random()>0.5 ? car1 : car2;
   obstacles.push({ x: canvas.width, img });
 }
 
@@ -186,41 +214,70 @@ function spawnStar(){
 function update(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // sfondo
-  ctx.drawImage(bg, -scroll*0.3, 0, canvas.width*2, canvas.height);
+  /* SFONDO BOSCO */
+  ctx.drawImage(bgBosco, -scroll*0.4, 0, canvas.width*2, canvas.height);
 
-  // fisica
+  /* TRANSIZIONE PAESE */
+  if(scroll > levelLength - 800){
+    ctx.globalAlpha = (scroll - (levelLength - 800)) / 800;
+    ctx.drawImage(bgPaese, 0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+  }
+
+  /* FISICA */
   vy += 0.8;
   y += vy;
   if(y > 300){ y=300; vy=0; onGround=true; }
 
   ctx.drawImage(mario,80,y,70,70);
 
+  /* VELOCITÀ + RALLENTAMENTO */
+  if(hitTimer > 0){
+    speed = 2;
+    hitTimer--;
+  }else{
+    speed = 5;
+  }
+
+  /* OSTACOLI */
   obstacles.forEach(o=>{
-    o.x -= 6;
+    o.x -= speed;
     ctx.drawImage(o.img,o.x,300,70,50);
-    if(o.x < 130 && o.x+60 > 80 && y+60 > 300){
-      endGame(false);
+    if(
+      o.x < 130 &&
+      o.x + 60 > 80 &&
+      y + 60 > 300 &&
+      hitTimer === 0
+    ){
+      hitTimer = 40;
+      score = Math.max(0, score - 5);
     }
   });
 
+  /* STELLE */
   stars.forEach(s=>{
-    s.x -= 6;
+    s.x -= speed;
     ctx.drawImage(star,s.x,s.y,40,40);
-    if(s.x < 120 && s.x+30 > 80 && y < s.y+40){
+    if(s.x < 120 && s.x+40 > 80 && y < s.y+40){
       score += 5;
       s.hit = true;
     }
   });
 
-  obstacles = obstacles.filter(o=>o.x>-100);
-  stars = stars.filter(s=>!s.hit && s.x>-40);
+  obstacles = obstacles.filter(o=>o.x>-120);
+  stars = stars.filter(s=>!s.hit && s.x>-50);
+
+  /* NEVE PIÙ FORTE VICINO ALLA FINE */
+  if(scroll > levelLength - 1200){
+    snowflakes.forEach(f=>f.s = Math.min(2, f.s + 0.01));
+  }
+  drawSnow();
 
   document.getElementById("info").textContent = `⭐ ${score}`;
 
-  scroll += 6;
-  if(scroll > levelLength){
-    endGame(true);
+  scroll += speed;
+  if(scroll >= levelLength){
+    endGame();
     return;
   }
 
@@ -232,44 +289,45 @@ document.getElementById("start").onclick=()=>{
   document.getElementById("panel").style.display="none";
   canvas.style.display="block";
   document.getElementById("info").style.display="block";
-  playing=true;
+  playing = true;
 
-  setInterval(()=>playing && spawnObstacle(),1600);
-  setInterval(()=>playing && spawnStar(),2200);
+  setInterval(()=>playing&&spawnObstacle(),1600);
+  setInterval(()=>playing&&spawnStar(),2200);
 
   update();
 };
 
-/* GAME OVER / VITTORIA */
-function endGame(win){
-  playing=false;
+/* FINE */
+function endGame(){
+  playing = false;
   canvas.style.display="none";
   document.getElementById("info").style.display="none";
   document.getElementById("fine").style.display="flex";
 
   document.getElementById("finalMsg").innerHTML =
-    win ? "🎉 Sei arrivato al paese!" : "💥 Game Over";
+    "🎉 Sei arrivato al paese! Il Natale è casa.";
 
   db.ref("punteggi/giorno11").push({
-    nome: "Giocatore",
-    punti: score,
-    time: Date.now()
+    nome:"Giocatore",
+    punti:score,
+    time:Date.now()
   });
 
   db.ref("punteggi/giorno11")
     .orderByChild("punti")
     .limitToLast(10)
-    .once("value", snap=>{
+    .once("value",snap=>{
       let rows="<tr><th>Nome</th><th>Punti</th></tr>";
       let arr=[];
       snap.forEach(s=>arr.push(s.val()));
       arr.reverse().forEach(r=>{
         rows+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
       });
-      document.getElementById("classifica").innerHTML=rows;
+      document.getElementById("classifica").innerHTML = rows;
     });
 }
 </script>
 
 </body>
 </html>
+
