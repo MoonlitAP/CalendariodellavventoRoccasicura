@@ -2,332 +2,894 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<title>🎹 Giorno 12 – Piano Tiles di Natale</title>
 
-<!-- BLOCCO ZOOM iOS / ANDROID -->
-<meta name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>🎅 Giorno 12 – Babbo Mario Run</title>
-
+<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
-
 <style>
-html,body{
-  margin:0;
-  padding:0;
-  font-family:'Ubuntu',sans-serif;
-  background:#7b0412;
-  color:white;
-  text-align:center;
-  touch-action:manipulation;
-  -webkit-user-select:none;
-  user-select:none;
+
+/* ===== RESET ===== */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: "Ubuntu", sans-serif;
+    background-color: #7b0412;
+    color: #fff;
+    overflow-x: hidden;
 }
 
-h1{color:#ffd700;margin:10px 0;}
-
-canvas{
-  display:none;
-  margin:10px auto;
-  border:3px solid #ffd700;
-  border-radius:14px;
-  background:#000;
+/* ===== START SCREEN ===== */
+#start-screen {
+    text-align: center;
+    padding-top: 40px;
 }
 
-#panel{
-  background:#fffaf0;
-  color:#400;
-  border-radius:16px;
-  border:2px solid #ffd700;
-  margin:20px;
-  padding:20px;
+.titolo {
+    color: #ffd700;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
-button{
-  padding:14px 30px;
-  border-radius:30px;
-  border:none;
-  font-size:18px;
-  background:#7b0412;
-  color:white;
-  cursor:pointer;
-}
-button:hover{background:#ffd700;color:#000;}
-
-#info{
-  display:none;
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:rgba(0,0,0,.6);
-  padding:8px;
-  font-size:18px;
+.sottotitolo {
+    font-size: 20px;
+    margin-bottom: 20px;
 }
 
-#fine{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:999;
+.btn-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 70%;
+    margin: 0 auto;
 }
 
-.box{
-  background:#fffaf0;
-  color:#400;
-  border-radius:20px;
-  padding:25px;
-  width:90%;
-  max-width:500px;
-  border:2px solid #ffd700;
+.level-btn {
+    background: #b3001b;
+    border: 3px solid #ffd700;
+    color: white;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-table{
-  width:100%;
-  margin-top:15px;
+.level-btn:hover {
+    background: #d10723;
 }
-th,td{
-  padding:10px;
-  border-bottom:1px solid #d7bb5f;
+
+.note-info {
+    margin-top: 25px;
+    font-size: 14px;
+    opacity: 0.8;
 }
+
+/* ===== GAME AREA ===== */
+#game-area {
+    display: none;
+    text-align: center;
+    margin-top: 10px;
+}
+
+#hud {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.hud-item {
+    background: #b3001b;
+    padding: 6px 10px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+}
+
+/* ===== CANVAS ===== */
+#game-canvas {
+    background: #300208;
+    border: 4px solid #ffd700;
+    border-radius: 10px;
+}
+
+/* ===== GAME OVER ===== */
+#gameover-screen {
+    display: none;
+    text-align: center;
+    padding-top: 40px;
+}
+
+#gameover-screen h2 {
+    font-size: 28px;
+    color: #ffd700;
+}
+
+#final-score {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.nickname-box {
+    margin: 20px 0;
+}
+
+.nickname-box input {
+    padding: 10px;
+    width: 70%;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+}
+
+.nickname-box button,
+#restart-btn,
+#top10-btn {
+    background: #b3001b;
+    border: 3px solid #ffd700;
+    padding: 10px 16px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ===== TOP 10 ===== */
+#top10-screen {
+    display: none;
+    text-align: center;
+    padding-top: 40px;
+}
+
+#top10-screen h2 {
+    font-size: 28px;
+    color: #ffd700;
+}
+
+#classifica {
+    text-align: left;
+    width: 260px;
+    margin: 0 auto;
+    font-size: 20px;
+}
+
+#back-btn {
+    margin-top: 20px;
+    background: #b3001b;
+    padding: 12px 18px;
+    border: 3px solid #ffd700;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 450px) {
+    #game-canvas {
+        width: 90vw;
+        height: 140vw;
+    }
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>🎅 Babbo Mario Run!</h1>
+<!-- ===== START SCREEN ===== -->
+<div id="start-screen">
+    <h1 class="titolo">🎹 Giorno 12 – Piano Tiles di Natale</h1>
+    <p class="sottotitolo">Scegli la difficoltà:</p>
 
-<div id="panel">
-  <p>
-    👆 Tocca / clicca per saltare<br>
-    ⌨️ SPACE da PC<br>
-    🚗 Gli ostacoli NON fanno morire<br>
-    ⭐ Prendi stelle (+5)<br>
-    🎯 Arriva al Paese!
-  </p>
-  <button id="start">▶️ INIZIA</button>
+    <div class="btn-container">
+        <button class="level-btn" data-level="easy">FACILE</button>
+        <button class="level-btn" data-level="medium">MEDIO</button>
+        <button class="level-btn" data-level="hard">DIFFICILE</button>
+        <button class="level-btn" data-level="ultra">EXTRA VELOCE</button>
+    </div>
+
+    <p class="note-info">Sincronizzato con Castle on the Hill – Ed Sheeran</p>
 </div>
 
-<canvas id="game"></canvas>
-<div id="info"></div>
+<!-- ===== GAME AREA ===== -->
+<div id="game-area">
+    <div id="hud">
+        <div class="hud-item">❤️ Vite: <span id="vite">3</span></div>
+        <div class="hud-item">⏳ Tempo: <span id="timer">30</span>s</div>
+        <div class="hud-item">🎯 Punti: <span id="punti">0</span></div>
+    </div>
 
-<div id="fine">
-  <div class="box">
-    <h2 id="finalMsg"></h2>
-    <h3>🏆 Classifica Giorno 11</h3>
-    <table id="classifica">
-      <tr><th>Nome</th><th>Punti</th></tr>
-    </table>
-    <br>
-    <button onclick="location.reload()">🔄 Riprova</button>
-  </div>
+    <canvas id="game-canvas" width="360" height="600"></canvas>
 </div>
 
+<!-- ===== GAME OVER ===== -->
+<div id="gameover-screen">
+    <h2>GAME OVER</h2>
+    <p>Punteggio: <span id="final-score">0</span></p>
+
+    <div class="nickname-box">
+        <input type="text" id="nickname" placeholder="Inserisci il tuo nome">
+        <button id="save-score">Salva Punteggio</button>
+    </div>
+
+    <button id="restart-btn">Ricomincia</button>
+    <button id="top10-btn">Vedi Top 10</button>
+</div>
+
+<!-- ===== TOP 10 ===== -->
+<div id="top10-screen">
+    <h2>🏆 Top 10</h2>
+    <ol id="classifica"></ol>
+    <button id="back-btn">Indietro</button>
+</div>
+
+<!-- AUDIO -->
+<audio id="song" preload="auto">
+    <source src="audio/canzone.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ===== JAVASCRIPT START ===== -->
 <script>
-/* FIREBASE */
-firebase.initializeApp({
-  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
-  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
-});
+
+
+
+
+
+
+
+/* ================================
+   FIREBASE CONFIG
+================================ */
+const firebaseConfig = {
+    apiKey: "YOUR_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "XXX",
+    appId: "XXX"
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* CANVAS */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+/* ================================
+   VARIABILI PRINCIPALI
+================================ */
+let canvas = document.getElementById("game-canvas");
+let ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth < 700 ? window.innerWidth-20 : 900;
-canvas.height = 420;
+let colonne = 3;
+let tiles = [];
+let tileWidth = canvas.width / colonne;
+let tileHeight = 160;
 
-/* IMMAGINI */
-const bgBosco = new Image(); bgBosco.src = "img/bosco.jpg";
-const bgPaese = new Image(); bgPaese.src = "img/paese.jpg";
-const mario = new Image(); mario.src = "img/babbo_mario.png";
-const star  = new Image(); star.src  = "img/stella.png";
-const car1  = new Image(); car1.src  = "img/car1.png";
-const car2  = new Image(); car2.src  = "img/car2.png";
+let vite = 3;
+let punti = 0;
+let tempo = 30;
+let livelloSelezionato = null;
+let isGameRunning = false;
 
-/* STATO */
-let y = 300, vy = 0, onGround = true;
-let obstacles = [];
-let stars = [];
-let score = 0;
-let playing = false;
-let scroll = 0;
-let speed = 5;
-let hitTimer = 0;
-const levelLength = 6000;
+let beatmap = [];       // Viene caricata dal livello scelto
+let beatIndex = 0;      // Evento corrente
+let startTime = null;   // Per sincronizzare la musica
+let song = document.getElementById("song");
 
-/* NEVE */
-let snowflakes = [];
-for(let i=0;i<80;i++){
-  snowflakes.push({
-    x: Math.random()*canvas.width,
-    y: Math.random()*canvas.height,
-    r: Math.random()*2+1,
-    s: Math.random()*0.5+0.3
-  });
+let fallSpeed = 4;      // Cambia in base al livello
+let timerInterval = null;
+
+/* ================================
+   MOSTRARE / NASCONDERE SCHERMATE
+================================ */
+function showScreen(id) {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("game-area").style.display = "none";
+    document.getElementById("gameover-screen").style.display = "none";
+    document.getElementById("top10-screen").style.display = "none";
+
+    document.getElementById(id).style.display = "block";
 }
 
-function drawSnow(){
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
-  snowflakes.forEach(f=>{
-    ctx.beginPath();
-    ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-    ctx.fill();
-    f.y += f.s;
-    if(f.y > canvas.height){
-      f.y = -5;
-      f.x = Math.random()*canvas.width;
-    }
-  });
-}
+/* ================================
+   AVVIO DEL GIOCO
+================================ */
+document.querySelectorAll(".level-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        livelloSelezionato = btn.dataset.level;
 
-/* INPUT */
-canvas.addEventListener("click", jump);
-document.addEventListener("keydown", e=>{
-  if(e.code === "Space") jump();
+        if (livelloSelezionato === "easy") fallSpeed = 4;
+        if (livelloSelezionato === "medium") fallSpeed = 5.5;
+        if (livelloSelezionato === "hard") fallSpeed = 7;
+        if (livelloSelezionato === "ultra") fallSpeed = 9;
+
+        caricaBeatmap(livelloSelezionato);
+
+        startGame();
+    });
 });
 
-function jump(){
-  if(onGround){
-    vy = -14;
-    onGround = false;
-  }
+function startGame() {
+    vite = 3;
+    punti = 0;
+    tempo = 30;
+    beatIndex = 0;
+    tiles = [];
+    startTime = null;
+
+    document.getElementById("vite").textContent = vite;
+    document.getElementById("punti").textContent = punti;
+    document.getElementById("timer").textContent = tempo;
+
+    showScreen("game-area");
+
+    song.currentTime = 0;
+    song.play();
+
+    timerInterval = setInterval(() => {
+        tempo--;
+        document.getElementById("timer").textContent = tempo;
+        if (tempo <= 0) endGame();
+    }, 1000);
+
+    isGameRunning = true;
+    requestAnimationFrame(update);
 }
 
-/* SPAWN */
-function spawnObstacle(){
-  const img = Math.random()>0.5 ? car1 : car2;
-  obstacles.push({ x: canvas.width, img });
-}
-
-function spawnStar(){
-  stars.push({ x: canvas.width, y: 220 });
-}
-
-/* GAME LOOP */
-function update(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  /* SFONDO BOSCO */
-  ctx.drawImage(bgBosco, -scroll*0.4, 0, canvas.width*2, canvas.height);
-
-  /* TRANSIZIONE PAESE */
-  if(scroll > levelLength - 800){
-    ctx.globalAlpha = (scroll - (levelLength - 800)) / 800;
-    ctx.drawImage(bgPaese, 0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha = 1;
-  }
-
-  /* FISICA */
-  vy += 0.8;
-  y += vy;
-  if(y > 300){ y=300; vy=0; onGround=true; }
-
-  ctx.drawImage(mario,80,y,70,70);
-
-  /* VELOCITÀ + RALLENTAMENTO */
-  if(hitTimer > 0){
-    speed = 2;
-    hitTimer--;
-  }else{
-    speed = 5;
-  }
-
-  /* OSTACOLI */
-  obstacles.forEach(o=>{
-    o.x -= speed;
-    ctx.drawImage(o.img,o.x,300,70,50);
-    if(
-      o.x < 130 &&
-      o.x + 60 > 80 &&
-      y + 60 > 300 &&
-      hitTimer === 0
-    ){
-      hitTimer = 40;
-      score = Math.max(0, score - 5);
-    }
-  });
-
-  /* STELLE */
-  stars.forEach(s=>{
-    s.x -= speed;
-    ctx.drawImage(star,s.x,s.y,40,40);
-    if(s.x < 120 && s.x+40 > 80 && y < s.y+40){
-      score += 5;
-      s.hit = true;
-    }
-  });
-
-  obstacles = obstacles.filter(o=>o.x>-120);
-  stars = stars.filter(s=>!s.hit && s.x>-50);
-
-  /* NEVE PIÙ FORTE VICINO ALLA FINE */
-  if(scroll > levelLength - 1200){
-    snowflakes.forEach(f=>f.s = Math.min(2, f.s + 0.01));
-  }
-  drawSnow();
-
-  document.getElementById("info").textContent = `⭐ ${score}`;
-
-  scroll += speed;
-  if(scroll >= levelLength){
-    endGame();
-    return;
-  }
-
-  if(playing) requestAnimationFrame(update);
-}
-
-/* START */
-document.getElementById("start").onclick=()=>{
-  document.getElementById("panel").style.display="none";
-  canvas.style.display="block";
-  document.getElementById("info").style.display="block";
-  playing = true;
-
-  setInterval(()=>playing&&spawnObstacle(),1600);
-  setInterval(()=>playing&&spawnStar(),2200);
-
-  update();
-};
-
-/* FINE */
-function endGame(){
-  playing = false;
-  canvas.style.display="none";
-  document.getElementById("info").style.display="none";
-  document.getElementById("fine").style.display="flex";
-
-  document.getElementById("finalMsg").innerHTML =
-    "🎉 Sei arrivato al paese! Il Natale è casa.";
-
-  db.ref("punteggi/giorno11").push({
-    nome:"Giocatore",
-    punti:score,
-    time:Date.now()
-  });
-
-  db.ref("punteggi/giorno11")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value",snap=>{
-      let rows="<tr><th>Nome</th><th>Punti</th></tr>";
-      let arr=[];
-      snap.forEach(s=>arr.push(s.val()));
-      arr.reverse().forEach(r=>{
-        rows+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
-      });
-      document.getElementById("classifica").innerHTML = rows;
+/* ================================
+   CREA UNA NUOVA TILE
+================================ */
+function creaTile(col) {
+    tiles.push({
+        x: col * tileWidth,
+        y: -tileHeight,
+        tapped: false
     });
 }
-</script>
 
+/* ================================
+   UPDATE PRINCIPALE
+================================ */
+function update(timestamp) {
+
+    if (!startTime) startTime = timestamp;
+    let elapsed = (timestamp - startTime) / 1000; // in secondi
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    /* EVENTI DELLA BEATMAP BASATI SUL TEMPO */
+    while (beatIndex < beatmap.length && beatmap[beatIndex].time <= elapsed) {
+        createBeatEvent(beatmap[beatIndex]);
+        beatIndex++;
+    }
+
+    /* DISEGNARE LE TILE */
+    for (let i = 0; i < tiles.length; i++) {
+        let t = tiles[i];
+        t.y += fallSpeed;
+
+        // Disegno piastrella rosso/oro
+        ctx.fillStyle = "#b3001b";
+        ctx.fillRect(t.x, t.y, tileWidth, tileHeight);
+
+        ctx.strokeStyle = "#ffd700";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(t.x, t.y, tileWidth, tileHeight);
+
+        // TOCCO A TERRA NON TAPPATO → PERDI VITA
+        if (!t.tapped && t.y > canvas.height) {
+            vite--;
+            document.getElementById("vite").textContent = vite;
+            tiles.splice(i, 1);
+            i--;
+
+            if (vite <= 0) {
+                endGame();
+                return;
+            }
+        }
+    }
+
+    if (isGameRunning) requestAnimationFrame(update);
+}
+
+/* ================================
+   CREAZIONE DI EVENTI DELLA BEATMAP
+================================ */
+function createBeatEvent(evt) {
+    for (let col of evt.cols) {
+        creaTile(col);
+    }
+}
+
+/* ================================
+   TAP SULLE TILE
+================================ */
+canvas.addEventListener("click", (e) => {
+
+    let rect = canvas.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+
+    for (let i = 0; i < tiles.length; i++) {
+        let t = tiles[i];
+
+        if (!t.tapped &&
+            x >= t.x && x <= t.x + tileWidth &&
+            y >= t.y && y <= t.y + tileHeight) {
+
+            t.tapped = true;
+            punti++;
+            document.getElementById("punti").textContent = punti;
+
+            tiles.splice(i, 1);
+            break;
+        }
+    }
+});
+
+/* ================================
+   FINE DEL GIOCO
+================================ */
+function endGame() {
+    isGameRunning = false;
+    song.pause();
+    clearInterval(timerInterval);
+
+    document.getElementById("final-score").textContent = punti;
+
+    showScreen("gameover-screen");
+}
+
+/* ================================
+   SALVATAGGIO IN FIREBASE
+================================ */
+document.getElementById("save-score").addEventListener("click", () => {
+    let name = document.getElementById("nickname").value.trim();
+    if (name === "") return;
+
+    db.ref("giorno12").push({
+        nickname: name,
+        punti: punti
+    });
+
+    alert("Punteggio salvato!");
+});
+
+/* ================================
+   MOSTRARE TOP 10
+================================ */
+document.getElementById("top10-btn").addEventListener("click", () => {
+    showScreen("top10-screen");
+
+    db.ref("giorno12")
+        .orderByChild("punti")
+        .limitToLast(10)
+        .once("value", snap => {
+            let arr = [];
+            snap.forEach(s => arr.push(s.val()));
+            arr.reverse();
+
+            let lista = document.getElementById("classifica");
+            lista.innerHTML = "";
+
+            arr.forEach(p => {
+                let li = document.createElement("li");
+                li.textContent = p.nickname + " — " + p.punti;
+                lista.appendChild(li);
+            });
+        });
+});
+
+document.getElementById("back-btn").addEventListener("click", () => {
+    showScreen("gameover-screen");
+});
+
+/* ================================
+   RICOMINCIA
+================================ */
+document.getElementById("restart-btn").addEventListener("click", () => {
+    location.reload();
+});
+
+/* ================================
+   FUNZIONE CHE CARICA LA BEATMAP
+   (LE BEATMAP ARRIVERANNO NELLE PROSSIME PARTI)
+================================ */
+function caricaBeatmap(level) {
+    if (level === "easy") beatmap = beatmap_easy;
+    if (level === "medium") beatmap = beatmap_medium;
+    if (level === "hard") beatmap = beatmap_hard;
+    if (level === "ultra") beatmap = beatmap_ultra;
+}
+
+
+
+
+
+
+
+
+/* ==========================================
+      BEATMAP FACILE – alternato morbido
+      (1 tile per beat, nessun doppio)
+========================================== */
+
+let beatmap_easy = [];
+
+/* Funzione generica per costruire pattern */
+function aggiungiAlternato(inizio, fine, bpm) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let seq = [0,1,2,1]; // colonne: 1→2→3→2 (0-based)
+
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_easy.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [seq[index]]
+        });
+
+        t += beatTime;
+        index = (index + 1) % seq.length;
+    }
+}
+
+/* ============ STRUTTURA CANZONE ============ */
+/*
+Castle on the Hill – schema approssimato:
+0:00 – 0:15  intro
+0:15 – 0:45  strofa 1
+0:45 – 1:15  pre-chorus
+1:15 – 1:45  ritornello
+1:45 – 2:15  strofa 2
+2:15 – 2:45  pre-chorus
+2:45 – 3:15  ritornello
+3:15 – 3:45  bridge
+3:45 – 4:00  ritornello finale
+*/
+
+let BPM_easy = 135;
+
+/* Intro */
+aggiungiAlternato(0.00, 15.00, BPM_easy);
+
+/* Strofa 1 */
+aggiungiAlternato(15.00, 45.00, BPM_easy);
+
+/* Pre-chorus */
+aggiungiAlternato(45.00, 75.00, BPM_easy);
+
+/* Ritornello 1 */
+aggiungiAlternato(75.00, 105.00, BPM_easy);
+
+/* Strofa 2 */
+aggiungiAlternato(105.00, 135.00, BPM_easy);
+
+/* Pre-chorus 2 */
+aggiungiAlternato(135.00, 165.00, BPM_easy);
+
+/* Ritornello 2 */
+aggiungiAlternato(165.00, 195.00, BPM_easy);
+
+/* Bridge */
+aggiungiAlternato(195.00, 225.00, BPM_easy);
+
+/* Ritornello finale */
+aggiungiAlternato(225.00, 240.00, BPM_easy);
+
+
+
+
+
+
+
+/* ==========================================
+      BEATMAP MEDIO – dinamico 1–2 per beat
+========================================== */
+
+let beatmap_medium = [];
+
+/* Pattern generator BASE (una tile) */
+function aggiungiSingolo(inizio, fine, bpm, seq=[0,1,2,1]) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_medium.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [seq[index]]
+        });
+
+        t += beatTime;
+        index = (index + 1) % seq.length;
+    }
+}
+
+/* Pattern generator con DOPPI */
+function aggiungiDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_medium.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: seq[index]
+        });
+
+        t += beatTime;
+        index = (index + 1) % seq.length;
+    }
+}
+
+/* ====== STRUTTURA CANZONE MEDIUM ====== */
+
+let BPM_med = 135;
+
+/* INTRO — solo singoli */
+aggiungiSingolo(0.00, 15.00, BPM_med);
+
+/* STROFA 1 — singolo con qualche doppio leggero */
+aggiungiSingolo(15.00, 30.00, BPM_med);
+aggiungiDoppio(30.00, 45.00, BPM_med);
+
+/* PRE-CHORUS — aumenta ritmo, mix singoli + doppi */
+aggiungiDoppio(45.00, 60.00, BPM_med);
+aggiungiSingolo(60.00, 75.00, BPM_med);
+
+/* RITORNELLO 1 — parte più dinamica */
+aggiungiDoppio(75.00, 90.00, BPM_med);
+aggiungiSingolo(90.00, 105.00, BPM_med);
+
+/* STROFA 2 — ritorna più leggero */
+aggiungiSingolo(105.00, 120.00, BPM_med);
+aggiungiDoppio(120.00, 135.00, BPM_med);
+
+/* PRE-CHORUS 2 — di nuovo ritmo crescente */
+aggiungiDoppio(135.00, 150.00, BPM_med);
+aggiungiSingolo(150.00, 165.00, BPM_med);
+
+/* RITORNELLO 2 — sezione forte */
+aggiungiDoppio(165.00, 180.00, BPM_med);
+aggiungiSingolo(180.00, 195.00, BPM_med);
+
+/* BRIDGE — rilassamento */
+aggiungiSingolo(195.00, 210.00, BPM_med);
+aggiungiDoppio(210.00, 225.00, BPM_med);
+
+/* RITORNELLO FINALE */
+aggiungiDoppio(225.00, 240.00, BPM_med);
+
+
+
+
+
+
+/* ==========================================
+      BEATMAP DIFFICILE – stile Magic Tiles Hard
+      1–2–3 tiles per beat, tripli nei ritornelli
+========================================== */
+
+let beatmap_hard = [];
+
+/* === GENERATORI DI PATTERN === */
+
+/* Pattern singolo veloce */
+function hardSingolo(inizio, fine, bpm, seq=[0,2,1,2]) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_hard.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [seq[index]]
+        });
+        index = (index + 1) % seq.length;
+        t += beatTime;
+    }
+}
+
+/* Pattern doppi energici */
+function hardDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_hard.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: seq[index]
+        });
+        index = (index + 1) % seq.length;
+        t += beatTime;
+    }
+}
+
+/* Pattern triplo per ritornelli (hard mode) */
+function hardTriplo(inizio, fine, bpm) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+
+    while (t <= fine) {
+        beatmap_hard.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [0,1,2]   // tutte e 3 le colonne
+        });
+        t += beatTime;
+    }
+}
+
+/* === STRUTTURA CANZONE HARD === */
+
+let BPM_hard = 135;
+
+/* INTRO – singolo tecnico */
+hardSingolo(0.00, 15.00, BPM_hard);
+
+/* STROFA 1 – singolo + qualche doppio */
+hardSingolo(15.00, 30.00, BPM_hard);
+hardDoppio(30.00, 45.00, BPM_hard);
+
+/* PRE-CHORUS – ritmo aumenta (doppi continui) */
+hardDoppio(45.00, 60.00, BPM_hard);
+
+/* RITORNELLO 1 – TRIPLI !!! */
+hardTriplo(60.00, 75.00, BPM_hard);
+
+/* RITORNO A SINGOLI/DOPPI */
+hardSingolo(75.00, 90.00, BPM_hard);
+hardDoppio(90.00, 105.00, BPM_hard);
+
+/* STROFA 2 – stessa logica */
+hardSingolo(105.00, 120.00, BPM_hard);
+hardDoppio(120.00, 135.00, BPM_hard);
+
+/* PRE-CHORUS 2 – doppi veloci */
+hardDoppio(135.00, 150.00, BPM_hard);
+
+/* RITORNELLO 2 – TRIPLI intensi */
+hardTriplo(150.00, 165.00, BPM_hard);
+
+/* MID-RITORNELLO – mix triplo + doppio */
+hardDoppio(165.00, 180.00, BPM_hard);
+hardTriplo(180.00, 195.00, BPM_hard);
+
+/* BRIDGE – singolo rilassato */
+hardSingolo(195.00, 210.00, BPM_hard);
+
+/* BUILD-UP – doppi crescenti */
+hardDoppio(210.00, 225.00, BPM_hard);
+
+/* RITORNELLO FINALE – TRIPLI FULL POWER */
+hardTriplo(225.00, 240.00, BPM_hard);
+
+
+
+/* ==========================================
+      BEATMAP ULTRA – EXPERT MODE
+      1–2–3 tiles, eventi ogni 1/2 beat
+========================================== */
+
+let beatmap_ultra = [];
+
+/* === GENERATORI ULTRA === */
+
+/* Singolo molto rapido (1 per beat) */
+function ultraSingolo(inizio, fine, bpm, seq=[0,2,1,2,0,1]) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_ultra.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [seq[index]]
+        });
+        index = (index + 1) % seq.length;
+        t += beatTime;
+    }
+}
+
+/* Singolo doppio (1 ogni 1/2 beat) */
+function ultraMezzoBeat(inizio, fine, bpm, seq=[0,1,2,1,0,2]) {
+    let beatTime = 60 / bpm / 2;  // mezzo beat
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_ultra.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [seq[index]]
+        });
+        index = (index + 1) % seq.length;
+        t += beatTime;
+    }
+}
+
+/* Doppi rapidi */
+function ultraDoppio(inizio, fine, bpm, seq=[[0,1],[1,2],[2,1],[1,0]]) {
+    let beatTime = 60 / bpm;
+    let t = inizio;
+    let index = 0;
+
+    while (t <= fine) {
+        beatmap_ultra.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: seq[index]
+        });
+        index = (index + 1) % seq.length;
+        t += beatTime;
+    }
+}
+
+/* Tripli (usati nei ritornelli) */
+function ultraTriplo(inizio, fine, bpm) {
+    let beatTime = 60 / bpm / 1.5; // leggermente più frequente
+    let t = inizio;
+
+    while (t <= fine) {
+        beatmap_ultra.push({
+            time: parseFloat(t.toFixed(3)),
+            cols: [0,1,2]
+        });
+        t += beatTime;
+    }
+}
+
+/* ==========================================
+   STRUTTURA CANZONE — LIVELLO ULTRA
+========================================== */
+
+let BPM_ultra = 135;
+
+/* INTRO — Mezzo beat già subito */
+ultraMezzoBeat(0.00, 15.00, BPM_ultra);
+
+/* STROFA 1 — alternanza veloce */
+ultraSingolo(15.00, 30.00, BPM_ultra);
+ultraDoppio(30.00, 45.00, BPM_ultra);
+
+/* PRE-CHORUS — mezzo beat */
+ultraMezzoBeat(45.00, 60.00, BPM_ultra);
+
+/* RITORNELLO 1 — TRIPLO + MEZZO BEAT */
+ultraTriplo(60.00, 75.00, BPM_ultra);
+
+/* SEZIONE MIXATA */
+ultraDoppio(75.00, 90.00, BPM_ultra);
+ultraMezzoBeat(90.00, 105.00, BPM_ultra);
+
+/* STROFA 2 — singoli veloci */
+ultraSingolo(105.00, 120.00, BPM_ultra);
+ultraDoppio(120.00, 135.00, BPM_ultra);
+
+/* PRE-CHORUS 2 — mezzo beat pieno */
+ultraMezzoBeat(135.00, 150.00, BPM_ultra);
+
+/* RITORNELLO 2 — TRIPLI HARD */
+ultraTriplo(150.00, 165.00, BPM_ultra);
+
+/* MID SECTION — combinazioni */
+ultraDoppio(165.00, 180.00, BPM_ultra);
+ultraMezzoBeat(180.00, 195.00, BPM_ultra);
+
+/* BRIDGE — ritmo rallenta un attimo */
+ultraSingolo(195.00, 210.00, BPM_ultra);
+
+/* BUILD-UP — mezzo beat intenso */
+ultraMezzoBeat(210.00, 225.00, BPM_ultra);
+
+/* RITORNELLO FINALE — TRIPLO CONTINUO */
+ultraTriplo(225.00, 240.00, BPM_ultra);
+
+
+
+</script>
 </body>
 </html>
-
