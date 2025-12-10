@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>🎅 Giorno 11 – Babbo Mario Run</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:#fff;
+  text-align:center;
+  touch-action: manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+h1{color:#ffd700;margin:10px 0;}
+
+canvas{
+  display:none;
+  margin:0 auto;
+  background:url("img/paese.jpg") repeat-x;
+  background-size:cover;
+  border:3px solid #ffd700;
+  border-radius:14px;
+}
+
+#panel{
+  background:#fffaf0;
+  color:#400;
+  border-radius:16px;
+  border:2px solid #ffd700;
+  margin:20px;
+  padding:20px;
+}
+
+button{
+  padding:14px 30px;
+  border-radius:30px;
+  border:none;
+  font-size:18px;
+  background:#7b0412;
+  color:white;
+  cursor:pointer;
+}
+button:hover{background:#ffd700;color:#000;}
+
+#info{
+  display:none;
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:rgba(0,0,0,.6);
+  padding:10px;
+  font-size:18px;
+}
+
+#fine{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.box{
+  background:#fffaf0;
+  color:#400;
+  border-radius:20px;
+  padding:25px;
+  width:90%;
+  max-width:480px;
+  border:2px solid #ffd700;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎅 Babbo Mario Run</h1>
+
+<div id="panel">
+  <p>
+    👆 Tocca / SPAZIO per saltare<br>
+    ⭐ Stelle +5 punti<br>
+    ❌ Evita le macchine<br>
+    🏰 Arriva al castello per vincere
+  </p>
+  <button id="start">▶️ INIZIA</button>
+</div>
+
+<canvas id="game"></canvas>
+<div id="info"></div>
+
+<div id="fine">
+  <div class="box">
+    <h2 id="finalMsg"></h2>
+    <h3>🏆 Classifica Giorno 11</h3>
+    <table id="leader" style="width:100%"></table><br>
+    <button onclick="location.reload()">🔄 Riprova</button>
+  </div>
+</div>
+
+<script>
+/* ========= FIREBASE ========= */
+firebase.initializeApp({
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
+});
+const db = firebase.database();
+
+/* ========= CANVAS ========= */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth < 720 ? window.innerWidth : 960;
+canvas.height = 380;
+
+/* ========= IMMAGINI ========= */
+const mario = new Image(); mario.src="img/babbo_mario.png";
+const car1  = new Image(); car1.src="img/auto1.png";
+const car2  = new Image(); car2.src="img/auto2.png";
+const excav = new Image(); excav.src="img/escavatore.png";
+const starI = new Image(); starI.src="img/stella.png";
+const castle= new Image(); castle.src="img/castello.png";
+
+/* ========= PLAYER ========= */
+let y=260, vy=0, onGround=true;
+
+/* ========= LIVELLO ========= */
+let scroll=0, score=0, playing=false;
+const levelLength = 9000;
+
+const obstacles = [
+  {x:600, img:car1},
+  {x:1200, img:car2},
+  {x:1700, img:excav},
+  {x:2600, img:car1},
+  {x:3200, img:car2},
+  {x:4000, img:excav}
+];
+
+const stars = [
+  {x:800,y:200},{x:1500,y:180},{x:2800,y:180},{x:5000,y:160}
+];
+
+function jump(){
+  if(onGround){
+    vy=-14;
+    onGround=false;
+  }
+}
+
+/* ========= INPUT ========= */
+canvas.onclick = jump;
+document.onkeydown = e=>{ if(e.code==="Space") jump(); };
+
+/* ========= UPDATE ========= */
+function update(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  scroll+=4;
+
+  vy+=0.8;
+  y+=vy;
+  if(y>260){y=260;vy=0;onGround=true;}
+
+  ctx.drawImage(mario,120,y,64,64);
+
+  obstacles.forEach(o=>{
+    const ox=o.x-scroll;
+    if(ox<-100) return;
+    ctx.drawImage(o.img,ox,270,70,50);
+
+    if(ox<160 && ox+50>120 && y+60>270){
+      endGame(false);
+    }
+  });
+
+  stars.forEach(s=>{
+    const sx=s.x-scroll;
+    if(s.collected||sx<-50) return;
+    ctx.drawImage(starI,sx,s.y,40,40);
+    if(sx<160 && sx+30>120 && y+40>s.y){
+      score+=5; s.collected=true;
+    }
+  });
+
+  if(scroll>levelLength-400){
+    ctx.drawImage(castle,canvas.width-240,180,180,180);
+    if(scroll>levelLength){
+      endGame(true);
+      return;
+    }
+  }
+
+  document.getElementById("info").textContent=`⭐ ${score}`;
+
+  if(playing) requestAnimationFrame(update);
+}
+
+/* ========= END ========= */
+function endGame(win){
+  playing=false;
+  canvas.style.display="none";
+  document.getElementById("info").style.display="none";
+  document.getElementById("fine").style.display="flex";
+
+  document.getElementById("finalMsg").innerHTML=
+    win ? "🏰 Hai raggiunto il castello!" : "💥 Game Over";
+
+  const name="Giocatore";
+  db.ref("punteggi/giorno11").push({
+    nome:name,punti:score,time:Date.now()
+  });
+
+  db.ref("punteggi/giorno11").orderByChild("punti")
+    .limitToLast(10).once("value",snap=>{
+      let h="<tr><th>Nome</th><th>Punti</th></tr>";
+      let a=[];
+      snap.forEach(s=>a.push(s.val()));
+      a.reverse().forEach(r=>{
+        h+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+      });
+      document.getElementById("leader").innerHTML=h;
+    });
+}
+
+/* ========= START ========= */
+document.getElementById("start").onclick=()=>{
+  document.getElementById("panel").style.display="none";
+  canvas.style.display="block";
+  document.getElementById("info").style.display="block";
+  playing=true;
+  update();
+};
+</script>
+
+</body>
+</html>
