@@ -9,6 +9,7 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 <title>🎅 Giorno 11 – Babbo Mario Run</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
@@ -16,35 +17,17 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 html,body{
   margin:0;
   padding:0;
-  font-family:'Ubuntu',sans-serif;
-  background:#7b0412;
-  color:white;
-  text-align:center;
   touch-action:manipulation;
   -webkit-user-select:none;
   user-select:none;
   overscroll-behavior:none;
-}
-h1{color:#ffd700;margin:10px 0;}
-
-canvas{
-  width:100%;
-  max-width:900px;
-  height:300px;
-  border:3px solid #ffd700;
-  border-radius:14px;
-  display:none;
-  margin:10px auto;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
 }
 
-#panel{
-  background:#fffaf0;
-  color:#400;
-  border-radius:18px;
-  border:2px solid #ffd700;
-  margin:20px;
-  padding:20px;
-}
+h1{color:#ffd700;}
 
 button{
   padding:14px 30px;
@@ -57,12 +40,33 @@ button{
 }
 button:hover{background:#ffd700;color:#000;}
 
+#panel{
+  margin:20px;
+  background:#fffaf0;
+  color:#400;
+  border-radius:20px;
+  border:2px solid #ffd700;
+  padding:20px;
+}
+
+canvas{
+  display:none;
+  width:100%;
+  max-width:900px;
+  height:300px;
+  background:url("img/bosco.jpg") repeat-x;
+  background-size:cover;
+  border:3px solid #ffd700;
+  border-radius:16px;
+  margin:auto;
+}
+
 #info{
   display:none;
   position:fixed;
   bottom:0;
   width:100%;
-  background:rgba(0,0,0,.6);
+  background:rgba(0,0,0,.7);
   padding:8px;
   font-size:18px;
 }
@@ -74,34 +78,43 @@ button:hover{background:#ffd700;color:#000;}
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:999;
+  z-index:9999;
 }
+
 .box{
   background:#fffaf0;
   color:#400;
   border-radius:20px;
   padding:25px;
   width:90%;
-  max-width:480px;
+  max-width:500px;
   border:2px solid #ffd700;
 }
-table{width:100%;margin-top:10px;}
-th,td{padding:8px;border-bottom:1px solid #d7bb5f;}
+
+table{
+  width:100%;
+  margin-top:10px;
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #d7bb5f;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎅 Babbo Mario Run!</h1>
+<h1>🎅 Babbo Mario Run</h1>
 
 <div id="panel">
-<p>
-👆 Tocca per saltare<br>
-⭐ Stella +10<br>
-🎁 Regalo +50<br>
-🏁 Arriva al paese
-</p>
-<button id="start">▶️ INIZIA</button>
+  <p>
+    👆 Tocca per saltare<br>
+    ⭐ Stella +10<br>
+    🎁 Regalo +50<br>
+    🚩 Arriva alla bandiera!
+  </p>
+  <button id="start">▶️ INIZIA</button><br><br>
+  <button id="openScore">🏆 CLASSIFICA</button>
 </div>
 
 <canvas id="game"></canvas>
@@ -109,105 +122,83 @@ th,td{padding:8px;border-bottom:1px solid #d7bb5f;}
 
 <div id="fine">
   <div class="box">
-    <h2 id="msgFinale"></h2>
+    <h2>🎉 Sei arrivato al paese!</h2>
+    <h3 id="finalScore"></h3>
+
     <h3>🏆 Classifica Giorno 11</h3>
     <table id="tabella"></table>
+
     <br>
     <button onclick="location.reload()">🔄 Riprova</button>
+    <a href="../calendario.html">
+      <button>⬅ Calendario</button>
+    </a>
   </div>
 </div>
 
 <script>
-/* FIREBASE */
 firebase.initializeApp({
-  apiKey:"AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
-  databaseURL:"https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app"
 });
 const db = firebase.database();
 
-const user="Giocatore"+Math.floor(Math.random()*999);
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth < 900 ? window.innerWidth : 900;
+canvas.height = 300;
 
-/* CANVAS */
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth<900?window.innerWidth:900;
-canvas.height=300;
+const mario = new Image(); mario.src="img/babbo_mario.png";
+const block = new Image(); block.src="img/blocco.png";
+const star  = new Image(); star.src="img/stella.png";
+const gift  = new Image(); gift.src="img/gift.png";
+const flag  = new Image(); flag.src="img/bandiera.png";
 
-/* IMMAGINI */
-const mario=new Image(); mario.src="img/babbo_mario.png";
-const block=new Image(); block.src="img/blocco.png";
-const star=new Image(); star.src="img/stella.png";
-const gift=new Image(); gift.src="img/gift.png";
-const bgBosco=new Image(); bgBosco.src="img/bosco.jpg";
-const bgPaese=new Image(); bgPaese.src="img/paese.jpg";
-
-/* STATO */
-let mY=200, vy=0, onGround=true;
-let blocks=[], stars=[], gifts=[], particles=[];
+let y=200, vy=0, onGround=true;
+let stars=[], gifts=[], blocks=[];
 let score=0, playing=false;
-let scroll=0;
-const SPEED=4;
-const LEVEL=6000;
+let distance=0, finished=false;
 
-/* CONTROLLI */
+const SPEED = window.innerWidth < 700 ? 3 : 4;
+const FINISH_DISTANCE = 4000;
+
 function jump(){
   if(onGround){
-    vy=-13;
+    vy=-12;
     onGround=false;
   }
 }
-canvas.addEventListener("click",jump);
-window.addEventListener("keydown",e=>{
-  if(e.code==="Space"||e.code==="ArrowUp") jump();
-});
 
-/* PARTICELLE REGALO */
-function giftEffect(x,y){
-  for(let i=0;i<16;i++){
-    particles.push({
-      x,y,
-      vx:(Math.random()*4-2),
-      vy:(Math.random()*4-3),
-      a:1,
-      s:Math.random()*4+4
-    });
+canvas.onclick = jump;
+window.onkeydown = e=>{
+  if(e.code==="Space" || e.code==="ArrowUp") jump();
+};
+window.oncontextmenu = e=>{
+  e.preventDefault();
+  jump();
+};
+
+function spawn(){
+  if(distance < FINISH_DISTANCE-400){
+    if(Math.random()<0.3) stars.push({x:canvas.width,y:150});
+    if(Math.random()<0.15) gifts.push({x:canvas.width,y:130});
+    if(Math.random()<0.4) blocks.push({x:canvas.width,y:230});
   }
-  particles.push({text:"+50",x,y,a:1,vy:-1.2});
 }
 
-/* SPAWN */
-function spawnBlock(){blocks.push({x:canvas.width,y:230});}
-function spawnStar(){stars.push({x:canvas.width,y:150});}
-function spawnGift(){gifts.push({x:canvas.width,y:170});}
-
-/* LOOP */
 function update(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.drawImage(bgBosco,-scroll*0.4,0,canvas.width*2,canvas.height);
-  if(scroll>LEVEL-1200){
-    ctx.globalAlpha=(scroll-(LEVEL-1200))/1200;
-    ctx.drawImage(bgPaese,0,0,canvas.width,canvas.height);
-    ctx.globalAlpha=1;
-  }
+  vy+=0.6;
+  y+=vy;
+  if(y>200){y=200;vy=0;onGround=true;}
 
-  vy+=0.5; mY+=vy;
-  if(mY>200){mY=200;vy=0;onGround=true;}
-
-  ctx.drawImage(mario,70,mY,70,70);
-
-  blocks.forEach(b=>{
-    b.x-=SPEED;
-    ctx.drawImage(block,b.x,b.y,60,60);
-    if(b.x<120&&b.x+50>70&&mY+60>b.y){
-      scroll-=40;
-    }
-  });
+  ctx.drawImage(mario,70,y,70,70);
 
   stars.forEach(s=>{
     s.x-=SPEED;
     ctx.drawImage(star,s.x,s.y,40,40);
-    if(s.x<120&&s.x+30>70&&mY+40>s.y){
+    if(s.x<130 && s.x+30>70 && y+40>s.y){
       score+=10;
       s.hit=true;
     }
@@ -215,86 +206,82 @@ function update(){
 
   gifts.forEach(g=>{
     g.x-=SPEED;
-    ctx.drawImage(gift,g.x,g.y,42,42);
-    if(g.x<120&&g.x+35>70&&mY+40>g.y){
+    ctx.drawImage(gift,g.x,g.y,40,40);
+    if(g.x<130 && g.x+30>70 && y+40>g.y){
       score+=50;
-      giftEffect(g.x+20,g.y+20);
       g.hit=true;
     }
   });
 
-  particles.forEach(p=>{
-    ctx.globalAlpha=p.a;
-    if(p.text){
-      ctx.fillStyle="#ffd700";
-      ctx.font="bold 22px Ubuntu";
-      ctx.fillText(p.text,p.x,p.y);
-      p.y+=p.vy; p.a-=0.03;
-    }else{
-      ctx.fillStyle="#ffd700";
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
-      ctx.fill();
-      p.x+=p.vx; p.y+=p.vy; p.a-=0.04;
-    }
-    ctx.globalAlpha=1;
+  blocks.forEach(b=>{
+    b.x-=SPEED;
+    ctx.drawImage(block,b.x,b.y,60,60);
   });
 
+  stars=stars.filter(s=>!s.hit && s.x>-50);
+  gifts=gifts.filter(g=>!g.hit && g.x>-50);
   blocks=blocks.filter(b=>b.x>-80);
-  stars=stars.filter(s=>!s.hit&&s.x>-40);
-  gifts=gifts.filter(g=>!g.hit&&g.x>-40);
-  particles=particles.filter(p=>p.a>0);
 
+  distance+=SPEED;
   document.getElementById("info").textContent=`⭐ ${score}`;
-  scroll+=SPEED;
 
-  if(scroll>=LEVEL){endGame();return;}
-  playing&&requestAnimationFrame(update);
+  if(distance > FINISH_DISTANCE && !finished){
+    finished=true;
+  }
+
+  if(finished){
+    ctx.drawImage(flag, canvas.width-120,180,60,80);
+    if(canvas.width-120 < 140){
+      endGame();
+      return;
+    }
+  }
+
+  playing && requestAnimationFrame(update);
 }
 
-/* FINE */
 function endGame(){
   playing=false;
-  document.getElementById("game").style.display="none";
+  canvas.style.display="none";
   document.getElementById("info").style.display="none";
   document.getElementById("fine").style.display="flex";
-  document.getElementById("msgFinale").innerHTML=
-    `🎉 Sei arrivato al paese!<br>⭐ Punti: <b>${score}</b>`;
+  document.getElementById("finalScore").innerHTML=`⭐ Punti: <b>${score}</b>`;
+
+  const nome = (localStorage.getItem("utente")||"Ospite")[0]+Math.floor(Math.random()*900+100);
 
   db.ref("punteggi/giorno11").push({
-    nome:user,
-    punti:score,
+    nome:nome,
+    punti:Number(score),
     t:Date.now()
   }).then(loadTop10);
 }
 
 function loadTop10(){
-  const tab=document.getElementById("tabella");
-  tab.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
-  db.ref("punteggi/giorno11")
-   .orderByChild("punti").limitToLast(10)
-   .once("value",snap=>{
-     let a=[];
-     snap.forEach(s=>a.push(s.val()));
-     a.sort((x,y)=>y.punti-x.punti);
-     a.forEach(r=>{
-       tab.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
-     });
-   });
+  const t=document.getElementById("tabella");
+  t.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+  db.ref("punteggi/giorno11").once("value",snap=>{
+    let a=[];
+    snap.forEach(c=>a.push(c.val()));
+    a.sort((x,y)=>y.punti-x.punti);
+    a.slice(0,10).forEach(r=>{
+      t.innerHTML+=`<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+    });
+  });
 }
 
-/* START */
 document.getElementById("start").onclick=()=>{
   document.getElementById("panel").style.display="none";
   canvas.style.display="block";
   document.getElementById("info").style.display="block";
   playing=true;
-
-  setInterval(()=>playing&&spawnBlock(),1600);
-  setInterval(()=>playing&&spawnStar(),2000);
-  setInterval(()=>playing&&spawnGift(),3500);
-
+  setInterval(()=>playing&&spawn(),1400);
   update();
+};
+
+document.getElementById("openScore").onclick=()=>{
+  document.getElementById("panel").style.display="none";
+  document.getElementById("fine").style.display="flex";
+  loadTop10();
 };
 </script>
 
