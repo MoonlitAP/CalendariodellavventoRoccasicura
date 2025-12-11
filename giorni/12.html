@@ -7,112 +7,165 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
+/* ============================================
+   SFONDO GENERALE
+============================================ */
 body {
-  margin: 0;
-  padding: 0;
-  font-family: "Ubuntu", sans-serif;
-  color: #fff;
-  text-align: center;
-  background: #000 url("img/piano_roccasicura.jpg") center/cover no-repeat fixed;
+  margin: 0;
+  padding: 0;
+  font-family: "Ubuntu", sans-serif;
+  color: #fff;
+  text-align: center;
+  background: #7b0412 url("img/piano_roccasicura.jpg") center/cover no-repeat fixed;
+  background-blend-mode: darken;
+  overflow-x: hidden;
 }
 
+/* ============================================
+   TITOLO
+============================================ */
 h1 {
-  margin-top: 10px;
-  color: #ffd700;
-  text-shadow: 2px 2px 5px #000;
+  margin-top: 12px;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px #000;
+  font-size: 1.9em;
 }
 
-canvas {
-  display: none;
-  margin: 20px auto;
-  background: rgba(0,0,0,0.45);
-  border: 3px solid #ffd700;
-  border-radius: 15px;
+/* ============================================
+   PANNELLO CENTRALE
+============================================ */
+.panel-box {
+  width: 90%;
+  max-width: 420px;
+  margin: 20px auto;
+  background: #fffaf2;
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  padding: 25px;
+  color: #400000;
+  box-shadow: 0 0 25px #000;
 }
 
-#info {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(0,0,0,0.6);
-  padding: 10px;
-  font-size: 1.2em;
-  border-top: 1px solid #ffd700;
-}
-
-/* PANEL */
-#panel, #unlock, #countdown, #fine {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-#panel, #unlock {
-  width: 85%;
-  max-width: 420px;
-  background: #fffaf2;
-  color: #400000;
-  border: 2px solid #ffd700;
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 0 25px #000;
-}
-
+/* BOTTONI */
 .btn {
-  width: 80%;
-  margin-top: 12px;
-  padding: 14px;
-  font-size: 1.1em;
-  background: #7b0412;
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
+  width: 80%;
+  padding: 14px;
+  margin-top: 12px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 30px;
+  background: #7b0412;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
 }
 .btn:hover { background: #ffd700; color: #000; }
 
-#unlock, #countdown, #fine {
-  display: none;
+/* ============================================
+   CANVAS
+============================================ */
+canvas {
+  display: none;
+  margin: 20px auto;
+  background: rgba(0,0,0,0.45);
+  border: 3px solid #ffd700;
+  border-radius: 15px;
+  box-shadow: 0 0 20px #000;
 }
 
+/* ============================================
+   INFO BOTTOM BAR
+============================================ */
+#info {
+  display: none;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 1.2em;
+  background: rgba(0,0,0,0.55);
+  border-top: 1px solid #ffd700;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+}
+
+/* ============================================
+   AUDIO UNLOCK BOX
+============================================ */
+#unlock-box {
+  display: none;
+}
+
+/* ============================================
+   COUNTDOWN
+============================================ */
 #countdown {
-  font-size: 120px;
-  color: #ffd700;
-  text-shadow: 0 0 25px #fff;
-  animation: pulse .8s;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 120px;
+  color: #ffd700;
+  text-shadow: 0 0 30px #fff;
+  font-weight: bold;
+  display: none;
+  z-index: 3000;
 }
 
 @keyframes pulse {
-  0% { transform: translate(-50%,-50%) scale(.3); opacity: 0; }
-  40% { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
-  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+  0% { transform: translate(-50%,-50%) scale(.3); opacity: 0; }
+  40% { transform: translate(-50%,-50%) scale(1.4); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
 }
 
-/* FINE */
+/* ============================================
+   FINE – CLASSIFICA BOX
+============================================ */
 #fine {
-  width: 90%;
-  max-width: 500px;
-  background: #fffaf2;
-  color: #400000;
-  border-radius: 20px;
-  padding: 30px;
+  display: none;
+}
+
+.score-box {
+  width: 90%;
+  max-width: 500px;
+  background: #fffaf2;
+  color: #400000;
+  padding: 30px;
+  border-radius: 20px;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 25px #000;
+  margin: 40px auto;
 }
 
 table {
-  width: 100%;
-  margin-top: 15px;
+  width: 100%;
+  margin-top: 15px;
 }
 
 th, td {
-  padding: 10px;
-  border-bottom: 1px solid #d7bb5f;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #d7bb5f;
+}
+
+.btn-small {
+  padding: 12px 25px;
+  margin-top: 20px;
+  border-radius: 30px;
+  background: #b30d0d;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+}
+.btn-small:hover {
+  background: #ffd700;
+  color: #000;
 }
 </style>
 </head>
@@ -121,47 +174,76 @@ th, td {
 
 <h1>🎹 Giorno 12 – Piano Tiles Evolution</h1>
 
-<div id="panel">
-  <p>🎼 Tocca le piastrelle d’oro a ritmo<br>
-     ❤️ 3 vite – perdi una se una tile cade<br>
-     ⚡ Difficoltà crescente automatica</p>
-  <button id="startBtn" class="btn">▶️ Inizia</button>
+<!-- ============================================
+     START PANEL
+============================================ -->
+<div id="panel" class="panel-box">
+  <h2>✨ Come si gioca ✨</h2>
+  <p>
+    🎼 Tocca le piastrelle d’oro al ritmo della musica<br>
+    ❤️ Hai 3 vite – perdi 1 se una tile cade<br>
+    ⚡ Difficoltà crescente automatica<br>
+    🎵 La musica accelera fino a 1.20×
+  </p>
+
+  <button id="btn-start" class="btn">▶️ INIZIA</button>
+  <button id="btn-top10" class="btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
 </div>
 
-<div id="unlock">
-  <h2>🎵 Attiva la musica</h2>
-  <button id="unlockBtn" class="btn">TOCCA PER ATTIVARE</button>
+<!-- ============================================
+     AUDIO UNLOCK PANEL
+============================================ -->
+<div id="unlock-box" class="panel-box">
+  <h2>🎵 Attiva la musica</h2>
+  <p>Tocca il pulsante per permettere al gioco di riprodurre l’audio.</p>
+  <button id="unlock-btn" class="btn" style="background:#ffd700; color:#400000;">TOCCA PER ATTIVARE</button>
 </div>
 
+<!-- COUNTDOWN -->
 <div id="countdown"></div>
 
-<canvas id="game" width="360" height="600"></canvas>
+<!-- CANVAS -->
+<canvas id="game"></canvas>
 <div id="info"></div>
 
-<div id="fine">
-  <h2 id="fineMsg"></h2>
-  <h3>🏆 Top 10</h3>
-  <table id="scoreTable">
-    <tr><th>Nome</th><th>Punti</th></tr>
-  </table>
-  <button class="btn" onclick="location.reload()">Riprova</button>
+<!-- ============================================
+     POPUP FINALE
+============================================ -->
+<div id="fine" class="score-box">
+  <h2 id="fine-msg"></h2>
+  <h3>🏆 Top 10 – Piano Tiles Evolution</h3>
+
+  <table id="score-table">
+    <tr><th>Nome</th><th>Punti</th></tr>
+  </table>
+
+  <button class="btn-small" onclick="location.reload()">🔄 Riprova</button>
+  <a href="../calendario.html" class="btn-small">⬅ Calendario</a>
 </div>
 
-<audio id="song" preload="auto" src="audio/piano.mp3"></audio>
+<!-- AUDIO -->
+<audio id="song" preload="auto">
+  <source src="audio/piano.mp3" type="audio/mpeg">
+</audio>
 
+
+<!-- ============================================
+     JAVASCRIPT (la tua logica originale)
+============================================ -->
 <script>
-// FIREBASE
+/* ========= FIREBASE ========= */
 firebase.initializeApp({
-  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
-  authDomain: "calendarioroccasicura.firebaseapp.com",
-  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "calendarioroccasicura",
-  storageBucket: "calendarioroccasicura.appspot.com",
-  messagingSenderId: "38731898044",
-  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
 });
 const db = firebase.database();
 
+/* ========= VARIABILI ========= */
 const song = document.getElementById("song");
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -174,155 +256,152 @@ let lives = 3;
 let playing = false;
 let startTime;
 
-const userBase = localStorage.getItem("utente") || "Ospite";
-const user = userBase[0] + Math.floor(Math.random()*900+100) + userBase.slice(1);
+const real = localStorage.getItem("utente") || "Ospite";
+const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
 
-// AUDIO UNLOCK
-document.getElementById("startBtn").onclick = () => {
-  document.getElementById("panel").style.display = "none";
-  document.getElementById("unlock").style.display = "block";
+/* ========= START BUTTON ========= */
+document.getElementById("btn-start").onclick = ()=>{
+  document.getElementById("panel").style.display = "none";
+  document.getElementById("unlock-box").style.display = "block";
 };
 
-document.getElementById("unlockBtn").onclick = async () => {
-  try {
-    await song.play();
-    song.pause();
-    song.currentTime = 0;
-    document.getElementById("unlock").style.display = "none";
-    startCountdown(startGame);
-  } catch {
-    alert("Riprovare");
-  }
+/* ========= AUDIO UNLOCK ========= */
+document.getElementById("unlock-btn").onclick = async ()=>{
+  try {
+    await song.play();
+    song.pause();
+    song.currentTime = 0;
+    document.getElementById("unlock-box").style.display = "none";
+    startCountdown(startGame);
+  } catch {
+    alert("Tocca di nuovo");
+  }
 };
 
-// COUNTDOWN
-function startCountdown(cb) {
-  const cd = document.getElementById("countdown");
-  const seq = ["3","2","1","VIA"];
-  let i = 0;
+/* ========= COUNTDOWN ========= */
+function startCountdown(cb){
+  const cd = document.getElementById("countdown");
+  const seq = ["3","2","1","VIA!"];
+  let i = 0;
 
-  function next() {
-    if (i >= seq.length) {
-      cd.style.display = "none";
-      cb();
-      return;
-    }
-    cd.innerText = seq[i++];
-    cd.style.display = "block";
-    cd.style.animation = "none";
-    void cd.offsetWidth;
-    cd.style.animation = "pulse .8s";
-    setTimeout(next, 900);
-  }
-  next();
+  function next(){
+    if(i >= seq.length){
+      cd.style.display = "none";
+      cb();
+      return;
+    }
+    cd.innerHTML = seq[i++];
+    cd.style.display = "block";
+    cd.style.animation = "pulse .8s";
+    setTimeout(next,900);
+  }
+  next();
 }
 
-// GAME START
-function startGame() {
-  canvas.style.display = "block";
-  info.style.display = "block";
-  song.play();
-  startTime = performance.now();
-  playing = true;
-  requestAnimationFrame(update);
+/* ========= GAME START ========= */
+function startGame(){
+  canvas.style.display = "block";
+  info.style.display = "block";
+  song.play();
+  startTime = performance.now();
+  playing = true;
+  requestAnimationFrame(update);
 }
 
-function spawnTile() {
-  const col = Math.floor(Math.random()*3);
-  tiles.push({ col, y: -120, hit:false });
-}
-
-// *** NUOVA LOGICA: Funzione Unificata per Click e Touch ***
-function handleInput(clientX) {
-  const r = canvas.getBoundingClientRect();
-  const x = clientX - r.left;
-  const col = Math.floor(x / (canvas.width/3));
-  
-  for (let t of tiles) {
-    if (!t.hit && t.col === col && t.y > canvas.height-180 && t.y < canvas.height) {
-      t.hit = true;
-      score += 10;
-      return;
-    }
-  }
-}
-
-// SOSTITUZIONE: L'onclick originale ora chiama handleInput (Desktop)
-canvas.onclick = e => {
-  handleInput(e.clientX);
-};
-
-// AGGIUNTA: Gestore per il Touch (Mobile)
+/* ========= TILE HANDLING ========= */
+canvas.onclick = e => handleInput(e.clientX);
 canvas.ontouchstart = e => {
-  e.preventDefault(); 
-  if (e.touches.length > 0) {
-    handleInput(e.touches[0].clientX); 
-  }
+  e.preventDefault();
+  if(e.touches.length > 0) handleInput(e.touches[0].clientX);
 };
-// *** FINE NUOVA LOGICA ***
 
+function handleInput(x){
+  const r = canvas.getBoundingClientRect();
+  const col = Math.floor((x - r.left) / (canvas.width/3));
 
-function update(ts) {
-  if (!playing) return;
-  if (ts - startTime > 240000) return endGame();
-
-  if (Math.random() < .02) spawnTile();
-  speed = 4 + (ts - startTime)/60000;
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const w = canvas.width/3;
-
-  tiles.forEach(t => {
-    t.y += speed;
-    if (!t.hit && t.y > canvas.height) {
-      lives--;
-      t.hit = true;
-      if (lives <= 0) endGame();
-    }
-    ctx.fillStyle = "#ffd700";
-    ctx.fillRect(t.col*w+8, t.y, w-16, 120);
-  });
-
-  tiles = tiles.filter(t => t.y < canvas.height+200);
-
-  info.textContent = `⭐ ${score} | ❤️ ${lives}`;
-  requestAnimationFrame(update);
+  for(let t of tiles){
+    if(!t.hit && t.col === col && t.y > canvas.height-180 && t.y < canvas.height){
+      t.hit = true;
+      score += 10;
+      return;
+    }
+  }
 }
 
-function endGame() {
-  playing = false;
-  song.pause();
-  document.getElementById("fine").style.display = "block";
-  document.getElementById("fineMsg").innerHTML = `⭐ Hai fatto <b>${score}</b> punti`;
+/* ========= UPDATE LOOP ========= */
+function update(ts){
+  if(!playing) return;
+  if(ts - startTime > 240000) return endGame();
 
-  db.ref("punteggi/giorno12").push({
-    nome: user,
-    punti: score,
-    timestamp: Date.now()
-  }).then(loadTop10);
+  if(Math.random() < .02) spawnTile();
+  speed = 4 + (ts - startTime)/60000;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w = canvas.width/3;
+
+  tiles.forEach(t=>{
+    t.y += speed;
+    if(!t.hit && t.y > canvas.height){
+      lives--;
+      t.hit = true;
+      if(lives <= 0) endGame();
+    }
+    ctx.fillStyle = "#ffd700";
+    ctx.fillRect(t.col*w+8, t.y, w-16, 120);
+  });
+
+  tiles = tiles.filter(t=>t.y < canvas.height+200);
+  info.textContent = `⭐ ${score} | ❤️ ${lives}`;
+
+  requestAnimationFrame(update);
 }
 
-// *** MODIFICA: La funzione loadTop10 ora pulisce la tabella (come Giorno 5) ***
-function loadTop10() {
-  const table = document.getElementById("scoreTable");
-  
-  // Correzione: Pulisce la tabella mantenendo solo l'intestazione
-  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>"; 
-
-  db.ref("punteggi/giorno12")
-    .orderByChild("punti").limitToLast(10)
-    .once("value", s => {
-      let arr=[];
-      s.forEach(c=>arr.push(c.val()));
-      arr.sort((a,b)=>b.punti-a.punti);
-      arr.forEach(r=>{
-        let tr=document.createElement("tr");
-        tr.innerHTML=`<td>${r.nome}</td><td>${r.punti}</td>`;
-        table.appendChild(tr);
-      });
-    });
+function spawnTile(){
+  const col = Math.floor(Math.random()*3);
+  tiles.push({ col, y:-120, hit:false });
 }
-// *** FINE MODIFICA ***
+
+/* ========= END GAME ========= */
+function endGame(){
+  playing = false;
+  song.pause();
+
+  document.getElementById("fine").style.display = "block";
+  document.getElementById("fine-msg").innerHTML =
+    `⭐ Hai ottenuto <b>${score}</b> punti`;
+
+  db.ref("punteggi/giorno12").push({
+    nome: user,
+    punti: score,
+    timestamp: Date.now()
+  }).then(loadTop10);
+}
+
+/* ========= CLASSIFICA ========= */
+function loadTop10(){
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+  db.ref("punteggi/giorno12")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap=>{
+      let list = [];
+      snap.forEach(c=>list.push(c.val()));
+      list.sort((a,b)=>b.punti - a.punti);
+      list.forEach(r=>{
+        let tr=document.createElement("tr");
+        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
+        table.appendChild(tr);
+      });
+    });
+}
+
+document.getElementById("btn-top10").onclick = ()=>{
+  document.getElementById("panel").style.display = "none";
+  document.getElementById("fine").style.display = "block";
+  loadTop10();
+};
 </script>
 
 </body>
