@@ -16,9 +16,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Ubuntu", sans-serif;
-  text-align: center;
   color: #fff;
-  overflow-x: hidden;
+  text-align: center;
   background: #000 url("img/piano_roccasicura.jpg") center/cover no-repeat fixed;
 }
 
@@ -28,172 +27,93 @@ h1 {
   text-shadow: 2px 2px 5px #000;
 }
 
-/* CANVAS */
 canvas {
   display: none;
+  margin: 20px auto;
   background: rgba(0,0,0,0.45);
   border: 3px solid #ffd700;
   border-radius: 15px;
-  margin: 20px auto;
-  touch-action: none;
-  box-shadow: 0 0 20px #000;
 }
 
-/* INFO BAR */
 #info {
   display: none;
-  width: 100%;
-  padding: 10px 0;
-  font-size: 1.2em;
-  background: rgba(0,0,0,0.55);
-  border-top: 1px solid #ffd700;
   position: fixed;
   bottom: 0;
   left: 0;
-  z-index: 50;
+  width: 100%;
+  background: rgba(0,0,0,0.6);
+  padding: 10px;
+  font-size: 1.2em;
+  border-top: 1px solid #ffd700;
 }
 
-/* START PANEL */
-#panel {
-  width: 90%;
+/* PANEL */
+#panel, #unlock, #countdown, #fine {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#panel, #unlock {
+  width: 85%;
   max-width: 420px;
-  margin: 20px auto;
-  background: rgba(255,250,242,0.92);
+  background: #fffaf2;
+  color: #400000;
   border: 2px solid #ffd700;
   border-radius: 20px;
-  padding: 20px;
-  color: #3a0000;
-  box-shadow: 0 0 20px #000;
+  padding: 25px;
+  box-shadow: 0 0 25px #000;
 }
 
 .btn {
   width: 80%;
+  margin-top: 12px;
   padding: 14px;
-  margin-top: 10px;
   font-size: 1.1em;
+  background: #7b0412;
+  color: #fff;
   border: none;
   border-radius: 30px;
-  background: #7b0412;
-  color: white;
   cursor: pointer;
 }
 .btn:hover { background: #ffd700; color: #000; }
 
-/* --- MUSIC UNLOCK PANEL --- */
-#unlock-audio {
+#unlock, #countdown, #fine {
   display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 85%;
-  max-width: 380px;
-  background: #fffaf2;
-  border: 2px solid #ffd700;
-  border-radius: 20px;
-  padding: 25px;
-  text-align: center;
-  color: #400000;
-  z-index: 5000;
-  box-shadow: 0 0 25px #000;
 }
 
-#unlock-btn {
-  width: 80%;
-  margin-top: 20px;
-  padding: 15px;
-  border-radius: 30px;
-  background: #ffd700;
-  border: none;
-  color: #400000;
-  font-weight: bold;
-  cursor: pointer;
-}
-#unlock-btn:hover {
-  background: #ffed9e;
-}
-
-/* COUNTDOWN */
 #countdown {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   font-size: 120px;
   color: #ffd700;
-  text-shadow: 0 0 25px #fff, 0 0 40px #ffd700;
-  font-weight: bold;
-  display: none;
-  opacity: 0;
-  z-index: 2000;
-  animation: pulse 0.8s forwards;
+  text-shadow: 0 0 25px #fff;
+  animation: pulse .8s;
 }
 
 @keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-  40% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1.0); opacity: 0; }
+  0% { transform: translate(-50%,-50%) scale(.3); opacity: 0; }
+  40% { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
 }
 
-/* POPUP FINALE */
+/* FINE */
 #fine {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-
-.classifica-box {
-  background: #fffaf2;
-  padding: 30px;
-  border-radius: 20px;
   width: 90%;
   max-width: 500px;
-  border: 2px solid #ffd700;
+  background: #fffaf2;
   color: #400000;
-  text-align: center;
-  animation: popup .4s ease-out;
-}
-
-@keyframes popup {
-  from { transform: scale(.7); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  border-radius: 20px;
+  padding: 30px;
 }
 
 table {
   width: 100%;
   margin-top: 15px;
 }
+
 th, td {
   padding: 10px;
-  text-align: center;
   border-bottom: 1px solid #d7bb5f;
-}
-
-.btn-row {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 25px;
-}
-
-.btn-small {
-  padding: 12px 25px;
-  border-radius: 30px;
-  font-weight: bold;
-  cursor: pointer;
-  border: none;
-  background: #b30d0d;
-  color: white;
-}
-.btn-small:hover {
-  background: #ffd700;
-  color: #000;
 }
 </style>
 </head>
@@ -202,63 +122,36 @@ th, td {
 
 <h1>🎹 Giorno 12 – Piano Tiles Evolution</h1>
 
-<!-- START PANEL -->
 <div id="panel">
-  <h2>✨ Come si gioca ✨</h2>
-  <p>
-    • Tocca le piastrelle d’oro al ritmo della musica<br>
-    • Perdi 1 vita se una piastrella cade senza tocco<br>
-    • Nessuna penalità per click a vuoto<br>
-    • La difficoltà aumenta automaticamente<br>
-    • La musica accelera fino a 1.20×<br>
-  </p>
-
-  <button id="btn-start" class="btn">▶️ INIZIA</button>
-  <button id="btn-top10" class="btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
+  <p>🎼 Tocca le piastrelle d’oro a ritmo<br>
+     ❤️ 3 vite – perdi una se una tile cade<br>
+     ⚡ Difficoltà crescente automatica</p>
+  <button id="startBtn" class="btn">▶️ Inizia</button>
 </div>
 
-<!-- UNLOCK AUDIO PANEL -->
-<div id="unlock-audio">
+<div id="unlock">
   <h2>🎵 Attiva la musica</h2>
-  <p>Tocca il pulsante per permettere al gioco di riprodurre l’audio.</p>
-  <button id="unlock-btn">TOCCA PER ATTIVARE</button>
+  <button id="unlockBtn" class="btn">TOCCA PER ATTIVARE</button>
 </div>
 
-<!-- CANVAS -->
-<canvas id="game"></canvas>
-<div id="info"></div>
-
-<!-- COUNTDOWN -->
 <div id="countdown"></div>
 
-<!-- POPUP FINALE -->
+<canvas id="game" width="360" height="600"></canvas>
+<div id="info"></div>
+
 <div id="fine">
-  <div class="classifica-box">
-
-    <h2 id="fine-msg"></h2>
-    <h3>🏆 Top 10 – Piano Tiles Evolution</h3>
-
-    <table id="score-table">
-      <tr><th>Nome</th><th>Punti</th></tr>
-    </table>
-
-    <div class="btn-row">
-      <button id="retry-btn" class="btn-small">🔄 Riprova</button>
-      <a href="../calendario.html" class="btn-small">⬅ Calendario</a>
-    </div>
-
-  </div>
+  <h2 id="fineMsg"></h2>
+  <h3>🏆 Top 10</h3>
+  <table id="scoreTable">
+    <tr><th>Nome</th><th>Punti</th></tr>
+  </table>
+  <button class="btn" onclick="location.reload()">Riprova</button>
 </div>
 
-<!-- AUDIO -->
-<audio id="song" preload="auto">
-  <source src="audio/canzone.mp3" type="audio/mpeg">
-</audio>
+<audio id="song" preload="auto" src="audio/piano.mp3"></audio>
 
 <script>
-/* ============================================================
-   FIREBASE
-============================================================ */
+// FIREBASE
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
@@ -270,318 +163,145 @@ firebase.initializeApp({
 });
 const db = firebase.database();
 
-const real = localStorage.getItem("utente") || "Ospite";
-const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
-
-
-/* ============================================================
-   VARIABILI GIOCO
-============================================================ */
-let canvas = document.getElementById("game");
-let ctx = canvas.getContext("2d");
-
-let lives = 3;
-let score = 0;
-let playing = false;
+const song = document.getElementById("song");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const info = document.getElementById("info");
 
 let tiles = [];
-let tileSpeed = 4;
-let currentPhase = 1;
+let speed = 4;
+let score = 0;
+let lives = 3;
+let playing = false;
+let startTime;
 
-let gameDuration = 240000; 
-let startTimestamp = null;
+const userBase = localStorage.getItem("utente") || "Ospite";
+const user = userBase[0] + Math.floor(Math.random()*900+100) + userBase.slice(1);
 
-const song = document.getElementById("song");
+// AUDIO UNLOCK
+document.getElementById("startBtn").onclick = () => {
+  document.getElementById("panel").style.display = "none";
+  document.getElementById("unlock").style.display = "block";
+};
 
-
-/* CANVAS SIZE */
-function resizeCanvas(){
-  if(window.innerWidth < 700){
-    canvas.width = window.innerWidth - 20;
-    canvas.height = window.innerHeight * 0.65;
-  } else {
-    canvas.width = 450;
-    canvas.height = 700;
+document.getElementById("unlockBtn").onclick = async () => {
+  try {
+    await song.play();
+    song.pause();
+    song.currentTime = 0;
+    document.getElementById("unlock").style.display = "none";
+    startCountdown(startGame);
+  } catch {
+    alert("Riprovare");
   }
-}
-resizeCanvas();
+};
 
-
-/* ============================================================
-   COUNTDOWN
-============================================================ */
-function startCountdown(callback) {
-  let countdown = document.getElementById("countdown");
-  let numbers = ["3","2","1","VIA!"];
+// COUNTDOWN
+function startCountdown(cb) {
+  const cd = document.getElementById("countdown");
+  const seq = ["3","2","1","VIA"];
   let i = 0;
 
-  function showNext() {
-    if (i >= numbers.length) {
-      countdown.style.display = "none";
-      callback();
+  function next() {
+    if (i >= seq.length) {
+      cd.style.display = "none";
+      cb();
       return;
     }
-
-    countdown.innerHTML = numbers[i];
-    countdown.style.display = "block";
-    countdown.style.animation = "none";
-    void countdown.offsetWidth;
-    countdown.style.animation = "pulse 0.8s forwards";
-
-    i++;
-    setTimeout(showNext, 900);
+    cd.innerText = seq[i++];
+    cd.style.display = "block";
+    cd.style.animation = "none";
+    void cd.offsetWidth;
+    cd.style.animation = "pulse .8s";
+    setTimeout(next, 900);
   }
-
-  showNext();
+  next();
 }
 
-
-/* ============================================================
-   TILE GENERATOR MIGLIORATO
-============================================================ */
-function spawnTileSmart() {
-  let col;
-
-  if (tiles.length === 0) col = Math.floor(Math.random()*3);
-  else {
-    let last = tiles[tiles.length-1].col;
-    let choices = [0,1,2].filter(c => c !== last);
-    col = choices[Math.floor(Math.random()*choices.length)];
-  }
-
-  tiles.push({
-    col: col,
-    y: -140,
-    hit: false
-  });
+// GAME START
+function startGame() {
+  canvas.style.display = "block";
+  info.style.display = "block";
+  song.play();
+  startTime = performance.now();
+  playing = true;
+  requestAnimationFrame(update);
 }
 
-
-/* ============================================================
-   EVOLUTION MODE
-============================================================ */
-function updatePhase(elapsed) {
-  if (elapsed > 180000 && currentPhase < 4) {
-    currentPhase = 4;
-    transitionTo(1.20, 9, 8);
-  }
-  else if (elapsed > 120000 && currentPhase < 3) {
-    currentPhase = 3;
-    transitionTo(1.12, 7, 6);
-  }
-  else if (elapsed > 60000 && currentPhase < 2) {
-    currentPhase = 2;
-    transitionTo(1.05, 5, 5);
-  }
+function spawnTile() {
+  const col = Math.floor(Math.random()*3);
+  tiles.push({ col, y: -120, hit:false });
 }
 
-function transitionTo(targetRate, speedIncrease, durationSec) {
-  let startRate = song.playbackRate;
-  let startSpeed = tileSpeed;
-
-  let steps = durationSec * 60;
-  let i = 0;
-
-  let interval = setInterval(()=>{
-    i++;
-    song.playbackRate = startRate + (targetRate - startRate)*(i/steps);
-    tileSpeed = startSpeed + speedIncrease*(i/steps);
-    if (i >= steps) clearInterval(interval);
-  }, 1000/60);
-}
-
-
-/* ============================================================
-   LOGICA TILE
-============================================================ */
-canvas.addEventListener("click", (e) => {
+canvas.onclick = e => {
   const r = canvas.getBoundingClientRect();
-  const mx = e.clientX - r.left;
-  const my = e.clientY - r.top;
-
-  let col = Math.floor(mx / (canvas.width / 3));
-
+  const x = e.clientX - r.left;
+  const col = Math.floor(x / (canvas.width/3));
   for (let t of tiles) {
-    if (!t.hit &&
-        t.col === col &&
-        my >= t.y && my <= t.y + 140) {
-
+    if (!t.hit && t.col === col && t.y > canvas.height-180 && t.y < canvas.height) {
       t.hit = true;
       score += 10;
       return;
     }
   }
-});
+};
 
-
-/* ============================================================
-   LOOP DI GIOCO
-============================================================ */
-function update(timestamp) {
+function update(ts) {
   if (!playing) return;
+  if (ts - startTime > 240000) return endGame();
 
-  if (!startTimestamp) startTimestamp = timestamp;
-  let elapsed = timestamp - startTimestamp;
+  if (Math.random() < .02) spawnTile();
+  speed = 4 + (ts - startTime)/60000;
 
-  updatePhase(elapsed);
-
-  if (elapsed % 480 < 20) spawnTileSmart();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w = canvas.width/3;
 
   tiles.forEach(t => {
-    t.y += tileSpeed;
-
+    t.y += speed;
     if (!t.hit && t.y > canvas.height) {
       lives--;
       t.hit = true;
       if (lives <= 0) endGame();
     }
+    ctx.fillStyle = "#ffd700";
+    ctx.fillRect(t.col*w+8, t.y, w-16, 120);
   });
 
-  tiles = tiles.filter(t => t.y < canvas.height + 200);
+  tiles = tiles.filter(t => t.y < canvas.height+200);
 
-  draw();
-
-  if (elapsed >= gameDuration) {
-    endGame();
-    return;
-  }
-
+  info.textContent = `⭐ ${score} | ❤️ ${lives}`;
   requestAnimationFrame(update);
 }
 
+function endGame() {
+  playing = false;
+  song.pause();
+  document.getElementById("fine").style.display = "block";
+  document.getElementById("fineMsg").innerHTML = `⭐ Hai fatto <b>${score}</b> punti`;
 
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  let w = canvas.width / 3;
-
-  tiles.forEach(t => {
-    ctx.fillStyle = "#ffd700";
-    ctx.shadowColor = "#fff";
-    ctx.shadowBlur = 25;
-    ctx.fillRect(t.col*w + 8, t.y, w-16, 140);
-    ctx.shadowBlur = 0;
-  });
-
-  document.getElementById("info").textContent =
-    `⭐ ${score} | ❤️ ${lives}`;
+  db.ref("punteggi/giorno12").push({
+    nome: user,
+    punti: score,
+    timestamp: Date.now()
+  }).then(loadTop10);
 }
-
-
-/* ============================================================
-   AUDIO UNLOCK DEFINITIVO
-============================================================ */
-async function unlockAudio() {
-    try {
-        song.volume = 1;
-        song.playbackRate = 1.0;
-        song.currentTime = 0;
-
-        await song.play();
-        await new Promise(r => setTimeout(r, 50));
-
-        song.pause();
-        song.currentTime = 0;
-
-        console.log("Audio UNLOCKED");
-        return true;
-
-    } catch (err) {
-        console.warn("Audio unlock failed:", err);
-        return false;
-    }
-}
-
-
-/* ============================================================
-   START SEQUENZA
-============================================================ */
-document.getElementById("btn-start").onclick = ()=>{
-  document.getElementById("panel").style.display = "none";
-  document.getElementById("unlock-audio").style.display = "block";
-};
-
-document.getElementById("unlock-btn").onclick = async ()=>{
-  
-  let ok = await unlockAudio();
-
-  if (!ok) {
-    alert("Tocca di nuovo per attivare la musica");
-    return;
-  }
-
-  document.getElementById("unlock-audio").style.display = "none";
-
-  startCountdown(()=>{
-
-    canvas.style.display = "block";
-    document.getElementById("info").style.display = "block";
-
-    playing = true;
-    song.currentTime = 0;
-    song.play().catch((e)=>console.warn(e));
-
-    requestAnimationFrame(update);
-  });
-};
-
-
-/* ============================================================
-   CLASSIFICA
-============================================================ */
-document.getElementById("btn-top10").onclick = ()=>{
-  document.getElementById("panel").style.display = "none";
-  document.getElementById("fine").style.display = "flex";
-  loadTop10();
-};
 
 function loadTop10() {
-  const table = document.getElementById("score-table");
-  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
-
+  const table = document.getElementById("scoreTable");
   db.ref("punteggi/giorno12")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value", snap => {
-      let list = [];
-      snap.forEach(c => list.push(c.val()));
-      list.sort((a,b)=>b.punti - a.punti);
-
-      list.forEach(r=>{
-        let tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
+    .orderByChild("punti").limitToLast(10)
+    .once("value", s => {
+      let arr=[];
+      s.forEach(c=>arr.push(c.val()));
+      arr.sort((a,b)=>b.punti-a.punti);
+      arr.forEach(r=>{
+        let tr=document.createElement("tr");
+        tr.innerHTML=`<td>${r.nome}</td><td>${r.punti}</td>`;
         table.appendChild(tr);
       });
     });
 }
-
-
-/* ============================================================
-   END GAME
-============================================================ */
-function endGame(){
-  playing = false;
-  canvas.style.display = "none";
-  document.getElementById("info").style.display = "none";
-
-  document.getElementById("fine").style.display = "flex";
-  document.getElementById("fine-msg").innerHTML =
-    `⭐ Hai totalizzato <b>${score}</b> punti!`;
-
-  db.ref("punteggi/giorno12").push({
-    nome: user,
-    punti: Number(score),
-    timestamp: Date.now()
-  }).then(()=> loadTop10());
-}
-
-document.getElementById("retry-btn").onclick = ()=>location.reload();
 </script>
 
 </body>
 </html>
-
-
-
-
-
