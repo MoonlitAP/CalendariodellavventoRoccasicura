@@ -437,7 +437,7 @@ function update(timestamp) {
     }
   });
 
-  tiles = tiles.filter(t => t.y < canvas.height + 200 && !t.hit);
+  tiles = tiles.filter(t => t.y < canvas.height + 200);
 
   draw();
 
@@ -469,18 +469,46 @@ function draw() {
 
 
 /* ============================================================
-   AUDIO UNLOCK + START
+   AUDIO UNLOCK DEFINITIVO
+============================================================ */
+async function unlockAudio() {
+    try {
+        song.volume = 1;
+        song.playbackRate = 1.0;
+        song.currentTime = 0;
+
+        await song.play();
+        await new Promise(r => setTimeout(r, 50));
+
+        song.pause();
+        song.currentTime = 0;
+
+        console.log("Audio UNLOCKED");
+        return true;
+
+    } catch (err) {
+        console.warn("Audio unlock failed:", err);
+        return false;
+    }
+}
+
+
+/* ============================================================
+   START SEQUENZA
 ============================================================ */
 document.getElementById("btn-start").onclick = ()=>{
   document.getElementById("panel").style.display = "none";
   document.getElementById("unlock-audio").style.display = "block";
 };
 
-document.getElementById("unlock-btn").onclick = ()=>{
-  let tryPlay = song.play();
-  if (tryPlay) tryPlay.catch(()=>{});
+document.getElementById("unlock-btn").onclick = async ()=>{
+  
+  let ok = await unlockAudio();
 
-  song.pause(); // audio autorizzato ma non parte
+  if (!ok) {
+    alert("Tocca di nuovo per attivare la musica");
+    return;
+  }
 
   document.getElementById("unlock-audio").style.display = "none";
 
@@ -490,7 +518,8 @@ document.getElementById("unlock-btn").onclick = ()=>{
     document.getElementById("info").style.display = "block";
 
     playing = true;
-    song.play().catch(()=>{});
+    song.currentTime = 0;
+    song.play().catch((e)=>console.warn(e));
 
     requestAnimationFrame(update);
   });
@@ -551,6 +580,7 @@ document.getElementById("retry-btn").onclick = ()=>location.reload();
 
 </body>
 </html>
+
 
 
 
