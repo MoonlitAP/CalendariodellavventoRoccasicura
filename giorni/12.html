@@ -232,7 +232,7 @@ function spawnTile() {
   tiles.push({ col, y: -120, hit:false });
 }
 
-// FUNZIONE UNIFICATA PER GESTIRE CLICK E TOUCH (Correzione mobile)
+// *** NUOVA LOGICA: Funzione Unificata per Click e Touch ***
 function handleInput(clientX) {
   const r = canvas.getBoundingClientRect();
   const x = clientX - r.left;
@@ -247,19 +247,19 @@ function handleInput(clientX) {
   }
 }
 
-// GESTORE CLICK (Desktop)
+// SOSTITUZIONE: L'onclick originale ora chiama handleInput (Desktop)
 canvas.onclick = e => {
   handleInput(e.clientX);
 };
 
-// GESTORE TOUCH (Mobile) - Aggiunto per risolvere i problemi sui telefoni
+// AGGIUNTA: Gestore per il Touch (Mobile)
 canvas.ontouchstart = e => {
   e.preventDefault(); 
   if (e.touches.length > 0) {
     handleInput(e.touches[0].clientX); 
   }
 };
-
+// *** FINE NUOVA LOGICA ***
 
 function update(ts) {
   if (!playing) return;
@@ -301,11 +301,11 @@ function endGame() {
   }).then(loadTop10);
 }
 
-// Correzione applicata: Pulisce la tabella prima di ricaricare i dati (come Giorno 5)
+// *** MODIFICA: La funzione loadTop10 ora pulisce la tabella (come Giorno 5) ***
 function loadTop10() {
   const table = document.getElementById("scoreTable");
   
-  // Pulisce la tabella mantenendo solo l'intestazione
+  // Correzione: Pulisce la tabella mantenendo solo l'intestazione
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>"; 
 
   db.ref("punteggi/giorno12")
@@ -313,9 +313,7 @@ function loadTop10() {
     .once("value", s => {
       let arr=[];
       s.forEach(c=>arr.push(c.val()));
-      // Riordina dal più alto al più basso
       arr.sort((a,b)=>b.punti-a.punti);
-      
       arr.forEach(r=>{
         let tr=document.createElement("tr");
         tr.innerHTML=`<td>${r.nome}</td><td>${r.punti}</td>`;
@@ -323,6 +321,7 @@ function loadTop10() {
       });
     });
 }
+// *** FINE MODIFICA ***
 </script>
 
 </body>
