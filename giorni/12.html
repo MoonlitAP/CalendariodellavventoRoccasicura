@@ -7,7 +7,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
@@ -269,8 +268,8 @@ function startCountdown(cb){
       return;
     }
     cd.innerText = seq[i++];
-    cd.style.display = "block";
     cd.style.animation = "none";
+    cd.style.display = "block";
     void cd.offsetWidth;
     cd.style.animation = "pulse .8s";
     setTimeout(showNext, 900);
@@ -290,7 +289,7 @@ function startGame(){
   requestAnimationFrame(update);
 }
 
-/* CLICK FULL COLUMN (PERFETTO) */
+/* CLICK = RIMUOVE SUBITO LA TILE */
 function handleInput(clientX){
   const r = canvas.getBoundingClientRect();
   const x = clientX - r.left;
@@ -306,13 +305,15 @@ function handleInput(clientX){
     }
   });
 
-  if(target){
+  if (target) {
     target.hit = true;
     score += 10;
+
+    /* RIMUOVE SUBITO LA TILE */
+    tiles = tiles.filter(t => t !== target);
   }
 }
 
-/* LISTENERS */
 canvas.onclick = e => handleInput(e.clientX);
 canvas.ontouchstart = e => {
   e.preventDefault();
