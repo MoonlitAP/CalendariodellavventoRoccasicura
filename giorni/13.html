@@ -8,98 +8,111 @@
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin: 0;
-  font-family: "Ubuntu", sans-serif;
-  background: #1e1e2f;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:#ffd9a0;
+  text-align:center;
+  user-select:none;
 }
 
-.container {
-  text-align: center;
+h1{color:#ffd700;}
+
+#panel{
+  width:90%;
+  max-width:420px;
+  margin:20px auto;
+  background:#fffaf2;
+  color:#3a0000;
+  border:2px solid #ffd700;
+  border-radius:20px;
+  padding:20px;
 }
 
-.controls {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 10px;
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:10px 0;
 }
 
-button {
-  padding: 10px 16px;
-  font-size: 15px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+button{
+  padding:10px 16px;
+  border-radius:30px;
+  border:none;
+  font-size:1em;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-.primary { background:#4da3ff; color:#fff; }
-.flag { background:#ffcc00; }
-.retry { background:#ffd369; margin-top:10px; }
+.primary{background:#7b0412;color:white;}
+.flag{background:#ffd700;color:#3a0000;}
+.retry{background:#7b0412;color:white;margin-top:15px;}
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(8, 42px);
-  gap: 5px;
-  margin: 15px auto;
+#counter{
+  font-weight:bold;
+  margin-bottom:10px;
 }
 
-.cell {
-  width: 42px;
-  height: 42px;
-  background: #9aa3b2;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(8,36px);
+  gap:6px;
+  justify-content:center;
 }
 
-.cell.revealed {
-  background: #ffffff;
-  cursor: default;
+.cell{
+  width:36px;
+  height:36px;
+  background:#3b0a10;
+  border-radius:6px;
+  font-weight:bold;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:#fffaf2;
 }
 
-.cell.mine {
-  background: #ff4b4b;
-  color: #fff;
+.cell.revealed{
+  background:#fffaf2;
+  color:#3a0000;
+  cursor:default;
 }
 
+.cell.mine{
+  background:#ff4b4b;
+  color:white;
+}
+
+/* numeri */
 .n1{color:#007bff;}
 .n2{color:#28a745;}
 .n3{color:#dc3545;}
 .n4{color:#6f42c1;}
 .n5{color:#000;}
 
-#message {
-  font-size: 18px;
-}
-
 /* MODAL */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
 }
 
-.modal-content {
-  background: #fff;
-  color: #333;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 320px;
-  text-align: center;
+.modal-box{
+  background:#fffaf2;
+  padding:25px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
+  border:2px solid #ffd700;
+  color:#3a0000;
 }
 </style>
 </head>
@@ -107,20 +120,23 @@ button {
 <body>
 
 <div class="modal" id="modal">
-  <div class="modal-content">
+  <div class="modal-box">
     <h2>🎄 Giorno 13 – Buscaminas</h2>
     <p>
-      🔢 I numeri indicano quante bombe ci sono intorno.<br><br>
-      🔍 <b>Scopri</b>: apri le caselle<br>
-      🚩 <b>Segna bomba</b>: marca una bomba sospetta<br><br>
-      💣 Se tocchi una bomba perdi.
+      🔢 I numeri indicano quante bombe ci sono intorno<br><br>
+      🔍 Usa <b>Scopri</b> per aprire le caselle<br>
+      🚩 Usa <b>Segna bomba</b> per indicare una bomba<br><br>
+      🎯 Vinci quando individui correttamente <b>3 bombe</b><br>
+      💣 Se tocchi una bomba perdi
     </p>
     <button class="primary" onclick="startGame()">Inizia a giocare</button>
   </div>
 </div>
 
-<div class="container">
-  <div id="message">Scegli una modalità</div>
+<h1>🎄 Giorno 13 – Buscaminas</h1>
+
+<div id="panel">
+  <div id="counter">Bombe individuate: 0 / 3</div>
 
   <div class="controls">
     <button class="primary" onclick="mode='reveal'">🔍 Scopri</button>
@@ -133,11 +149,16 @@ button {
 </div>
 
 <script>
-const rows=8, cols=8, minesCount=10;
-let cells=[], mines=[], gameOver=false, mode="reveal";
+const rows=8, cols=8;
+const totalMines=10;
+const winTarget=3;
+
+let cells=[], mines=[];
+let mode="reveal", gameOver=false;
+let found=0;
 
 const grid=document.getElementById("grid");
-const message=document.getElementById("message");
+const counter=document.getElementById("counter");
 const modal=document.getElementById("modal");
 
 function startGame(){
@@ -147,10 +168,11 @@ function startGame(){
 
 function resetGame(){
   grid.innerHTML="";
-  cells=[]; mines=[]; gameOver=false;
-  message.textContent="Gioca con attenzione 🧠";
+  cells=[]; mines=[]; found=0;
+  gameOver=false;
+  updateCounter();
 
-  while(mines.length<minesCount){
+  while(mines.length<totalMines){
     let p=Math.floor(Math.random()*rows*cols);
     if(!mines.includes(p)) mines.push(p);
   }
@@ -167,20 +189,24 @@ function resetGame(){
 function clickCell(i){
   if(gameOver) return;
   const c=cells[i];
-  if(c.classList.contains("revealed")) return;
 
   if(mode==="flag"){
-    c.textContent = c.textContent==="🚩" ? "" : "🚩";
+    if(c.textContent==="🚩"){
+      c.textContent="";
+      if(mines.includes(i)){ found--; updateCounter(); }
+    }else{
+      c.textContent="🚩";
+      if(mines.includes(i)){ found++; updateCounter(); checkWin(); }
+    }
     return;
   }
 
+  if(c.classList.contains("revealed")) return;
   c.classList.add("revealed");
 
   if(mines.includes(i)){
     c.textContent="💣";
     c.classList.add("mine");
-    message.textContent="💥 Game Over!";
-    revealMines();
     gameOver=true;
     return;
   }
@@ -189,7 +215,7 @@ function clickCell(i){
   if(n>0){
     c.textContent=n;
     c.classList.add("n"+n);
-  } else revealAround(i);
+  }else revealAround(i);
 }
 
 function countMines(i){
@@ -216,11 +242,15 @@ function revealAround(i){
   });
 }
 
-function revealMines(){
-  mines.forEach(i=>{
-    cells[i].textContent="💣";
-    cells[i].classList.add("mine");
-  });
+function updateCounter(){
+  counter.textContent=`Bombe individuate: ${found} / ${winTarget}`;
+}
+
+function checkWin(){
+  if(found===winTarget){
+    gameOver=true;
+    counter.textContent="🎉 Hai completato il Giorno 13!";
+  }
 }
 </script>
 </body>
