@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 13 – Buscaminas</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: "Ubuntu", sans-serif;
+  background: #1e1e2f;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(8, 42px);
+  gap: 4px;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 42px;
+  height: 42px;
+  background: #cfd6e6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell.revealed {
+  background: #e8ebf3;
+  cursor: default;
+}
+
+.cell.mine {
+  background: #ff4b4b;
+  color: #fff;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-family: "Ubuntu", sans-serif;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #ffd369;
+  color: #333;
+}
+
+#message {
+  margin: 10px 0;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>🎄 Giorno 13 – Buscaminas</h1>
+
+  <div id="message">Evita le mine 💣</div>
+
+  <div class="grid" id="grid"></div>
+
+  <button onclick="startGame()">🔄 Riprova</button>
+</div>
+
+<script>
+const rows = 8;
+const cols = 8;
+const minesCount = 10;
+
+let gridElement = document.getElementById("grid");
+let message = document.getElementById("message");
+let cells = [];
+let minePositions = [];
+let gameOver = false;
+
+function startGame() {
+  gridElement.innerHTML = "";
+  cells = [];
+  minePositions = [];
+  gameOver = false;
+  message.textContent = "Evita le mine 💣";
+
+  // Genera mine
+  while (minePositions.length < minesCount) {
+    let pos = Math.floor(Math.random() * rows * cols);
+    if (!minePositions.includes(pos)) {
+      minePositions.push(pos);
+    }
+  }
+
+  for (let i = 0; i < rows * cols; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+
+    cell.addEventListener("click", () => revealCell(i));
+
+    gridElement.appendChild(cell);
+    cells.push(cell);
+  }
+}
+
+function revealCell(index) {
+  if (gameOver) return;
+  const cell = cells[index];
+  if (cell.classList.contains("revealed")) return;
+
+  cell.classList.add("revealed");
+
+  if (minePositions.includes(index)) {
+    cell.textContent = "💣";
+    cell.classList.add("mine");
+    message.textContent = "💥 Game Over!";
+    revealAllMines();
+    gameOver = true;
+    return;
+  }
+
+  const count = countAdjacentMines(index);
+  if (count > 0) {
+    cell.textContent = count;
+  } else {
+    revealAdjacent(index);
+  }
+}
+
+function countAdjacentMines(index) {
+  const neighbors = getNeighbors(index);
+  return neighbors.filter(n => minePositions.includes(n)).length;
+}
+
+function getNeighbors(index) {
+  const x = index % cols;
+  const y = Math.floor(index / cols);
+  const neighbors = [];
+
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      if (dx === 0 && dy === 0) continue;
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+        neighbors.push(ny * cols + nx);
+      }
+    }
+  }
+  return neighbors;
+}
+
+function revealAdjacent(index) {
+  getNeighbors(index).forEach(n => {
+    if (!cells[n].classList.contains("revealed")) {
+      revealCell(n);
+    }
+  });
+}
+
+function revealAllMines() {
+  minePositions.forEach(i => {
+    cells[i].textContent = "💣";
+    cells[i].classList.add("mine");
+  });
+}
+
+startGame();
+</script>
+</body>
+</html>
