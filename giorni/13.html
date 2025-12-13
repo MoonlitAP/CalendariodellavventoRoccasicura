@@ -23,29 +23,47 @@ body {
   text-align: center;
 }
 
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 16px;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primary { background:#4da3ff; color:#fff; }
+.flag { background:#ffcc00; }
+.retry { background:#ffd369; margin-top:10px; }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(8, 42px);
-  gap: 4px;
-  margin: 20px auto;
+  gap: 5px;
+  margin: 15px auto;
 }
 
 .cell {
   width: 42px;
   height: 42px;
-  background: #cfd6e6;
+  background: #9aa3b2;
   border-radius: 4px;
-  cursor: pointer;
   font-weight: bold;
   font-size: 18px;
-  color: #333;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 
 .cell.revealed {
-  background: #e8ebf3;
+  background: #ffffff;
   cursor: default;
 }
 
@@ -54,135 +72,156 @@ body {
   color: #fff;
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  font-family: "Ubuntu", sans-serif;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #ffd369;
-  color: #333;
-}
+.n1{color:#007bff;}
+.n2{color:#28a745;}
+.n3{color:#dc3545;}
+.n4{color:#6f42c1;}
+.n5{color:#000;}
 
 #message {
-  margin: 10px 0;
   font-size: 18px;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  color: #333;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
-  <h1>🎄 Giorno 13 – Buscaminas</h1>
 
-  <div id="message">Evita le mine 💣</div>
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2>🎄 Giorno 13 – Buscaminas</h2>
+    <p>
+      🔢 I numeri indicano quante bombe ci sono intorno.<br><br>
+      🔍 <b>Scopri</b>: apri le caselle<br>
+      🚩 <b>Segna bomba</b>: marca una bomba sospetta<br><br>
+      💣 Se tocchi una bomba perdi.
+    </p>
+    <button class="primary" onclick="startGame()">Inizia a giocare</button>
+  </div>
+</div>
+
+<div class="container">
+  <div id="message">Scegli una modalità</div>
+
+  <div class="controls">
+    <button class="primary" onclick="mode='reveal'">🔍 Scopri</button>
+    <button class="flag" onclick="mode='flag'">🚩 Segna bomba</button>
+  </div>
 
   <div class="grid" id="grid"></div>
 
-  <button onclick="startGame()">🔄 Riprova</button>
+  <button class="retry" onclick="resetGame()">🔄 Riprova</button>
 </div>
 
 <script>
-const rows = 8;
-const cols = 8;
-const minesCount = 10;
+const rows=8, cols=8, minesCount=10;
+let cells=[], mines=[], gameOver=false, mode="reveal";
 
-let gridElement = document.getElementById("grid");
-let message = document.getElementById("message");
-let cells = [];
-let minePositions = [];
-let gameOver = false;
+const grid=document.getElementById("grid");
+const message=document.getElementById("message");
+const modal=document.getElementById("modal");
 
-function startGame() {
-  gridElement.innerHTML = "";
-  cells = [];
-  minePositions = [];
-  gameOver = false;
-  message.textContent = "Evita le mine 💣";
+function startGame(){
+  modal.style.display="none";
+  resetGame();
+}
 
-  // Genera mine
-  while (minePositions.length < minesCount) {
-    let pos = Math.floor(Math.random() * rows * cols);
-    if (!minePositions.includes(pos)) {
-      minePositions.push(pos);
-    }
+function resetGame(){
+  grid.innerHTML="";
+  cells=[]; mines=[]; gameOver=false;
+  message.textContent="Gioca con attenzione 🧠";
+
+  while(mines.length<minesCount){
+    let p=Math.floor(Math.random()*rows*cols);
+    if(!mines.includes(p)) mines.push(p);
   }
 
-  for (let i = 0; i < rows * cols; i++) {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-
-    cell.addEventListener("click", () => revealCell(i));
-
-    gridElement.appendChild(cell);
-    cells.push(cell);
+  for(let i=0;i<rows*cols;i++){
+    const c=document.createElement("div");
+    c.className="cell";
+    c.onclick=()=>clickCell(i);
+    grid.appendChild(c);
+    cells.push(c);
   }
 }
 
-function revealCell(index) {
-  if (gameOver) return;
-  const cell = cells[index];
-  if (cell.classList.contains("revealed")) return;
+function clickCell(i){
+  if(gameOver) return;
+  const c=cells[i];
+  if(c.classList.contains("revealed")) return;
 
-  cell.classList.add("revealed");
-
-  if (minePositions.includes(index)) {
-    cell.textContent = "💣";
-    cell.classList.add("mine");
-    message.textContent = "💥 Game Over!";
-    revealAllMines();
-    gameOver = true;
+  if(mode==="flag"){
+    c.textContent = c.textContent==="🚩" ? "" : "🚩";
     return;
   }
 
-  const count = countAdjacentMines(index);
-  if (count > 0) {
-    cell.textContent = count;
-  } else {
-    revealAdjacent(index);
+  c.classList.add("revealed");
+
+  if(mines.includes(i)){
+    c.textContent="💣";
+    c.classList.add("mine");
+    message.textContent="💥 Game Over!";
+    revealMines();
+    gameOver=true;
+    return;
   }
+
+  const n=countMines(i);
+  if(n>0){
+    c.textContent=n;
+    c.classList.add("n"+n);
+  } else revealAround(i);
 }
 
-function countAdjacentMines(index) {
-  const neighbors = getNeighbors(index);
-  return neighbors.filter(n => minePositions.includes(n)).length;
+function countMines(i){
+  return neighbors(i).filter(n=>mines.includes(n)).length;
 }
 
-function getNeighbors(index) {
-  const x = index % cols;
-  const y = Math.floor(index / cols);
-  const neighbors = [];
-
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dy = -1; dy <= 1; dy++) {
-      if (dx === 0 && dy === 0) continue;
-      const nx = x + dx;
-      const ny = y + dy;
-      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-        neighbors.push(ny * cols + nx);
+function neighbors(i){
+  const x=i%cols, y=Math.floor(i/cols), arr=[];
+  for(let dx=-1;dx<=1;dx++)
+    for(let dy=-1;dy<=1;dy++){
+      if(dx||dy){
+        let nx=x+dx, ny=y+dy;
+        if(nx>=0&&nx<cols&&ny>=0&&ny<rows)
+          arr.push(ny*cols+nx);
       }
     }
-  }
-  return neighbors;
+  return arr;
 }
 
-function revealAdjacent(index) {
-  getNeighbors(index).forEach(n => {
-    if (!cells[n].classList.contains("revealed")) {
-      revealCell(n);
-    }
+function revealAround(i){
+  neighbors(i).forEach(n=>{
+    if(!cells[n].classList.contains("revealed"))
+      clickCell(n);
   });
 }
 
-function revealAllMines() {
-  minePositions.forEach(i => {
-    cells[i].textContent = "💣";
+function revealMines(){
+  mines.forEach(i=>{
+    cells[i].textContent="💣";
     cells[i].classList.add("mine");
   });
 }
-
-startGame();
 </script>
 </body>
 </html>
