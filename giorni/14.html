@@ -19,7 +19,7 @@ h2{
 }
 
 #game{
-  max-width:380px;
+  max-width:400px;
   margin:0 auto;
   padding:20px;
 }
@@ -48,6 +48,7 @@ h2{
   width:16px;
 }
 
+/* celle standard */
 .cell{
   border:1px solid #666;
   background:#fff;
@@ -57,18 +58,24 @@ h2{
   text-transform:uppercase;
 }
 
-/* dimensioni standard */
 .cell.normal{
   width:32px;
   height:32px;
   font-size:18px;
 }
 
-/* celle più piccole per parole lunghe */
+/* celle piccole */
 .cell.small{
   width:26px;
   height:26px;
   font-size:14px;
+}
+
+/* celle EXTRA-piccole SOLO per ROCCASICURA */
+.cell.xsmall{
+  width:22px;
+  height:22px;
+  font-size:12px;
 }
 
 .cell:focus{
@@ -93,7 +100,7 @@ button{
 
 <body>
 
-<h2>🎄 Giorno 14 – Parole di Roccasicura</h2>
+<h2>🎄 Giorno 14 – Cruciverba di Roccasicura</h2>
 
 <div id="game">
   <div id="question"></div>
@@ -104,15 +111,15 @@ button{
 
 <script>
 const words = [
-  { q:"Il nostro paese", a:"ROCCASICURA", view:["ROCCASICURA"], size:"small" },
-  { q:"Zona dove i ragazzi si divertono con la neve", a:"LAMACCHIA", view:["LA","MACCHIA"] },
-  { q:"Simbolo del Natale", a:"ALBERO", view:["ALBERO"] },
-  { q:"Associazione che promuove il paese", a:"PROLOCO", view:["PRO","LOCO"] },
-  { q:"Sede istituzionale del paese", a:"COMUNE", view:["COMUNE"] },
-  { q:"Luogo di incontro del paese", a:"PIAZZA", view:["PIAZZA"] },
-  { q:"Antica popolazione del territorio", a:"SANNITI", view:["SANNITI"] },
-  { q:"Statua ritrovata nel tratturo Castel di Sangro–Lucera", a:"ERCOLE", view:["ERCOLE"] },
-  { q:"Lab-Oratorio per bambini e ragazzi", a:"ARCADINOE", view:["ARCA","DI","NOE"] }
+  { q:"Il nostro paese", a:"ROCCASICURA", view:["ROCCASICURA"], size:"xsmall" },
+  { q:"Zona dove i ragazzi si divertono con la neve", a:"LAMACCHIA", view:["LA","MACCHIA"], size:"normal" },
+  { q:"Simbolo del Natale", a:"ALBERO", view:["ALBERO"], size:"normal" },
+  { q:"Associazione che promuove il paese", a:"PROLOCO", view:["PRO","LOCO"], size:"normal" },
+  { q:"Sede istituzionale del paese", a:"COMUNE", view:["COMUNE"], size:"normal" },
+  { q:"Luogo di incontro del paese", a:"PIAZZA", view:["PIAZZA"], size:"normal" },
+  { q:"Antica popolazione del territorio", a:"SANNITI", view:["SANNITI"], size:"normal" },
+  { q:"Statua ritrovata nel tratturo Castel di Sangro–Lucera", a:"ERCOLE", view:["ERCOLE"], size:"normal" },
+  { q:"Lab-Oratorio per bambini e ragazzi", a:"ARCADINOE", view:["ARCA","DI","NOE"], size:"normal" }
 ];
 
 let index = 0;
@@ -136,20 +143,24 @@ function load(){
 
     for(let i=0;i<part.length;i++){
       const input = document.createElement("input");
-      input.className = `cell ${current.size === "small" ? "small" : "normal"}`;
+
+      let cls = "normal";
+      if(current.size === "small") cls = "small";
+      if(current.size === "xsmall") cls = "xsmall";
+
+      input.className = `cell ${cls}`;
       input.maxLength = 1;
 
       input.addEventListener("input", () => {
         input.value = input.value.toUpperCase();
-        if(input.nextElementSibling) {
-          input.nextElementSibling.focus();
-        }
+        if(input.nextElementSibling) input.nextElementSibling.focus();
       });
 
       group.appendChild(input);
     }
 
     cellsEl.appendChild(group);
+
     if(pIndex < current.view.length - 1){
       const space = document.createElement("div");
       space.className = "space";
