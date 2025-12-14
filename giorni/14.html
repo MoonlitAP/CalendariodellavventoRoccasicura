@@ -10,59 +10,73 @@ body{
   margin:0;
   background:#0b0b0b;
   color:#fff;
-  font-family: Arial, sans-serif;
+  font-family:Arial,sans-serif;
   text-align:center;
 }
 h2{margin:18px 10px;}
 
 .grid{
   display:grid;
-  grid-template-columns: repeat(12, 36px);
-  gap:4px;
+  grid-template-columns: repeat(13, 34px);
+  gap:3px;
   justify-content:center;
   margin:20px auto;
 }
 
 .cell{
-  width:36px;
-  height:36px;
-  font-size:18px;
-  text-align:center;
-  text-transform:uppercase;
-  border:none;
-  border-radius:4px;
+  width:34px;
+  height:34px;
+  position:relative;
 }
-.white{ background:#fff; color:#000; }
-.black{ background:#333; }
+.cell input{
+  width:100%;
+  height:100%;
+  border:none;
+  text-align:center;
+  font-size:18px;
+  text-transform:uppercase;
+}
+.black{
+  background:#222;
+}
+.num{
+  position:absolute;
+  top:2px;
+  left:3px;
+  font-size:10px;
+  color:#555;
+}
+input{
+  background:#fff;
+  color:#000;
+}
 
 @media(max-width:420px){
   .grid{
-    grid-template-columns: repeat(12, 30px);
+    grid-template-columns: repeat(13, 28px);
   }
   .cell{
-    width:30px;
-    height:30px;
-    font-size:16px;
+    width:28px;
+    height:28px;
   }
 }
 
 .clues{
-  max-width:380px;
+  max-width:420px;
   margin:20px auto;
   text-align:left;
   font-size:14px;
   line-height:1.5;
 }
+
 button{
   background:#c00;
   color:#fff;
   border:none;
   padding:10px 16px;
   border-radius:6px;
-  font-size:15px;
-  margin:8px;
+  margin:6px;
 }
-#msg{margin-top:10px;}
 </style>
 </head>
 
@@ -71,20 +85,112 @@ button{
 <h2>🎄 Giorno 14 – Cruciverba di Roccasicura</h2>
 
 <div class="grid">
-<!-- RIGA 1 -->
-<input class="white cell" id="c1"><input class="white cell" id="c2"><input class="white cell" id="c3"><input class="white cell" id="c4"><input class="white cell" id="c5"><input class="white cell" id="c6"><input class="white cell" id="c7"><input class="white cell" id="c8"><input class="white cell" id="c9"><input class="white cell" id="c10"><input class="white cell" id="c11"><div class="black cell"></div>
 
-<!-- RIGA 2 -->
-<input class="white cell" id="c12"><input class="white cell" id="c13"><input class="white cell" id="c14"><input class="white cell" id="c15"><input class="white cell" id="c16"><input class="white cell" id="c17"><input class="white cell" id="c18"><input class="white cell" id="c19"><input class="white cell" id="c20"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
+<!-- riga 1 -->
+<div class="cell black"></div>
+<div class="cell"><span class="num">6</span><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell"><span class="num">1</span><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
 
-<!-- RIGA 3 -->
-<input class="white cell" id="c21"><input class="white cell" id="c22"><input class="white cell" id="c23"><input class="white cell" id="c24"><input class="white cell" id="c25"><input class="white cell" id="c26"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
+<!-- riga 2 -->
+<div class="cell black"></div>
+<div class="cell"><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell"><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
 
-<!-- RIGA 4 -->
-<input class="white cell" id="c27"><input class="white cell" id="c28"><input class="white cell" id="c29"><input class="white cell" id="c30"><input class="white cell" id="c31"><input class="white cell" id="c32"><input class="white cell" id="c33"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
+<!-- riga 3 -->
+<div class="cell"><span class="num">2</span><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
 
-<!-- RIGA 5 -->
-<input class="white cell" id="c34"><input class="white cell" id="c35"><input class="white cell" id="c36"><input class="white cell" id="c37"><input class="white cell" id="c38"><input class="white cell" id="c39"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
+<!-- riga 4 -->
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell"><span class="num">3</span><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+
+<!-- riga 5 -->
+<div class="cell"><span class="num">4</span><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+
+<!-- riga 6 -->
+<div class="cell"><span class="num">5</span><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell"><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+
+<!-- riga 7 -->
+<div class="cell black"></div>
+<div class="cell"><span class="num">9</span><input></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+<div class="cell black"></div>
+
 </div>
 
 <div class="clues">
@@ -101,46 +207,6 @@ button{
 8. Statua ritrovata nel tratturo Castel di Sangro–Lucera (6)<br>
 9. Lab-Oratorio per bambini e ragazzi (9)
 </div>
-
-<button onclick="verifica()">Verifica</button>
-<button onclick="aiuto()">Aiuto</button>
-
-<p id="msg"></p>
-
-<script>
-const soluzione={
-  // ROCCASICURA
-  c1:"R",c2:"O",c3:"C",c4:"C",c5:"A",c6:"S",c7:"I",c8:"C",c9:"U",c10:"R",c11:"A",
-  // LAMACCHIA
-  c12:"L",c13:"A",c14:"M",c15:"A",c16:"C",c17:"C",c18:"H",c19:"I",c20:"A",
-  // ALBERO
-  c21:"A",c22:"L",c23:"B",c24:"E",c25:"R",c26:"O",
-  // PROLOCO
-  c27:"P",c28:"R",c29:"O",c30:"L",c31:"O",c32:"C",c33:"O",
-  // COMUNE
-  c34:"C",c35:"O",c36:"M",c37:"U",c38:"N",c39:"E"
-};
-
-function verifica(){
-  let ok=true;
-  for(let id in soluzione){
-    const el=document.getElementById(id);
-    if(el && el.value.toUpperCase()!==soluzione[id]) ok=false;
-  }
-  document.getElementById("msg").innerText=
-    ok?"🎉 Complimenti! Cruciverba completato!":"❌ Ci sono errori, riprova.";
-}
-
-function aiuto(){
-  for(let id in soluzione){
-    const el=document.getElementById(id);
-    if(el && el.value===""){
-      el.value=soluzione[id];
-      break;
-    }
-  }
-}
-</script>
 
 </body>
 </html>
