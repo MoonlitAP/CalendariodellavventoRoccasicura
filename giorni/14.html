@@ -10,54 +10,59 @@ body{
   margin:0;
   background:#0b0b0b;
   color:#fff;
-  font-family:Arial, sans-serif;
+  font-family: Arial, sans-serif;
   text-align:center;
 }
-h2{margin:20px 10px;}
+h2{margin:18px 10px;}
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(7,42px);
+  grid-template-columns: repeat(12, 36px);
   gap:4px;
   justify-content:center;
-  margin:15px auto;
+  margin:20px auto;
 }
 
 .cell{
-  width:42px;
-  height:42px;
+  width:36px;
+  height:36px;
+  font-size:18px;
   text-align:center;
-  font-size:22px;
   text-transform:uppercase;
   border:none;
+  border-radius:4px;
 }
+.white{ background:#fff; color:#000; }
+.black{ background:#333; }
 
-.black{
-  background:#333;
-}
-
-.white{
-  background:#fff;
-  color:#000;
+@media(max-width:420px){
+  .grid{
+    grid-template-columns: repeat(12, 30px);
+  }
+  .cell{
+    width:30px;
+    height:30px;
+    font-size:16px;
+  }
 }
 
 .clues{
-  max-width:360px;
+  max-width:380px;
   margin:20px auto;
   text-align:left;
   font-size:14px;
   line-height:1.5;
 }
-
 button{
-  margin:10px;
-  padding:10px 16px;
   background:#c00;
   color:#fff;
   border:none;
+  padding:10px 16px;
   border-radius:6px;
-  font-size:16px;
+  font-size:15px;
+  margin:8px;
 }
+#msg{margin-top:10px;}
 </style>
 </head>
 
@@ -66,85 +71,35 @@ button{
 <h2>🎄 Giorno 14 – Cruciverba di Roccasicura</h2>
 
 <div class="grid">
-  <!-- R1 -->
-  <input class="white cell" id="c1">
-  <input class="white cell" id="c2">
-  <input class="white cell" id="c3">
-  <input class="white cell" id="c4">
-  <input class="white cell" id="c5">
-  <input class="white cell" id="c6">
-  <input class="white cell" id="c7">
+<!-- RIGA 1 -->
+<input class="white cell" id="c1"><input class="white cell" id="c2"><input class="white cell" id="c3"><input class="white cell" id="c4"><input class="white cell" id="c5"><input class="white cell" id="c6"><input class="white cell" id="c7"><input class="white cell" id="c8"><input class="white cell" id="c9"><input class="white cell" id="c10"><input class="white cell" id="c11"><div class="black cell"></div>
 
-  <!-- R2 -->
-  <input class="white cell" id="c8">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c9">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c10">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c11">
+<!-- RIGA 2 -->
+<input class="white cell" id="c12"><input class="white cell" id="c13"><input class="white cell" id="c14"><input class="white cell" id="c15"><input class="white cell" id="c16"><input class="white cell" id="c17"><input class="white cell" id="c18"><input class="white cell" id="c19"><input class="white cell" id="c20"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
 
-  <!-- R3 -->
-  <input class="white cell" id="c12">
-  <input class="white cell" id="c13">
-  <input class="white cell" id="c14">
-  <input class="white cell" id="c15">
-  <input class="white cell" id="c16">
-  <input class="white cell" id="c17">
-  <input class="white cell" id="c18">
+<!-- RIGA 3 -->
+<input class="white cell" id="c21"><input class="white cell" id="c22"><input class="white cell" id="c23"><input class="white cell" id="c24"><input class="white cell" id="c25"><input class="white cell" id="c26"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
 
-  <!-- R4 -->
-  <input class="white cell" id="c19">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c20">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c21">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c22">
+<!-- RIGA 4 -->
+<input class="white cell" id="c27"><input class="white cell" id="c28"><input class="white cell" id="c29"><input class="white cell" id="c30"><input class="white cell" id="c31"><input class="white cell" id="c32"><input class="white cell" id="c33"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
 
-  <!-- R5 -->
-  <input class="white cell" id="c23">
-  <input class="white cell" id="c24">
-  <input class="white cell" id="c25">
-  <input class="white cell" id="c26">
-  <input class="white cell" id="c27">
-  <input class="white cell" id="c28">
-  <input class="white cell" id="c29">
-
-  <!-- R6 -->
-  <input class="white cell" id="c30">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c31">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c32">
-  <input class="black cell" disabled>
-  <input class="white cell" id="c33">
-
-  <!-- R7 -->
-  <input class="white cell" id="c34">
-  <input class="white cell" id="c35">
-  <input class="white cell" id="c36">
-  <input class="white cell" id="c37">
-  <input class="white cell" id="c38">
-  <input class="white cell" id="c39">
-  <input class="white cell" id="c40">
+<!-- RIGA 5 -->
+<input class="white cell" id="c34"><input class="white cell" id="c35"><input class="white cell" id="c36"><input class="white cell" id="c37"><input class="white cell" id="c38"><input class="white cell" id="c39"><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div><div class="black cell"></div>
 </div>
 
 <div class="clues">
 <b>ORIZZONTALI</b><br>
-1. Il nostro paese (7)<br>
-3. Zona dove i ragazzi si divertono con la neve (7)<br>
-5. Simbolo del Natale (5)<br>
-7. Antica struttura difensiva del paese (8)<br><br>
+1. Il nostro paese (11)<br>
+2. Zona dove i ragazzi si divertono con la neve (9)<br>
+3. Simbolo del Natale (6)<br>
+4. Associazione che promuove il paese (7)<br>
+5. Sede istituzionale del paese (6)<br><br>
 
 <b>VERTICALI</b><br>
-2. Luogo di incontro del paese (6)<br>
-4. Antica popolazione del territorio (7)<br>
-6. Statua ritrovata nel tratturo Castel di Sangro–Lucera (6)<br>
-8. Luogo sacro di riferimento per la comunità (9)<br>
-9. Associazione che promuove il paese (7)<br>
-10. Insieme delle persone che vivono il paese (8)<br>
-11. Lab-Oratorio per bambini e ragazzi (9)
+6. Luogo di incontro del paese (6)<br>
+7. Antica popolazione del territorio (7)<br>
+8. Statua ritrovata nel tratturo Castel di Sangro–Lucera (6)<br>
+9. Lab-Oratorio per bambini e ragazzi (9)
 </div>
 
 <button onclick="verifica()">Verifica</button>
@@ -153,21 +108,17 @@ button{
 <p id="msg"></p>
 
 <script>
-const soluzione = {
+const soluzione={
   // ROCCASICURA
-  c1:"R",c2:"O",c3:"C",c4:"C",c5:"A",c6:"S",c7:"I",
+  c1:"R",c2:"O",c3:"C",c4:"C",c5:"A",c6:"S",c7:"I",c8:"C",c9:"U",c10:"R",c11:"A",
   // LAMACCHIA
-  c12:"L",c13:"A",c14:"M",c15:"A",c16:"C",c17:"C",c18:"H",
+  c12:"L",c13:"A",c14:"M",c15:"A",c16:"C",c17:"C",c18:"H",c19:"I",c20:"A",
   // ALBERO
-  c23:"A",c24:"L",c25:"B",c26:"E",c27:"R",
-  // CASTELLO
-  c34:"C",c35:"A",c36:"S",c37:"T",c38:"E",c39:"L",c40:"L",
-  // Verticali (lettere incrociate)
-  c8:"P",c19:"I",c30:"A",c35:"Z",c24:"L",c13:"A",   // PIAZZA
-  c9:"S",c20:"A",c31:"N",c36:"N",c25:"I",c14:"T",c37:"I", // SANNITI
-  c10:"E",c21:"R",c32:"C",c38:"E",c27:"L",c15:"E", // ERCOLE
-  c11:"S",c22:"A",c33:"N",c39:"T",c28:"U",c16:"A",c40:"R",c17:"I",c29:"O", // SANTUARIO
-  c18:"H",c29:"O",c32:"C",c17:"C",c27:"R",c37:"T",c38:"A",c39:"L", // COMUNITÀ (semplificata)
+  c21:"A",c22:"L",c23:"B",c24:"E",c25:"R",c26:"O",
+  // PROLOCO
+  c27:"P",c28:"R",c29:"O",c30:"L",c31:"O",c32:"C",c33:"O",
+  // COMUNE
+  c34:"C",c35:"O",c36:"M",c37:"U",c38:"N",c39:"E"
 };
 
 function verifica(){
@@ -176,14 +127,17 @@ function verifica(){
     const el=document.getElementById(id);
     if(el && el.value.toUpperCase()!==soluzione[id]) ok=false;
   }
-  document.getElementById("msg").innerText =
-    ok ? "🎉 Complimenti! Cruciverba completato!" : "❌ Ci sono degli errori.";
+  document.getElementById("msg").innerText=
+    ok?"🎉 Complimenti! Cruciverba completato!":"❌ Ci sono errori, riprova.";
 }
 
 function aiuto(){
   for(let id in soluzione){
     const el=document.getElementById(id);
-    if(el && el.value==="") el.value=soluzione[id];
+    if(el && el.value===""){
+      el.value=soluzione[id];
+      break;
+    }
   }
 }
 </script>
