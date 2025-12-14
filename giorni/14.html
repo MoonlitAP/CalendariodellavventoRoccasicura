@@ -32,19 +32,20 @@ h2{
 
 #cells{
   display:flex;
+  flex-wrap:wrap;
   gap:6px;
   justify-content:center;
   margin-bottom:16px;
 }
 
 .cell{
-  width:32px;
-  height:32px;
+  width:30px;
+  height:30px;
   border:1px solid #666;
   background:#fff;
   color:#000;
   text-align:center;
-  font-size:18px;
+  font-size:16px;
   font-weight:bold;
   text-transform:uppercase;
 }
@@ -82,15 +83,15 @@ button{
 
 <script>
 const words = [
-  { q:"Il nostro paese", a:"ROCCASICURA" },
-  { q:"Zona dove i ragazzi si divertono con la neve", a:"LAMACCHIA" },
-  { q:"Simbolo del Natale", a:"ALBERO" },
-  { q:"Associazione che promuove il paese", a:"PROLOCO" },
-  { q:"Sede istituzionale del paese", a:"COMUNE" },
-  { q:"Luogo di incontro del paese", a:"PIAZZA" },
-  { q:"Antica popolazione del territorio", a:"SANNITI" },
-  { q:"Statua ritrovata nel tratturo Castel di Sangro–Lucera", a:"ERCOLE" },
-  { q:"Lab-Oratorio per bambini e ragazzi", a:"ARCADINOE" }
+  { q:"Il nostro paese", a:"ROCCASICURA" },   // 11 lettere ✔
+  { q:"Zona dove i ragazzi si divertono con la neve", a:"LAMACCHIA" }, // 9
+  { q:"Simbolo del Natale", a:"ALBERO" },     // 6
+  { q:"Associazione che promuove il paese", a:"PROLOCO" }, // 7
+  { q:"Sede istituzionale del paese", a:"COMUNE" }, // 6
+  { q:"Luogo di incontro del paese", a:"PIAZZA" }, // 6
+  { q:"Antica popolazione del territorio", a:"SANNITI" }, // 7
+  { q:"Statua ritrovata nel tratturo Castel di Sangro–Lucera", a:"ERCOLE" }, // 6
+  { q:"Lab-Oratorio per bambini e ragazzi", a:"ARCADINOE" } // 9
 ];
 
 let index = 0;
@@ -101,14 +102,17 @@ const msgEl = document.getElementById("msg");
 
 function load(){
   msgEl.textContent = "";
-  questionEl.innerHTML = `<b>${index+1}.</b> ${words[index].q} <em>(${words[index].a.length})</em>`;
+  const current = words[index];
+  questionEl.innerHTML =
+    `<b>${index+1}.</b> ${current.q} <em>(${current.a.length})</em>`;
+
   cellsEl.innerHTML = "";
 
-  for(let i=0;i<words[index].a.length;i++){
+  for(let i = 0; i < current.a.length; i++){
     const input = document.createElement("input");
     input.className = "cell";
     input.maxLength = 1;
-    input.addEventListener("input", ()=>{
+    input.addEventListener("input", () => {
       input.value = input.value.toUpperCase();
       if(input.nextElementSibling) input.nextElementSibling.focus();
     });
@@ -118,7 +122,9 @@ function load(){
 
 function check(){
   let value = "";
-  document.querySelectorAll(".cell").forEach(c=> value += c.value.toUpperCase());
+  document.querySelectorAll(".cell").forEach(c => {
+    value += c.value.toUpperCase();
+  });
 
   if(value === words[index].a){
     index++;
@@ -127,7 +133,8 @@ function check(){
     } else {
       questionEl.innerHTML = "🎉 Complimenti!";
       cellsEl.innerHTML = "";
-      msgEl.innerHTML = "Hai completato tutte le parole.<br>🎄 Buon Natale da Roccasicura!";
+      msgEl.innerHTML =
+        "Hai completato tutte le parole.<br><br>🎄 Buon Natale da Roccasicura!";
     }
   } else {
     msgEl.textContent = "❌ Riprova";
