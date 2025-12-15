@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🎄 Giorno 15 – Trova l’Intruso</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Ubuntu", sans-serif;
+  background: linear-gradient(180deg, #8b0000, #5a0000);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#app {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+#counter {
+  font-size: 16px;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.option {
+  background: #0b6623;
+  border-radius: 16px;
+  padding: 22px 10px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.option:active {
+  transform: scale(0.96);
+}
+
+.option.correct {
+  background: #2ecc71;
+}
+
+.option.wrong {
+  background: #c0392b;
+}
+
+#feedback {
+  margin-top: 20px;
+  font-size: 18px;
+  min-height: 24px;
+}
+
+#next {
+  display: none;
+  margin-top: 20px;
+  background: #ffd700;
+  color: #5a0000;
+  border: none;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 18px;
+  width: 100%;
+  font-weight: bold;
+}
+
+#end {
+  display: none;
+}
+
+#end h2 {
+  font-size: 26px;
+}
+
+#restart {
+  margin-top: 20px;
+  background: #ffd700;
+  color: #5a0000;
+  border: none;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 18px;
+  width: 100%;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+  <h1>🧠 Trova l’Intruso</h1>
+  <div id="counter"></div>
+
+  <div id="grid"></div>
+
+  <div id="feedback"></div>
+  <button id="next" onclick="nextQuestion()">Continua</button>
+
+  <div id="end">
+    <h2>🎉 Fine gioco!</h2>
+    <p id="finalScore"></p>
+    <button id="restart" onclick="startGame()">Rigioca</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { items: ["Medioevo", "Rinascimento", "Età moderna", "Natale"], correct: 3 },
+  { items: ["Avvento", "Vigilia", "Natale", "Ferragosto"], correct: 3 },
+  { items: ["Borgo", "Paese", "Città", "Continente"], correct: 3 },
+  { items: ["Albero di Natale", "Presepe", "Stella", "Ombrellone"], correct: 3 },
+  { items: ["Europa", "Asia", "Africa", "Lapponia"], correct: 3 },
+  { items: ["Romanico", "Gotico", "Barocco", "Moderno"], correct: 3 },
+  { items: ["Corona dell’Avvento", "Candela", "Stella cometa", "Fuochi d’artificio"], correct: 3 },
+  { items: ["Castello", "Torre", "Mura", "Grattacielo"], correct: 3 },
+  { items: ["Storia", "Geografia", "Letteratura", "Velocità"], correct: 3 },
+  { items: ["Rinascimento", "Illuminismo", "Rivoluzione industriale", "Epoca dei dinosauri"], correct: 3 },
+  { items: ["Babbo Natale", "Renne", "Slitta", "Cammello"], correct: 3 },
+  { items: ["Comune", "Regione", "Stato", "Quartiere"], correct: 3 },
+  { items: ["Natale", "Pasqua", "Epifania", "Capodanno"], correct: 3 },
+  { items: ["Tradizione", "Comunità", "Cultura", "Isolamento"], correct: 3 },
+  { items: ["Libro", "Archivio", "Museo", "Discoteca"], correct: 3 }
+];
+
+let current = 0;
+let score = 0;
+let locked = false;
+
+const grid = document.getElementById("grid");
+const feedback = document.getElementById("feedback");
+const counter = document.getElementById("counter");
+const nextBtn = document.getElementById("next");
+const endEl = document.getElementById("end");
+
+function startGame() {
+  current = 0;
+  score = 0;
+  endEl.style.display = "none";
+  loadQuestion();
+}
+
+function loadQuestion() {
+  locked = false;
+  feedback.textContent = "";
+  nextBtn.style.display = "none";
+  grid.innerHTML = "";
+
+  counter.textContent = `Domanda ${current + 1} di ${questions.length}`;
+
+  const q = questions[current];
+  q.items.forEach((text, i) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.textContent = text;
+    div.onclick = () => select(i, div);
+    grid.appendChild(div);
+  });
+}
+
+function select(index, element) {
+  if (locked) return;
+  locked = true;
+
+  const options = document.querySelectorAll(".option");
+  options.forEach((opt, i) => {
+    if (i === questions[current].correct) {
+      opt.classList.add("correct");
+    }
+  });
+
+  if (index === questions[current].correct) {
+    score++;
+    feedback.textContent = "✅ Corretto!";
+  } else {
+    element.classList.add("wrong");
+    feedback.textContent = "❌ Non è l’intruso";
+  }
+
+  nextBtn.style.display = "block";
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    endGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+function endGame() {
+  grid.innerHTML = "";
+  counter.textContent = "";
+  feedback.textContent = "";
+  nextBtn.style.display = "none";
+  endEl.style.display = "block";
+  document.getElementById("finalScore").textContent =
+    `Hai trovato ${score} intrusi su ${questions.length}`;
+}
+
+startGame();
+</script>
+
+</body>
+</html>
