@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🐰 Carrera de Conejos - Fibonacci Original</title>
+<title>🐰 Carrera de Conejos - Spirale Perfetta</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root { --bg: #e8f5e9; --wood: #d2a679; --grass: #81c784; }
@@ -15,75 +15,71 @@
     height: 100vh; padding: 10px; overflow: hidden;
   }
 
-  /* Overlay Istruzioni */
   .overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.75); 
     display: flex; align-items: center; justify-content: center; z-index: 100;
   }
   .modal {
     background: #fffdf5; padding: 25px; border-radius: 30px; border: 6px solid var(--wood);
-    width: 90%; max-width: 350px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    width: 90%; max-width: 350px; text-align: center;
   }
 
-  /* Tabellone Circolare */
   #game-container {
-    position: relative; width: 95vmin; height: 75vmin; max-width: 500px;
+    position: relative; width: 95vmin; height: 80vmin; max-width: 500px;
     display: flex; align-items: center; justify-content: center;
   }
   #board {
-    width: 85%; height: 100%; background: var(--grass); border-radius: 50%; 
+    width: 85%; height: 95%; background: var(--grass); border-radius: 50%; 
     position: relative; border: 6px solid #4a8c4d; box-shadow: inset 0 0 40px rgba(0,0,0,0.1);
   }
 
-  /* Caselle numerate */
+  /* Caselle: Dimensioni ridotte per non sovrapporsi */
   .cell { 
-    width: 10%; height: 10%; background: #fdf5e6; border-radius: 20%; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 3vmin; 
-    font-weight: bold; color: #5d4037; border: 1.5px solid #deb887;
-    transform: translate(-50%, -50%); z-index: 2; box-shadow: 0 2px 0 #deb887;
+    width: 9%; height: 9%; background: #fdf5e6; border-radius: 20%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 2.8vmin; 
+    font-weight: bold; color: #5d4037; border: 1.2px solid #deb887;
+    transform: translate(-50%, -50%); z-index: 2;
   }
   .hole { background: #222 !important; border: none; box-shadow: inset 0 3px 5px #000; color: transparent !important; }
 
-  /* Carota Finale al centro */
+  /* Carota molto piccola per mostrare il 30 */
   #carrot { 
-    width: 12%; height: 12%; position: absolute; 
+    width: 8%; height: 8%; position: absolute; 
     top: 50%; left: 50%; transform: translate(-50%, -50%); 
     display: flex; align-items: center; justify-content: center; 
-    font-size: 6vmin; z-index: 1;
+    font-size: 5vmin; z-index: 1; pointer-events: none;
   }
 
-  /* Coniglietti */
   .rabbit { 
     width: 10%; height: 10%; position: absolute; z-index: 10;
-    transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
     transform: translate(-50%, -50%);
     background-size: contain; background-repeat: no-repeat; background-position: center;
   }
   .player { background-image: url('../img/rabbit_1.png'); }
   .cpu { background-image: url('../img/rabbit_2.png'); }
   
-  .active-move { animation: jump 0.5s infinite alternate; filter: drop-shadow(0 0 10px #fff); }
-  @keyframes jump { from { margin-top: 0; } to { margin-top: -10px; } }
+  .active-move { animation: jump 0.5s infinite alternate; filter: drop-shadow(0 0 8px #fff); }
+  @keyframes jump { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -65%) scale(1.1); } }
 
-  /* Basi Esterne (Lontane dal tabellone) */
+  /* Basi Esterne (Dritte) */
   .base { 
-    position: absolute; display: flex; flex-direction: column; gap: 12px; 
-    padding: 10px; background: rgba(255,255,255,0.4); border-radius: 20px;
-    width: 55px; align-items: center; top: 50%; transform: translateY(-50%);
+    position: absolute; display: flex; flex-direction: column; gap: 10px; 
+    padding: 10px; background: rgba(255,255,255,0.3); border-radius: 20px;
+    width: 50px; align-items: center; top: 50%; transform: translateY(-50%);
   }
   .p-base { left: -5%; }
   .c-base { right: -5%; }
-  .base .rabbit { position: static; transform: none; width: 40px; height: 40px; }
+  .base .rabbit { position: static; transform: none; width: 38px; height: 38px; }
 
-  /* Interfaccia */
-  .controls { width: 100%; text-align: center; padding-bottom: 10px; }
+  .controls { width: 100%; text-align: center; }
   #msg {
-    background: white; padding: 12px; border-radius: 20px; border: 3px solid var(--wood);
-    font-weight: bold; margin-bottom: 10px; color: #2e7d32; font-size: 16px;
+    background: white; padding: 10px; border-radius: 20px; border: 3px solid var(--wood);
+    font-weight: bold; margin-bottom: 8px; color: #2e7d32; font-size: 15px;
   }
   .btn {
-    padding: 15px 45px; border: none; border-radius: 30px;
-    background: #ff9800; color: white; font-size: 20px; font-weight: bold;
+    padding: 15px 40px; border: none; border-radius: 30px;
+    background: #ff9800; color: white; font-size: 18px; font-weight: bold;
     box-shadow: 0 5px 0 #e65100; cursor: pointer;
   }
 </style>
@@ -92,22 +88,21 @@
 
 <div id="startUI" class="overlay">
   <div class="modal">
-    <h2 style="color:#2e7d32">🐰 Carrera de Conejos</h2>
-    <p style="text-align:left; color:#5d4037; font-size:15px; line-height:1.4">
-      Porta i tuoi coniglietti al centro del prato!<br><br>
-      • <b>Inizio:</b> Casella 1 (esterna).<br>
-      • <b>Traguardo:</b> Casella 30 (carota).<br>
-      • <b>Attenzione:</b> Se esce 6, i buchi si spostano!<br>
-      • <b>Caduta:</b> Se finisci nel buco, torni in base.
+    <h2 style="color:#2e7d32">🐰 Giorno 16</h2>
+    <p style="text-align:left; color:#5d4037; font-size:15px;">
+      Porta i coniglietti al centro!<br><br>
+      • Parti dal <b>1</b> all'esterno.<br>
+      • Arriva al <b>30</b> (la carota).<br>
+      • Se cade nel buco, torni in base.
     </p>
-    <button class="btn" onclick="start()">GIOCA</button>
+    <button class="btn" onclick="start()">INIZIA</button>
   </div>
 </div>
 
 <div id="winUI" class="overlay" style="display:none">
   <div class="modal">
     <h1 id="winTxt">VITTORIA!</h1>
-    <button class="btn" onclick="location.reload()">RIPROVA</button>
+    <button class="btn" onclick="location.reload()">RIGIOCA</button>
   </div>
 </div>
 
@@ -118,7 +113,7 @@
 </div>
 
 <div class="controls">
-  <div id="msg">Tira il dado per iniziare!</div>
+  <div id="msg">Tira il dado!</div>
   <button id="diceBtn" class="btn" onclick="roll()">🎲 TIRA IL DADO</button>
 </div>
 
@@ -131,18 +126,18 @@ let turn = "player";
 let currentDice = 0;
 let state = "wait"; 
 const path = [];
-let holes = [8, 16, 24]; 
+let holes = [5, 12, 21]; 
 
 function start() { document.getElementById("startUI").style.display = "none"; }
 
-// Costruzione Spirale Armoniosa 1 -> 30
+// SPIRALE AMPIA: Inizia da 1 (esterno) a 30 (centro)
 function buildPath() {
-  const steps = 30;
-  for (let i = 0; i < steps; i++) {
-    // Angolo costante per la forma a chiocciola
-    const angle = 0.55 * i; 
-    // Il raggio diminuisce linearmente per andare dall'esterno all'interno
-    const r = 42 - (i * 1.35); 
+  const totalSteps = 30;
+  for (let i = 0; i < totalSteps; i++) {
+    // Angolo calcolato per una spirale fluida
+    const angle = 0.52 * i; 
+    // Raggio decrescente: da 42% (esterno) a 5% (centro)
+    const r = 42 - (i * 1.3); 
     const x = 50 + r * Math.cos(angle);
     const y = 50 + r * Math.sin(angle);
     path.push({ x: x + "%", y: y + "%" });
@@ -153,7 +148,7 @@ buildPath();
 function draw() {
   document.querySelectorAll('.cell').forEach(c => c.remove());
   path.forEach((p, i) => {
-    const num = i + 1; // 1 è fuori, 30 è dentro
+    const num = i + 1;
     const c = document.createElement("div");
     c.className = "cell" + (holes.includes(num) ? " hole" : "");
     c.style.left = p.x; c.style.top = p.y;
@@ -166,7 +161,7 @@ draw();
 function swapHoles() {
   let h = [];
   while(h.length < 3) {
-    let r = Math.floor(Math.random() * 26) + 3;
+    let r = Math.floor(Math.random() * 25) + 3;
     if(!h.includes(r)) h.push(r);
   }
   holes = h;
@@ -181,8 +176,7 @@ function init() {
     const isP = i < 3;
     const r = document.createElement("div");
     r.className = "rabbit " + (isP ? "player" : "cpu");
-    r.pos = -1; 
-    r.id = i; r.type = isP ? "player" : "cpu";
+    r.pos = -1; r.id = i; r.type = isP ? "player" : "cpu";
     r.onclick = () => tap(r);
     isP ? pb.appendChild(r) : cb.appendChild(r);
     conigli.push(r);
@@ -207,17 +201,15 @@ function roll() {
   currentDice = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
   msg.innerHTML = `🎲 Risultato: <b>${currentDice}</b>`;
-  if (currentDice === 6) { 
-    swapHoles(); 
-    setTimeout(go, 600); 
-  } else { go(); }
+  if (currentDice === 6) { swapHoles(); setTimeout(go, 600); } 
+  else { go(); }
 }
 
 function go() {
   if (turn === "player") {
     state = "pick";
     conigli.filter(r => r.type === "player").forEach(r => r.classList.add("active-move"));
-    msg.innerHTML += " - Scegli un coniglio!";
+    msg.innerHTML += " - Muovi un coniglio!";
   } else { setTimeout(cpu, 1000); }
 }
 
@@ -230,7 +222,6 @@ function tap(r) {
 function move(r) {
   state = "move";
   r.pos += currentDice;
-
   if (r.pos >= 29) { // Casella 30
     r.pos = 29; place(r);
     setTimeout(() => {
@@ -239,13 +230,9 @@ function move(r) {
     }, 400);
     return;
   }
-
   place(r);
   if (holes.includes(r.pos + 1)) {
-    setTimeout(() => { 
-        r.pos = -1; place(r); 
-        msg.innerHTML = "🌀 Ouch! Sei caduto nel buco.";
-    }, 700);
+    setTimeout(() => { r.pos = -1; place(r); msg.innerHTML = "🌀 Caduto nel buco!"; }, 700);
   }
   setTimeout(next, 1000);
 }
@@ -259,7 +246,7 @@ function cpu() {
 function next() {
   turn = turn === "player" ? "cpu" : "player";
   state = "wait";
-  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 Il PC sta pensando...";
+  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 Il PC gioca...";
   diceBtn.disabled = (turn === "cpu");
   if (turn === "cpu") setTimeout(roll, 600);
 }
