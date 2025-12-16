@@ -8,95 +8,118 @@
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin: 0;
-  font-family: 'Ubuntu', sans-serif;
-  background: #eaf6e6;
-  text-align: center;
-}
+  body {
+    margin: 0;
+    font-family: 'Ubuntu', sans-serif;
+    background: #eaf6e6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
 
-h1 {
-  margin: 10px 0;
-}
+  h1 { margin: 10px 0; color: #2e7d32; }
 
-#board {
-  margin: 15px auto;
-  width: 320px;
-  height: 320px;
-  position: relative;
-  background: #4caf50;
-  border-radius: 50%;
-  border: 6px solid #2e7d32;
-}
+  #board {
+    margin: 20px;
+    width: 340px;
+    height: 340px;
+    position: relative;
+    background: #4caf50;
+    border-radius: 50%;
+    border: 8px solid #2e7d32;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
 
-.cell {
-  width: 26px;
-  height: 26px;
-  background: #ffeb3b;
-  border-radius: 50%;
-  position: absolute;
-}
+  .cell {
+    width: 28px;
+    height: 28px;
+    background: #ffeb3b;
+    border-radius: 50%;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #f57f17;
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1);
+  }
 
-.hole {
-  background: #000;
-}
+  .hole {
+    background: #333;
+    box-shadow: inset 0 4px 6px rgba(0,0,0,0.6);
+  }
 
-#carrot {
-  width: 42px;
-  height: 42px;
-  background: orange;
-  border-radius: 50%;
-  position: absolute;
-  top: 139px;
-  left: 139px;
-  line-height: 42px;
-  font-size: 20px;
-}
+  #carrot {
+    width: 50px;
+    height: 50px;
+    background: #ff9800;
+    border-radius: 50%;
+    position: absolute;
+    top: 145px;
+    left: 145px;
+    line-height: 50px;
+    font-size: 28px;
+    z-index: 10;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
 
-.rabbit {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  position: absolute;
-  z-index: 5;
-}
+  .rabbit {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 20;
+    border: 2px solid white;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+  }
 
-.player {
-  background: hotpink;
-}
+  .player { background: #e91e63; } /* Rosa acceso */
+  .cpu { background: #673ab7; }    /* Viola */
 
-.cpu {
-  background: purple;
-}
+  #controls { margin-top: 15px; }
 
-#controls {
-  margin-top: 10px;
-}
+  button {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 30px;
+    background: #ff9800;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px #e65100;
+    transition: 0.2s;
+  }
 
-button {
-  padding: 10px 22px;
-  border: none;
-  border-radius: 20px;
-  background: #ff9800;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
+  button:active {
+    box-shadow: 0 2px #e65100;
+    transform: translateY(2px);
+  }
 
-button:disabled {
-  opacity: 0.5;
-}
+  button:disabled {
+    background: #ccc;
+    box-shadow: 0 4px #999;
+    cursor: not-allowed;
+  }
 
-#info {
-  margin-top: 10px;
-  font-weight: bold;
-}
+  #info {
+    margin-top: 15px;
+    font-size: 1.1em;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
 </style>
 </head>
 
 <body>
 
-<h1>🐰 Giorno 16 – Carrera de Conejos</h1>
+<h1>🐰 Carrera de Conejos</h1>
 
 <div id="board">
   <div id="carrot">🥕</div>
@@ -106,7 +129,7 @@ button:disabled {
   <button id="diceBtn" onclick="rollDice()">🎲 Tira il dado</button>
 </div>
 
-<div id="info">Turno: Giocatore</div>
+<div id="info">Tocca il bottone per iniziare!</div>
 
 <script>
 const board = document.getElementById("board");
@@ -115,42 +138,44 @@ const diceBtn = document.getElementById("diceBtn");
 
 let turn = "player";
 let dice = 0;
-
-/* PERCORSO A SPIRALE */
 const path = [];
-const holes = [6, 13, 19]; // buchi fissi
+const holes = [7, 15, 22]; // Buchi posizionati lungo il percorso
 
+/* CREAZIONE PERCORSO A SPIRALE REALE */
 function createPath() {
-  const radii = [135, 110, 85, 60];
-  let index = 0;
-
-  radii.forEach(r => {
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      const x = 160 + r * Math.cos(angle) - 13;
-      const y = 160 + r * Math.sin(angle) - 13;
-      path.push({ x, y, index });
-      index++;
-    }
-  });
+  const totalSteps = 28; 
+  const centerX = 170;
+  const centerY = 170;
+  
+  for (let i = 0; i < totalSteps; i++) {
+    // Il raggio diminuisce progressivamente verso il centro
+    const r = 130 - (i * 4); 
+    // L'angolo aumenta per girare attorno al centro
+    const angle = i * 0.7; 
+    
+    const x = centerX + r * Math.cos(angle) - 14;
+    const y = centerY + r * Math.sin(angle) - 14;
+    path.push({ x, y });
+  }
 }
 
 createPath();
 
-/* DISEGNO CASELLE */
+/* DISEGNO DELLE CASELLE */
 path.forEach((p, i) => {
   const c = document.createElement("div");
   c.className = "cell" + (holes.includes(i) ? " hole" : "");
   c.style.left = p.x + "px";
   c.style.top = p.y + "px";
+  // Opzionale: aggiungi numero casella per chiarezza
+  // c.textContent = i + 1; 
   board.appendChild(c);
 });
 
-/* CONIGLI */
+/* CREAZIONE CONIGLI */
 let rabbits = [];
-
 function createRabbits(type) {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 1; i++) { // Iniziamo con 1 coniglio per semplicità
     const r = document.createElement("div");
     r.className = "rabbit " + type;
     r.pos = -1;
@@ -164,62 +189,68 @@ createRabbits("player");
 createRabbits("cpu");
 
 function updateRabbit(r) {
-  if (r.pos >= 0) {
-    r.style.left = path[r.pos].x + 4 + "px";
-    r.style.top = path[r.pos].y + 4 + "px";
+  if (r.pos >= 0 && r.pos < path.length) {
+    r.style.left = path[r.pos].x + 3 + "px";
+    r.style.top = path[r.pos].y + 3 + "px";
   } else {
-    r.style.left = "150px";
-    r.style.top = r.type === "player" ? "300px" : "0px";
+    // Posizione di partenza fuori dal cerchio
+    r.style.left = r.type === "player" ? "20px" : "300px";
+    r.style.top = "300px";
   }
 }
 
 rabbits.forEach(updateRabbit);
 
-/* DADO */
+/* LOGICA DADO */
 function rollDice() {
   diceBtn.disabled = true;
   dice = Math.floor(Math.random() * 6) + 1;
-  info.textContent = `🎲 È uscito ${dice}`;
-  setTimeout(playTurn, 900);
+  info.innerHTML = `🎲 Risultato: <strong>${dice}</strong>`;
+  
+  setTimeout(playTurn, 600);
 }
 
-/* TURNO */
+/* LOGICA TURNO */
 function playTurn() {
-  const active = rabbits.filter(r => r.type === turn);
+  const currentRabbit = rabbits.find(r => r.type === turn);
+  
+  // Muovi il coniglio
+  currentRabbit.pos += dice;
 
-  // sceglie il coniglio più avanti
-  let r = active.sort((a, b) => b.pos - a.pos)[0];
-
-  r.pos += dice;
-
-  // vittoria
-  if (r.pos >= path.length) {
-    endGame(turn);
+  // Controllo Vittoria
+  if (currentRabbit.pos >= path.length - 1) {
+    currentRabbit.pos = path.length - 1; // Ferma alla carota
+    updateRabbit(currentRabbit);
+    setTimeout(() => endGame(turn), 500);
     return;
   }
 
-  // buco solo se esce 6
-  if (dice === 6 && holes.includes(r.pos)) {
-    r.pos = -1;
+  updateRabbit(currentRabbit);
+
+  // Controllo Buco (cade se finisce esattamente sopra)
+  if (holes.includes(currentRabbit.pos)) {
+    setTimeout(() => {
+      info.innerHTML = `🕳️ Oh no! Il ${turn === "player" ? "tuo coniglio" : "computer"} è caduto!`;
+      currentRabbit.pos = -1;
+      updateRabbit(currentRabbit);
+    }, 700);
   }
 
-  updateRabbit(r);
-
-  turn = turn === "player" ? "cpu" : "player";
-  info.textContent += ` | Turno: ${turn === "player" ? "Giocatore" : "Computer"}`;
-
-  diceBtn.disabled = turn === "cpu";
-
-  if (turn === "cpu") {
-    setTimeout(rollDice, 1200);
-  }
+  // Cambio Turno
+  setTimeout(() => {
+    turn = turn === "player" ? "cpu" : "player";
+    info.innerHTML = `Turno: <span style="color:${turn === 'player' ? '#e91e63':'#673ab7'}"><strong>${turn === "player" ? "Giocatore" : "Computer"}</strong></span>`;
+    
+    if (turn === "cpu") {
+      setTimeout(rollDice, 1000);
+    } else {
+      diceBtn.disabled = false;
+    }
+  }, 1000);
 }
 
-/* FINE GIOCO */
 function endGame(winner) {
-  alert(winner === "player"
-    ? "🐰 HAI VINTO! Hai raggiunto la carota!"
-    : "🤖 IL COMPUTER HA VINTO!");
+  alert(winner === "player" ? "🎉 VITTORIA! Hai preso la carota!" : "🤖 GARA FINITA! Il computer ha vinto!");
   location.reload();
 }
 </script>
