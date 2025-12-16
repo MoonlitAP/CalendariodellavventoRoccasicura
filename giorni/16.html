@@ -61,6 +61,7 @@ body{
   font-weight:bold;
   position:relative;
   box-shadow: inset 0 0 0 2px #c62828;
+  overflow:hidden;
 }
 
 .cell.start{background:#e3f2fd;}
@@ -76,21 +77,24 @@ body{
 .players{
   position:absolute;
   bottom:4px;
-  right:6px;
+  left:50%;
+  transform:translateX(-50%);
   display:flex;
   gap:4px;
-}
-.players img{
-  width:22px;
-  height:22px;
+  font-size:20px;
 }
 
 /* ===== MESSAGE ===== */
 .message{
-  padding:12px;
+  padding:14px;
   text-align:center;
   font-weight:bold;
   border-top:2px solid #c62828;
+  background:linear-gradient(135deg,#fffde7,#fff9c4);
+  min-height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* ===== BUTTON ===== */
@@ -135,7 +139,7 @@ body{
 <header class="header">
   <h1>🎄 Christmas Garden Race</h1>
   <div class="status">
-    <span id="turno">Turno: TU</span>
+    <span id="turno">Turno: TU 🐰</span>
     <span id="dado">Dado: —</span>
   </div>
 </header>
@@ -170,14 +174,14 @@ let currentPlayer=1;
 let dado=0;
 
 const players={
-  1:{pos:0,img:"giorni/img/rabbit_1.png",skip:false},
-  2:{pos:0,img:"giorni/img/rabbit_2.png",skip:false}
+  1:{pos:0,icon:"🐰",skip:false},
+  2:{pos:0,icon:"🎅",skip:false}
 };
 
 /* ===== SPECIALI ===== */
-let blackHoles=[8,13,19];       // buco nero
-const gifts=[6,18];            // regalo
-const ice=[12,25];             // ghiaccio
+let blackHoles=[8,13,19];
+const gifts=[6,18];
+const ice=[12,25];
 
 /* ===== CREA GRIGLIA 0–30 ===== */
 for(let i=30;i>=0;i--){
@@ -215,9 +219,9 @@ function render(){
       const box=document.createElement("div");
       box.className="players";
       here.forEach(p=>{
-        const img=document.createElement("img");
-        img.src=p.img;
-        box.appendChild(img);
+        const span=document.createElement("span");
+        span.textContent=p.icon;
+        box.appendChild(span);
       });
       cell.appendChild(box);
     }
@@ -245,7 +249,7 @@ function randomizeBlackHoles(){
 function checkBlackHole(p){
   if(blackHoles.includes(players[p].pos)){
     players[p].pos=0;
-    msg.textContent="⚫ Buco nero! Torni alla partenza";
+    msg.textContent="⚫ Buco nero! Torni allo START";
     return true;
   }
   return false;
@@ -300,7 +304,7 @@ btn.onclick=()=>{
 
 /* ===== TURNO PC ===== */
 function pcTurn(){
-  turnoEl.textContent="Turno: PC";
+  turnoEl.textContent="Turno: PC 🎅";
   btn.disabled=true;
 
   setTimeout(()=>{
@@ -342,7 +346,7 @@ function nextTurn(){
   dadoEl.textContent="Dado: —";
 
   if(currentPlayer===1){
-    turnoEl.textContent="Turno: TU";
+    turnoEl.textContent="Turno: TU 🐰";
     msg.textContent="🎯 Tira il dado";
     btn.disabled=false;
   }else{
