@@ -3,92 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐰 Giorno 16 – Carrera de Conejos PRO</title>
+<title>🐰 Carrera de Conejos: Black Hole Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  body { margin: 0; font-family: 'Ubuntu', sans-serif; background: #eaf6e6; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-  #board { margin: 20px; width: 380px; height: 380px; position: relative; background: #4caf50; border-radius: 50%; border: 8px solid #2e7d32; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+  body { margin: 0; font-family: 'Ubuntu', sans-serif; background: #eaf6e6; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+  
+  /* OVERLAY PER ISTRUZIONI E FINE GIOCO */
+  .overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); display: flex; align-items: center;
+    justify-content: center; z-index: 100; color: white; text-align: center;
+  }
+  .modal {
+    background: white; color: #333; padding: 30px; border-radius: 20px;
+    max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .modal h2 { color: #e91e63; margin-top: 0; }
+  .modal p { line-height: 1.5; font-size: 16px; }
+  .hidden { display: none !important; }
+
+  /* TABELLONE */
+  #board { margin: 20px; width: 420px; height: 420px; position: relative; background: #4caf50; border-radius: 50%; border: 8px solid #2e7d32; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
   
   .cell { 
-    width: 30px; height: 30px; background: #ffeb3b; border-radius: 50%; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #f57f17; 
+    width: 32px; height: 32px; background: #ffeb3b; border-radius: 50%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; color: #f57f17; 
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); transition: all 0.5s ease;
   }
-  .hole { background: #222; color: transparent; box-shadow: inset 0 4px 6px rgba(0,0,0,0.6); }
+  .hole { background: #1a1a1a !important; color: transparent !important; box-shadow: inset 0 4px 8px rgba(0,0,0,0.8); border: 1px solid #444; transform: scale(1.1); }
 
   #carrot { 
-    width: 50px; height: 50px; background: #ff9800; border-radius: 50%; position: absolute; 
-    top: 165px; left: 165px; line-height: 50px; font-size: 28px; z-index: 5; text-align: center;
+    width: 60px; height: 60px; background: #ff9800; border-radius: 50%; position: absolute; 
+    top: 180px; left: 180px; line-height: 60px; font-size: 32px; z-index: 1; text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .rabbit { 
-    width: 24px; height: 24px; border-radius: 50%; position: absolute; z-index: 10; border: 2px solid white; 
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+    width: 28px; height: 28px; border-radius: 50%; position: absolute; z-index: 10; border: 2px solid white; 
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
   }
-  .player { background: #e91e63; box-shadow: 0 0 10px rgba(233,30,99,0.5); }
+  .player { background: #e91e63; }
   .cpu { background: #673ab7; }
 
-  /* Effetto selezione */
-  .can-move { animation: pulse 0.8s infinite alternate; border: 3px solid #fff; z-index: 15; }
-  @keyframes pulse { from { transform: scale(1); box-shadow: 0 0 5px #fff; } to { transform: scale(1.3); box-shadow: 0 0 20px #fff; } }
+  .can-move { animation: pulse 0.6s infinite alternate; z-index: 15; border: 3px solid #fff; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.25); } }
 
-  #info { margin-top: 15px; padding: 10px 20px; background: white; border-radius: 15px; font-weight: bold; min-width: 200px; text-align: center; }
-  button { padding: 12px 25px; border: none; border-radius: 25px; background: #ff9800; color: white; font-size: 18px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-  button:disabled { background: #ccc; }
+  #info { margin-top: 10px; padding: 15px; background: white; border-radius: 15px; font-weight: bold; min-width: 300px; text-align: center; font-size: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+  button { padding: 12px 35px; border: none; border-radius: 30px; background: #ff9800; color: white; font-size: 20px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #e65100; transition: 0.2s; }
+  button:active { transform: translateY(2px); box-shadow: 0 2px #e65100; }
+  button:disabled { background: #ccc; box-shadow: 0 4px #999; opacity: 0.7; }
 </style>
 </head>
 <body>
 
+<div id="startOverlay" class="overlay">
+  <div class="modal">
+    <h2>🐰 Benvenuto!</h2>
+    <p>
+      L'obiettivo è portare uno dei tuoi conigli alla <b>carota centrale</b>.<br><br>
+      1. Tira il dado.<br>
+      2. Se esce <b>6</b>, i buchi neri cambiano posizione!<br>
+      3. Clicca su un coniglio rosa per muoverlo.<br>
+      4. Se finisci in un buco nero, torni alla partenza.
+    </p>
+    <button onclick="startGame()">Inizia Gioco</button>
+  </div>
+</div>
+
+<div id="endOverlay" class="overlay hidden">
+  <div class="modal">
+    <h2 id="endTitle">VITTORIA!</h2>
+    <p id="endMessage">Complimenti, hai raggiunto la carota!</p>
+    <button onclick="location.reload()">Riprova</button>
+  </div>
+</div>
+
 <h1>🐰 Carrera de Conejos</h1>
-<div id="info">Tira il dado per iniziare!</div>
 <div id="board"><div id="carrot">🥕</div></div>
-<button id="diceBtn" onclick="rollDice()">🎲 Tira il dado</button>
+<div id="info">Tira il dado per iniziare!</div>
+<div id="controls" style="margin-top:20px;">
+  <button id="diceBtn" onclick="rollDice()">🎲 Tira il dado</button>
+</div>
 
 <script>
 const board = document.getElementById("board");
 const info = document.getElementById("info");
 const diceBtn = document.getElementById("diceBtn");
+const endOverlay = document.getElementById("endOverlay");
 
 let turn = "player";
 let currentDice = 0;
-let gameState = "waiting"; // waiting, selecting
+let gameState = "waiting"; 
 const path = [];
-const holes = [5, 12, 18, 24]; // Numeri delle caselle (secondo numerazione inversa)
+let holes = [6, 14, 22];
 
-// 1. CREAZIONE PERCORSO SPIRALE (Fibonacci-style)
+function startGame() {
+  document.getElementById("startOverlay").classList.add("hidden");
+}
+
 function createPath() {
-  const totalSteps = 30;
+  const totalSteps = 32;
+  const centerX = 210; const centerY = 210;
   for (let i = 0; i < totalSteps; i++) {
-    const angle = 0.5 * i;
-    const r = (i * 5) + 25; // Crescita raggio
-    const x = 190 + r * Math.cos(angle) - 15;
-    const y = 190 + r * Math.sin(angle) - 15;
+    const angle = 0.6 * i;
+    const r = 180 - (i * 5.2); 
+    const x = centerX + r * Math.cos(angle) - 16;
+    const y = centerY + r * Math.sin(angle) - 16;
     path.push({ x, y });
   }
-  path.reverse(); // Invertiamo: la 0 è la più esterna (partenza), l'ultima è la carota
 }
 createPath();
 
-// 2. DISEGNO CASELLE (Numerazione 1 vicino alla carota)
-path.forEach((p, i) => {
-  const cellNum = path.length - i; 
-  const c = document.createElement("div");
-  c.className = "cell" + (holes.includes(cellNum) ? " hole" : "");
-  c.style.left = p.x + "px";
-  c.style.top = p.y + "px";
-  if (!holes.includes(cellNum)) c.textContent = cellNum;
-  board.appendChild(c);
-});
+function renderCells() {
+  document.querySelectorAll('.cell').forEach(c => c.remove());
+  path.forEach((p, i) => {
+    const cellNum = i + 1;
+    const c = document.createElement("div");
+    c.className = "cell" + (holes.includes(cellNum) ? " hole" : "");
+    c.style.left = p.x + "px"; c.style.top = p.y + "px";
+    if (!holes.includes(cellNum)) c.textContent = cellNum;
+    board.appendChild(c);
+  });
+}
+renderCells();
 
-// 3. GESTIONE CONIGLI
+function rotateHoles() {
+  info.innerHTML = "🌀 <b>EFFETTO 6!</b> Buchi in movimento!";
+  let newHoles = [];
+  while(newHoles.length < 3) {
+    let r = Math.floor(Math.random() * 23) + 5;
+    if(!newHoles.includes(r)) newHoles.push(r);
+  }
+  holes = newHoles;
+  renderCells();
+}
+
 let rabbits = [];
 function initRabbits() {
   for (let i = 0; i < 8; i++) {
     const isPlayer = i < 4;
     const r = document.createElement("div");
     r.className = "rabbit " + (isPlayer ? "player" : "cpu");
-    r.pos = -1; // Fuori dal tabellone
-    r.id = i;
-    r.dataset.type = isPlayer ? "player" : "cpu";
+    r.pos = -1; r.id = i; r.dataset.type = isPlayer ? "player" : "cpu";
     r.onclick = () => handleRabbitClick(r);
     board.appendChild(r);
     rabbits.push(r);
@@ -98,98 +155,81 @@ function initRabbits() {
 
 function updatePosition(r) {
   if (r.pos === -1) {
-    r.style.left = r.dataset.type === "player" ? "10px" : "340px";
-    r.style.top = (300 + (r.id % 4) * 15) + "px"; // Spaziati in partenza
+    const offset = (r.id % 4) * 35;
+    r.style.left = r.dataset.type === "player" ? "10px" : "380px";
+    r.style.top = (120 + offset) + "px";
   } else {
-    r.style.left = path[r.pos].x + 3 + "px";
-    r.style.top = path[r.pos].y + 3 + "px";
+    r.style.left = path[r.pos].x + 2 + "px";
+    r.style.top = path[r.pos].y + 2 + "px";
   }
 }
-
 initRabbits();
 
-// 4. LOGICA DI GIOCO
 function rollDice() {
   currentDice = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
-  info.innerHTML = `🎲 Risultato: ${currentDice}. <br> ${turn === 'player' ? 'Scegli quale coniglio muovere!' : 'Il computer sta pensando...'}`;
-  
+  if (currentDice === 6) {
+    rotateHoles();
+    setTimeout(startSelection, 1000);
+  } else {
+    startSelection();
+  }
+}
+
+function startSelection() {
+  info.innerHTML = `🎲 Risultato: <b>${currentDice}</b><br>${turn === 'player' ? 'Muovi una pedina!' : 'Computer in azione...'}`;
   if (turn === "player") {
     gameState = "selecting";
-    highlightMovable(true);
+    rabbits.filter(r => r.dataset.type === "player").forEach(r => r.classList.add("can-move"));
   } else {
     setTimeout(cpuLogic, 1000);
   }
 }
 
-function highlightMovable(show) {
-  rabbits.forEach(r => {
-    if (r.dataset.type === "player") r.classList.toggle("can-move", show);
-  });
-}
-
 function handleRabbitClick(r) {
   if (gameState !== "selecting" || r.dataset.type !== "player") return;
+  rabbits.forEach(rb => rb.classList.remove("can-move"));
   moveRabbit(r);
 }
 
 function moveRabbit(r) {
-  highlightMovable(false);
   gameState = "moving";
-  
   r.pos += currentDice;
-  if (r.pos >= path.length) {
-    endGame("Giocatore");
+  if (r.pos >= path.length - 1) {
+    r.pos = path.length - 1;
+    updatePosition(r);
+    setTimeout(() => showEndScreen(turn === "player"), 500);
     return;
   }
-
   updatePosition(r);
-
-  // Controllo Buco
-  const currentCellNum = path.length - r.pos;
-  if (holes.includes(currentCellNum)) {
+  if (holes.includes(r.pos + 1)) {
     setTimeout(() => {
-      alert("🕳️ Caduto in un buco! Si ricomincia.");
       r.pos = -1;
       updatePosition(r);
+      info.innerHTML = "🌀 <b>CADUTO!</b>";
     }, 600);
   }
-
   setTimeout(nextTurn, 1000);
 }
 
 function cpuLogic() {
-  const myRabbits = rabbits.filter(r => r.dataset.type === "cpu");
-  // Strategia semplice: muove il coniglio più avanti
-  const r = myRabbits.sort((a, b) => b.pos - a.pos)[0];
-  
-  r.pos += currentDice;
-  updatePosition(r);
-
-  const currentCellNum = path.length - r.pos;
-  if (holes.includes(currentCellNum)) {
-    r.pos = -1;
-    setTimeout(() => updatePosition(r), 600);
-  }
-
-  if (r.pos >= path.length - 1) {
-    endGame("Computer");
-  } else {
-    setTimeout(nextTurn, 1000);
-  }
+  let r = rabbits.filter(r => r.dataset.type === "cpu").sort((a,b) => b.pos - a.pos)[0];
+  moveRabbit(r);
 }
 
 function nextTurn() {
   turn = turn === "player" ? "cpu" : "player";
   gameState = "waiting";
-  info.innerHTML = `Turno: ${turn === 'player' ? 'Giocatore' : 'Computer'}`;
+  info.innerHTML = `Turno: <span style="color:${turn === 'player' ? '#e91e63':'#673ab7'}">${turn === 'player' ? 'Giocatore' : 'Computer'}</span>`;
   diceBtn.disabled = (turn === "cpu");
-  if (turn === "cpu") setTimeout(rollDice, 500);
+  if (turn === "cpu") setTimeout(rollDice, 1000);
 }
 
-function endGame(winner) {
-  alert("🏆 " + winner + " ha vinto!");
-  location.reload();
+function showEndScreen(isWin) {
+  endOverlay.classList.remove("hidden");
+  document.getElementById("endTitle").innerText = isWin ? "🎉 VITTORIA!" : "😢 SCONFITTA";
+  document.getElementById("endTitle").style.color = isWin ? "#4caf50" : "#e91e63";
+  document.getElementById("endMessage").innerText = isWin ? "Hai raggiunto la carota per primo!" : "Il Computer ha mangiato la tua carota!";
 }
 </script>
 </body>
