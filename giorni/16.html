@@ -112,7 +112,6 @@ h1{
   box-shadow:0 6px 0 rgba(0,0,0,.1);
   user-select:none;
 }
-
 .hole{
   background:var(--hole);
   border-bottom-color:#000;
@@ -151,23 +150,19 @@ h1{
 }
 .player{background-image:url('img/rabbit_1.png')}
 .cpu{background-image:url('img/rabbit_2.png')}
-
 .pickable{
   outline:4px solid #fff;
   box-shadow:0 0 0 6px rgba(255,152,0,.4);
 }
 
-/* ===== BARRA FISSA DADO (SAFE AREA iOS) ===== */
+/* ===== BARRA FISSA DADO ===== */
 .controls{
   position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
+  left:0; right:0; bottom:0;
   padding:12px 16px calc(12px + env(safe-area-inset-bottom));
   background:linear-gradient(to top, #e3f2fd 70%, transparent);
   z-index:999;
 }
-
 #msg{
   max-width:520px;
   margin:0 auto 10px;
@@ -178,7 +173,6 @@ h1{
   font-weight:800;
   text-align:center;
 }
-
 button{
   max-width:520px;
   margin:0 auto;
@@ -193,14 +187,8 @@ button{
   font-weight:900;
   box-shadow:0 8px 0 #e65100;
 }
-button:active{
-  transform:translateY(4px);
-  box-shadow:0 4px 0 #e65100;
-}
-button:disabled{
-  background:#ccc;
-  box-shadow:0 6px 0 #999;
-}
+button:active{transform:translateY(4px);box-shadow:0 4px 0 #e65100}
+button:disabled{background:#ccc;box-shadow:0 6px 0 #999}
 </style>
 </head>
 
@@ -210,10 +198,10 @@ button:disabled{
 
 <div class="wrap">
 
-  <!-- TANA PC -->
+  <!-- TANA PC (PARTENZA COMUNE) -->
   <div class="baseRow">
     <div class="base" id="cpuBase">
-      <div class="baseLabel">TANA PC</div>
+      <div class="baseLabel">TANA PC (PARTENZA)</div>
     </div>
     <div style="width:160px"></div>
   </div>
@@ -227,7 +215,7 @@ button:disabled{
     <div class="zero">0</div>
   </div>
 
-  <!-- TANA TUA -->
+  <!-- TANA TUA (RITORNO DA BUCO) -->
   <div class="baseRow">
     <div style="width:160px"></div>
     <div class="base" id="playerBase">
@@ -237,7 +225,7 @@ button:disabled{
 
 </div>
 
-<!-- CONTROLLI FISSI -->
+<!-- CONTROLLI -->
 <div class="controls">
   <div id="msg">Tira il dado per iniziare!</div>
   <button id="diceBtn">🎲 TIRA IL DADO</button>
@@ -271,35 +259,31 @@ for(let n=30;n>=1;n--){
   d.className="tile"+(holes.includes(n)?" hole":"");
   d.style.left=`calc(${pos[n][0]}% - 27px)`;
   d.style.top =`calc(${pos[n][1]}% - 27px)`;
-  const s=document.createElement("span");
-  s.textContent=n;
+  const s=document.createElement("span"); s.textContent=n;
   d.appendChild(s);
   board.appendChild(d);
 }
 
-/* CONIGLI */
+/* CONIGLI – TUTTI PARTONO DALLA TANA PC */
 const bunnies=[];
 function makeBunny(owner,i){
   const b=document.createElement("div");
   b.className=`bunny ${owner}`;
   b.dataset.owner=owner;
-  b.dataset.pos=-1;
+  b.dataset.pos=-1;      // -1 = in tana
   b.dataset.idx=i;
   b.onclick=()=>select(b);
-  (owner==="player"?playerBase:cpuBase).appendChild(b);
+  cpuBase.appendChild(b); // PARTENZA COMUNE
   bunnies.push(b);
 }
-for(let i=0;i<4;i++){
-  makeBunny("player",i);
-  makeBunny("cpu",i);
-}
+for(let i=0;i<4;i++){ makeBunny("player",i); makeBunny("cpu",i); }
 
-/* UPDATE POSIZIONE CONIGLIO */
+/* AGGIORNA POSIZIONE */
 function update(b){
   const p=+b.dataset.pos;
-  if(p===-1) return;
+  if(p===-1) return; // resta in tana
   board.appendChild(b);
-  const [x,y]=p===0?[50,105]:pos[p];
+  const [x,y]=p===0 ? [50,105] : pos[p];
   b.style.left=`calc(${x}% - 20px)`;
   b.style.top =`calc(${y}% - 20px)`;
 }
@@ -330,14 +314,20 @@ function select(b){
 
 function move(b){
   let p=+b.dataset.pos;
-  if(p===-1) p=30;
+  if(p===-1) p=30;           // entra nel percorso
   let n=p-dice;
-  if(n<=0){
+  if(n<=0){                 // vittoria
     b.dataset.pos=0; update(b); win(b.dataset.owner); return;
   }
   b.dataset.pos=n; update(b);
+
+  // CADUTA SOLO SE 6
   if(dice===6 && holes.includes(n)){
-    setTimeout(()=>{ b.dataset.pos=-1; location.reload(); },600);
+    setTimeout(()=>{
+      b.dataset.pos=-1;
+      playerBase.appendChild(b); // TORNA NELLA TANA TUA
+      msg.innerHTML="🕳️ Caduto nel buco! Torni nella TANA TUA";
+    },500);
   }
   endTurn();
 }
