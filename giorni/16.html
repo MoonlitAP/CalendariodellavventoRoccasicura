@@ -3,117 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🐰 Carrera de Conejos - Spirale Perfetta</title>
+<title>🐰 Carrera de Conejos - Versione Finale</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #e8f5e9; --wood: #d2a679; --grass: #81c784; }
+  :root { --bg: #e8f5e9; --wood: #8d6e63; --grass: #81c784; --path: #fdf5e6; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
   body { 
     margin: 0; font-family: 'Ubuntu', sans-serif; background: var(--bg); 
-    display: flex; flex-direction: column; align-items: center; justify-content: space-around; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
     height: 100vh; padding: 10px; overflow: hidden;
   }
 
-  .overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.75); 
-    display: flex; align-items: center; justify-content: center; z-index: 100;
-  }
-  .modal {
-    background: #fffdf5; padding: 25px; border-radius: 30px; border: 6px solid var(--wood);
-    width: 90%; max-width: 350px; text-align: center;
-  }
-
+  /* Tabellone e Contenitore */
   #game-container {
-    position: relative; width: 95vmin; height: 80vmin; max-width: 500px;
+    position: relative; width: 100vmin; height: 85vmin; max-width: 550px;
     display: flex; align-items: center; justify-content: center;
   }
   #board {
-    width: 85%; height: 95%; background: var(--grass); border-radius: 50%; 
-    position: relative; border: 6px solid #4a8c4d; box-shadow: inset 0 0 40px rgba(0,0,0,0.1);
+    width: 80%; height: 90%; background: var(--grass); border-radius: 50%; 
+    position: relative; border: 8px solid #4a8c4d; 
+    box-shadow: 0 15px 0 #2e7d32, inset 0 0 50px rgba(0,0,0,0.1);
   }
 
-  /* Caselle: Dimensioni ridotte per non sovrapporsi */
+  /* Caselle: Dimensioni fisse per leggibilità */
   .cell { 
-    width: 9%; height: 9%; background: #fdf5e6; border-radius: 20%; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 2.8vmin; 
-    font-weight: bold; color: #5d4037; border: 1.2px solid #deb887;
+    width: 38px; height: 38px; background: var(--path); border-radius: 10px; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 14px; 
+    font-weight: bold; color: #5d4037; border-bottom: 3px solid #deb887;
     transform: translate(-50%, -50%); z-index: 2;
   }
-  .hole { background: #222 !important; border: none; box-shadow: inset 0 3px 5px #000; color: transparent !important; }
+  .hole { background: #333 !important; border: none; box-shadow: inset 0 4px 0 #000; color: transparent !important; }
 
-  /* Carota molto piccola per mostrare il 30 */
+  /* Carota Centrale: Piccola e sopra il 30 */
   #carrot { 
-    width: 8%; height: 8%; position: absolute; 
+    width: 30px; height: 30px; position: absolute; 
     top: 50%; left: 50%; transform: translate(-50%, -50%); 
-    display: flex; align-items: center; justify-content: center; 
-    font-size: 5vmin; z-index: 1; pointer-events: none;
+    z-index: 5; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
   }
 
+  /* Coniglietti */
   .rabbit { 
-    width: 10%; height: 10%; position: absolute; z-index: 10;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
+    width: 35px; height: 35px; position: absolute; z-index: 10;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     transform: translate(-50%, -50%);
     background-size: contain; background-repeat: no-repeat; background-position: center;
   }
   .player { background-image: url('../img/rabbit_1.png'); }
   .cpu { background-image: url('../img/rabbit_2.png'); }
   
-  .active-move { animation: jump 0.5s infinite alternate; filter: drop-shadow(0 0 8px #fff); }
-  @keyframes jump { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -65%) scale(1.1); } }
+  .active-move { animation: jump 0.4s infinite alternate; filter: drop-shadow(0 0 10px #fff); }
+  @keyframes jump { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -70%) scale(1.1); } }
 
-  /* Basi Esterne (Dritte) */
+  /* BASI REALISTICHE (Tane) */
   .base { 
-    position: absolute; display: flex; flex-direction: column; gap: 10px; 
-    padding: 10px; background: rgba(255,255,255,0.3); border-radius: 20px;
-    width: 50px; align-items: center; top: 50%; transform: translateY(-50%);
+    position: absolute; width: 60px; height: 160px; 
+    background: #795548; border: 4px solid #5d4037; border-radius: 15px;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
   }
-  .p-base { left: -5%; }
-  .c-base { right: -5%; }
-  .base .rabbit { position: static; transform: none; width: 38px; height: 38px; }
+  .p-base { left: -5px; }
+  .c-base { right: -5px; }
+  .base::before { content: 'TANA'; font-size: 10px; color: #d7ccc8; font-weight: bold; }
 
-  .controls { width: 100%; text-align: center; }
+  /* Interfaccia */
+  .controls { width: 100%; max-width: 400px; text-align: center; margin-top: 15px; }
   #msg {
-    background: white; padding: 10px; border-radius: 20px; border: 3px solid var(--wood);
-    font-weight: bold; margin-bottom: 8px; color: #2e7d32; font-size: 15px;
+    background: white; padding: 12px; border-radius: 15px; border: 3px solid var(--wood);
+    font-weight: bold; margin-bottom: 10px; color: #2e7d32; font-size: 16px;
   }
   .btn {
-    padding: 15px 40px; border: none; border-radius: 30px;
-    background: #ff9800; color: white; font-size: 18px; font-weight: bold;
-    box-shadow: 0 5px 0 #e65100; cursor: pointer;
+    padding: 15px 40px; border: none; border-radius: 50px;
+    background: #ff9800; color: white; font-size: 20px; font-weight: bold;
+    box-shadow: 0 6px 0 #e65100; cursor: pointer; transition: 0.1s;
   }
+  .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #e65100; }
 </style>
 </head>
 <body>
 
-<div id="startUI" class="overlay">
-  <div class="modal">
-    <h2 style="color:#2e7d32">🐰 Giorno 16</h2>
-    <p style="text-align:left; color:#5d4037; font-size:15px;">
-      Porta i coniglietti al centro!<br><br>
-      • Parti dal <b>1</b> all'esterno.<br>
-      • Arriva al <b>30</b> (la carota).<br>
-      • Se cade nel buco, torni in base.
-    </p>
-    <button class="btn" onclick="start()">INIZIA</button>
-  </div>
-</div>
-
-<div id="winUI" class="overlay" style="display:none">
-  <div class="modal">
-    <h1 id="winTxt">VITTORIA!</h1>
-    <button class="btn" onclick="location.reload()">RIGIOCA</button>
-  </div>
-</div>
-
 <div id="game-container">
   <div class="base p-base" id="p-base"></div>
-  <div id="board"><div id="carrot">🥕</div></div>
+  
+  <div id="board">
+      <img id="carrot" src="https://cdn-icons-png.flaticon.com/512/3014/3014467.png" alt="🥕">
+  </div>
+  
   <div class="base c-base" id="c-base"></div>
 </div>
 
 <div class="controls">
-  <div id="msg">Tira il dado!</div>
+  <div id="msg">Tira il dado per iniziare!</div>
   <button id="diceBtn" class="btn" onclick="roll()">🎲 TIRA IL DADO</button>
 </div>
 
@@ -126,18 +106,16 @@ let turn = "player";
 let currentDice = 0;
 let state = "wait"; 
 const path = [];
-let holes = [5, 12, 21]; 
+let holes = [7, 15, 23]; 
 
-function start() { document.getElementById("startUI").style.display = "none"; }
-
-// SPIRALE AMPIA: Inizia da 1 (esterno) a 30 (centro)
+// COSTRUZIONE SPIRALE DISTANZIATA (1 -> 30)
 function buildPath() {
-  const totalSteps = 30;
-  for (let i = 0; i < totalSteps; i++) {
-    // Angolo calcolato per una spirale fluida
-    const angle = 0.52 * i; 
-    // Raggio decrescente: da 42% (esterno) a 5% (centro)
-    const r = 42 - (i * 1.3); 
+  const total = 30;
+  for (let i = 0; i < total; i++) {
+    // La chiave è usare un angolo che cresce e un raggio che decresce lentamente
+    const angle = 0.65 * i; 
+    // Raggio: parte da 42 e scende fino a 6, mantenendo distanze eque
+    const r = 43 - (i * 1.25); 
     const x = 50 + r * Math.cos(angle);
     const y = 50 + r * Math.sin(angle);
     path.push({ x: x + "%", y: y + "%" });
@@ -152,6 +130,7 @@ function draw() {
     const c = document.createElement("div");
     c.className = "cell" + (holes.includes(num) ? " hole" : "");
     c.style.left = p.x; c.style.top = p.y;
+    // Il 30 sarà sotto la carota ma visibile
     if (!holes.includes(num)) c.textContent = num;
     board.appendChild(c);
   });
@@ -161,7 +140,7 @@ draw();
 function swapHoles() {
   let h = [];
   while(h.length < 3) {
-    let r = Math.floor(Math.random() * 25) + 3;
+    let r = Math.floor(Math.random() * 26) + 2; // Evita 1 e 30
     if(!h.includes(r)) h.push(r);
   }
   holes = h;
@@ -176,7 +155,8 @@ function init() {
     const isP = i < 3;
     const r = document.createElement("div");
     r.className = "rabbit " + (isP ? "player" : "cpu");
-    r.pos = -1; r.id = i; r.type = isP ? "player" : "cpu";
+    r.pos = -1; 
+    r.id = i; r.type = isP ? "player" : "cpu";
     r.onclick = () => tap(r);
     isP ? pb.appendChild(r) : cb.appendChild(r);
     conigli.push(r);
@@ -209,7 +189,6 @@ function go() {
   if (turn === "player") {
     state = "pick";
     conigli.filter(r => r.type === "player").forEach(r => r.classList.add("active-move"));
-    msg.innerHTML += " - Muovi un coniglio!";
   } else { setTimeout(cpu, 1000); }
 }
 
@@ -222,17 +201,10 @@ function tap(r) {
 function move(r) {
   state = "move";
   r.pos += currentDice;
-  if (r.pos >= 29) { // Casella 30
-    r.pos = 29; place(r);
-    setTimeout(() => {
-      document.getElementById("winUI").style.display = "flex";
-      document.getElementById("winTxt").innerText = turn === "player" ? "🏆 HAI VINTO!" : "🤖 CPU VINCE";
-    }, 400);
-    return;
-  }
+  if (r.pos >= 29) { r.pos = 29; place(r); win(); return; }
   place(r);
   if (holes.includes(r.pos + 1)) {
-    setTimeout(() => { r.pos = -1; place(r); msg.innerHTML = "🌀 Caduto nel buco!"; }, 700);
+    setTimeout(() => { r.pos = -1; place(r); msg.innerHTML = "🌀 Buco! Torna in tana."; }, 700);
   }
   setTimeout(next, 1000);
 }
@@ -246,9 +218,14 @@ function cpu() {
 function next() {
   turn = turn === "player" ? "cpu" : "player";
   state = "wait";
-  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 Il PC gioca...";
+  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 CPU muove...";
   diceBtn.disabled = (turn === "cpu");
   if (turn === "cpu") setTimeout(roll, 600);
+}
+
+function win() {
+    msg.innerHTML = turn === "player" ? "🏆 HAI VINTO!" : "🤖 CPU VINCE";
+    setTimeout(() => location.reload(), 3000);
 }
 </script>
 </body>
