@@ -3,394 +3,254 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🐰 Carrera de Conejos - Premium Edition</title>
+<title>🐰 Bunny Garden Run</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* Variabili Colore e Design */
   :root { 
-    --bg-color: #f1f8e9;
-    --grass-green: #81c784;
-    --grass-border: #4a8c4d;
-    --wood-brown: #795548;
-    --path-color: #ffffff;
-    --shadow: rgba(0, 0, 0, 0.15);
+    --grass: #66bb6a; 
+    --path: #efebe9; 
+    --wood: #795548;
+    --sky: #e3f2fd;
   }
-
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
   body { 
-    margin: 0; 
-    font-family: 'Ubuntu', sans-serif; 
-    background: var(--bg-color); 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    height: 100vh; 
-    overflow: hidden;
+    margin: 0; font-family: 'Ubuntu', sans-serif; background: var(--sky); 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    height: 100vh; overflow: hidden;
   }
 
-  /* Area di Gioco Principale */
-  #main-wrapper {
-    position: relative;
-    width: 95vmin;
-    height: 95vmin;
-    max-width: 600px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* Sfondo Giardino */
+  #garden-map {
+    position: relative; width: 95vmin; height: 85vmin; max-width: 500px;
+    background: var(--grass); border: 12px solid #4caf50; border-radius: 40px;
+    box-shadow: 0 15px 0 #2e7d32, inset 0 0 100px rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
   }
 
-  /* Il Tabellone (Il Prato) */
-  #board-container {
-    width: 82%;
-    height: 82%;
-    background: var(--grass-green);
-    border-radius: 50%;
-    position: relative;
-    border: 10px solid var(--grass-border);
-    box-shadow: 0 15px 0 #2e7d32, inset 0 0 60px rgba(0,0,0,0.2);
-    z-index: 2;
-  }
+  /* Decorazioni Fiori */
+  .flower { position: absolute; font-size: 20px; z-index: 1; opacity: 0.8; }
 
-  /* Caselle del Percorso */
-  .cell { 
-    width: 38px; 
-    height: 38px; 
-    background: var(--path-color); 
-    border-radius: 12px; 
-    position: absolute; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 14px; 
-    font-weight: 700; 
-    color: #5d4037; 
-    border-bottom: 4px solid #d7ccc8;
-    transform: translate(-50%, -50%); 
-    transition: transform 0.2s;
-    z-index: 5;
-    box-shadow: 0 4px 6px var(--shadow);
+  /* Caselle come pietre */
+  .stone { 
+    width: 34px; height: 34px; background: var(--path); border-radius: 50%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 12px; 
+    font-weight: bold; color: #5d4037; border-bottom: 4px solid #bcaaa4;
+    transform: translate(-50%, -50%); z-index: 2; box-shadow: 0 4px 5px rgba(0,0,0,0.2);
   }
+  .hole { background: #333 !important; border: none; box-shadow: inset 0 5px 8px #000; color: transparent !important; }
 
-  /* Buchi Neri */
-  .cell.hole { 
-    background: #212121 !important; 
-    border: none; 
-    box-shadow: inset 0 5px 10px #000; 
-    color: transparent !important; 
+  /* Casella Premio 0 */
+  .prize-box {
+    width: 60px; height: 60px; background: #fff176; border: 4px dashed #f9a825;
+    border-radius: 15px; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 3;
   }
-
-  /* Carota Finale */
-  #finish-carrot { 
-    width: 40px; 
-    height: 40px; 
-    position: absolute; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    z-index: 6; 
-    pointer-events: none;
-    filter: drop-shadow(0 3px 2px rgba(0,0,0,0.3));
-  }
+  .carrot-icon { font-size: 30px; line-height: 1; }
+  .prize-label { font-size: 10px; font-weight: bold; color: #f57f17; }
 
   /* Coniglietti */
-  .rabbit { 
-    width: 34px; 
-    height: 34px; 
-    position: absolute; 
-    z-index: 20;
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-    background-size: contain; 
-    background-repeat: no-repeat; 
-    background-position: center;
+  .bunny { 
+    width: 35px; height: 35px; position: absolute; z-index: 10;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
   }
-  .player-rabbit { background-image: url('../img/rabbit_1.png'); }
-  .cpu-rabbit { background-image: url('../img/rabbit_2.png'); }
+  .p-rabbit { background-image: url('../img/rabbit_1.png'); }
+  .c-rabbit { background-image: url('../img/rabbit_2.png'); }
   
-  /* Animazione Salto */
-  .active-jump { 
-    animation: bunny-hop 0.5s infinite alternate; 
-    filter: drop-shadow(0 0 12px #fff); 
-  }
-  @keyframes bunny-hop { 
-    from { transform: translate(-50%, -50%) scale(1); } 
-    to { transform: translate(-50%, -85%) scale(1.15); } 
-  }
+  .jump { animation: hop 0.5s infinite alternate; filter: drop-shadow(0 0 8px #fff); }
+  @keyframes hop { from { margin-top: 0; } to { margin-top: -12px; } }
 
-  /* TANE LATERALI (BASI) */
-  .tana { 
-    position: absolute; 
-    width: 65px; 
-    height: 180px; 
-    background: var(--wood-brown); 
-    border: 5px solid #5d4037; 
-    border-radius: 20px;
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: space-around;
-    box-shadow: 6px 6px 0 rgba(0,0,0,0.2); 
-    z-index: 1;
-    padding: 10px 0;
+  /* Tane (Recinti) */
+  .pen { 
+    position: absolute; width: 60px; height: 140px; 
+    background: #a1887f; border: 4px solid var(--wood); border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+    padding: 5px; box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
   }
-  .tana-player { left: -15px; }
-  .tana-cpu { right: -15px; }
-  
-  .tana-label {
-    font-size: 10px;
-    color: #efebe9;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+  .p-pen { left: -20px; top: 50%; transform: translateY(-50%); }
+  .c-pen { right: -20px; top: 50%; transform: translateY(-50%); }
 
-  /* Controlli e Messaggi */
-  .ui-panel { 
-    width: 90%; 
-    max-width: 450px; 
-    text-align: center; 
-    margin-top: 25px; 
-    z-index: 10;
+  /* UI Pannello */
+  .ui { width: 90%; max-width: 400px; text-align: center; margin-top: 20px; }
+  #info {
+    background: white; padding: 12px; border-radius: 20px; border: 3px solid var(--wood);
+    font-weight: bold; margin-bottom: 10px; color: #2e7d32;
   }
-  #status-bar {
-    background: white; 
-    padding: 15px; 
-    border-radius: 25px; 
-    border: 4px solid var(--wood-brown);
-    font-weight: bold; 
-    margin-bottom: 15px; 
-    color: #2e7d32; 
-    font-size: 18px;
-    box-shadow: 0 4px 0 var(--shadow);
-  }
-  .roll-button {
-    padding: 18px 55px; 
-    border: none; 
-    border-radius: 60px;
-    background: #ff9800; 
-    color: white; 
-    font-size: 22px; 
-    font-weight: 900;
-    box-shadow: 0 8px 0 #e65100; 
-    cursor: pointer; 
-    transition: 0.1s;
-    text-transform: uppercase;
-  }
-  .roll-button:active { 
-    transform: translateY(4px); 
-    box-shadow: 0 4px 0 #e65100; 
-  }
-  .roll-button:disabled {
-    background: #bdbdbd;
-    box-shadow: 0 8px 0 #9e9e9e;
-    cursor: not-allowed;
+  .dice-btn {
+    padding: 15px 40px; border: none; border-radius: 50px;
+    background: #ff9800; color: white; font-size: 18px; font-weight: bold;
+    box-shadow: 0 6px 0 #e65100; cursor: pointer;
   }
 </style>
 </head>
 <body>
 
-<div id="main-wrapper">
-  <div class="tana tana-player" id="p-base">
-    <div class="tana-label">Tu</div>
-  </div>
+<div id="garden-map">
+  <div class="flower" style="top:10%; left:15%">🌸</div>
+  <div class="flower" style="bottom:10%; right:20%">🌼</div>
+  <div class="flower" style="top:20%; right:10%">🌻</div>
   
-  <div id="board-container">
-    <img id="finish-carrot" src="https://cdn-icons-png.flaticon.com/512/3014/3014467.png" alt="🥕">
-    </div>
+  <div class="pen p-pen" id="p-base"></div>
   
-  <div class="tana tana-cpu" id="c-base">
-    <div class="tana-label">CPU</div>
+  <div class="prize-box">
+      <div class="prize-label">TRAGUARDO</div>
+      <div class="carrot-icon">🥕</div>
+      <div class="prize-label">0</div>
   </div>
+
+  <div class="pen c-pen" id="c-base"></div>
 </div>
 
-<div class="ui-panel">
-  <div id="status-bar">Pronto per la sfida? Tira!</div>
-  <button id="diceBtn" class="roll-button" onclick="rollDice()">🎲 Tira il Dado</button>
+<div class="ui">
+  <div id="info">Benvenuto nel Giardino! Tira il dado.</div>
+  <button id="diceBtn" class="dice-btn" onclick="roll()">🎲 TIRA IL DADO</button>
 </div>
 
 <script>
-/* --- CONFIGURAZIONE GIOCO --- */
-const board = document.getElementById("board-container");
-const statusBar = document.getElementById("status-bar");
+const garden = document.getElementById("garden-map");
+const info = document.getElementById("info");
 const diceBtn = document.getElementById("diceBtn");
 
-let currentPlayer = "player";
-let diceResult = 0;
-let gameState = "waiting"; 
-const cellPath = [];
-let holePositions = [6, 14, 22]; // Posizioni iniziali buchi
+let turn = "player";
+let diceNum = 0;
+let state = "wait"; 
+const trail = [];
+let holes = [25, 17, 9]; 
 
-/* --- GENERAZIONE PERCORSO SPIRALE --- */
-function createSpiralPath() {
-  const totalCells = 30;
-  for (let i = 0; i < totalCells; i++) {
-    // Matematica per spirale logaritmica distanziata
-    const angle = 0.64 * i; 
-    const radius = 43 - (i * 1.32); 
-    
-    const posX = 50 + radius * Math.cos(angle);
-    const posY = 50 + radius * Math.sin(angle);
-    
-    cellPath.push({ x: posX + "%", y: posY + "%" });
+// Costruzione sentiero dal 30 (esterno) allo 1 (interno)
+function buildTrail() {
+  for (let i = 0; i < 30; i++) {
+    const angle = 0.6 * i; 
+    const r = 42 - (i * 1.35); 
+    const x = 50 + r * Math.cos(angle);
+    const y = 50 + r * Math.sin(angle);
+    trail.push({ x: x + "%", y: y + "%" });
   }
 }
+buildTrail();
 
-function renderBoard() {
-  // Rimuovi vecchie caselle
-  document.querySelectorAll('.cell').forEach(c => c.remove());
-  
-  cellPath.forEach((pos, index) => {
-    const num = index + 1;
-    const cellEl = document.createElement("div");
-    cellEl.className = "cell" + (holePositions.includes(num) ? " hole" : "");
-    cellEl.style.left = pos.x; 
-    cellEl.style.top = pos.y;
-    
-    if (!holePositions.includes(num)) {
-      cellEl.textContent = num;
-    }
-    board.appendChild(cellEl);
+function drawGarden() {
+  document.querySelectorAll('.stone').forEach(s => s.remove());
+  trail.forEach((pos, i) => {
+    const num = 30 - i; // Dal 30 all'1
+    const s = document.createElement("div");
+    s.className = "stone" + (holes.includes(num) ? " hole" : "");
+    s.style.left = pos.x; s.style.top = pos.y;
+    if (!holes.includes(num)) s.textContent = num;
+    garden.appendChild(s);
   });
 }
+drawGarden();
 
-/* --- LOGICA DEI BUCHI --- */
-function moveHoles() {
-  let newHoles = [];
-  while(newHoles.length < 3) {
-    let rand = Math.floor(Math.random() * 27) + 2; // Non mette buchi sull'1 o sul 30
-    if(!newHoles.includes(rand)) newHoles.push(rand);
+function shuffleHoles() {
+  let h = [];
+  while(h.length < 3) {
+    let r = Math.floor(Math.random() * 25) + 2;
+    if(!h.includes(r)) h.push(r);
   }
-  holePositions = newHoles;
-  renderBoard();
+  holes = h;
+  drawGarden();
 }
 
-/* --- GESTIONE CONIGLI --- */
 let bunnies = [];
-function setupBunnies() {
-  const pBase = document.getElementById("p-base");
-  const cBase = document.getElementById("c-base");
-  
+function setupGame() {
+  const pb = document.getElementById("p-base");
+  const cb = document.getElementById("c-base");
   for (let i = 0; i < 6; i++) {
-    const isPlayer = i < 3;
+    const isP = i < 3;
     const b = document.createElement("div");
-    b.className = "rabbit " + (isPlayer ? "player-rabbit" : "cpu-rabbit");
-    b.dataset.pos = -1; // In tana
-    b.id = "bunny-" + i;
-    b.dataset.type = isPlayer ? "player" : "cpu";
-    
-    b.onclick = () => selectBunny(b);
-    
-    isPlayer ? pBase.appendChild(b) : cBase.appendChild(b);
+    b.className = "bunny " + (isP ? "p-rabbit" : "c-rabbit");
+    b.pos = -1; // -1 = Tana
+    b.type = isP ? "player" : "cpu";
+    b.onclick = () => playerChoice(b);
+    isP ? pb.appendChild(b) : cb.appendChild(b);
     bunnies.push(b);
   }
 }
 
-function updateBunnyPosition(bunny) {
-  const pos = parseInt(bunny.dataset.pos);
-  if (pos === -1) {
-    const base = bunny.dataset.type === "player" ? document.getElementById("p-base") : document.getElementById("c-base");
-    bunny.style.position = "static";
-    bunny.style.transform = "none";
-    base.appendChild(bunny);
+function updatePos(b) {
+  if (b.pos === -1) {
+    const base = b.type === "player" ? document.getElementById("p-base") : document.getElementById("c-base");
+    b.style.position = "static"; b.style.transform = "none";
+    base.appendChild(b);
   } else {
-    bunny.style.position = "absolute";
-    bunny.style.left = cellPath[pos].x;
-    bunny.style.top = cellPath[pos].y;
-    bunny.style.transform = "translate(-50%, -50%)";
-    board.appendChild(bunny);
+    b.style.position = "absolute";
+    // Usiamo trail[30 - b.pos] perché l'indice 0 è la casella 30
+    const index = 30 - b.pos;
+    b.style.left = trail[index].x;
+    b.style.top = trail[index].y;
+    b.style.transform = "translate(-50%, -50%)";
+    garden.appendChild(b);
   }
 }
+setupGame();
 
-/* --- TURNO DI GIOCO --- */
-function rollDice() {
-  diceResult = Math.floor(Math.random() * 6) + 1;
+function roll() {
+  diceNum = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
-  statusBar.innerHTML = `Hai ottenuto: <span>${diceResult}</span>`;
-  
-  if (diceResult === 6) {
-    statusBar.innerHTML = "🎲 6! I buchi cambiano posto!";
-    moveHoles();
-    setTimeout(startMovePhase, 800);
-  } else {
-    startMovePhase();
-  }
+  info.innerHTML = `🎲 Dado: <b>${diceNum}</b>`;
+  if (diceNum === 6) { 
+    info.innerHTML = "🎲 <b>6!</b> Il giardino cambia!";
+    shuffleHoles(); 
+    setTimeout(startMove, 800);
+  } else { startMove(); }
 }
 
-function startMovePhase() {
-  if (currentPlayer === "player") {
-    gameState = "selecting";
-    bunnies.filter(b => b.dataset.type === "player").forEach(b => b.classList.add("active-jump"));
-    statusBar.innerHTML = `Dado: ${diceResult} - Scegli chi muovere!`;
-  } else {
-    setTimeout(cpuTurn, 1000);
-  }
+function startMove() {
+  if (turn === "player") {
+    state = "pick";
+    bunnies.filter(b => b.type === "player").forEach(b => b.classList.add("jump"));
+  } else { setTimeout(cpuAction, 1000); }
 }
 
-function selectBunny(bunny) {
-  if (gameState !== "selecting" || bunny.dataset.type !== "player") return;
-  bunnies.forEach(b => b.classList.remove("active-jump"));
-  executeMove(bunny);
+function playerChoice(b) {
+  if (state !== "pick" || b.type !== "player") return;
+  bunnies.forEach(x => x.classList.remove("jump"));
+  executeMove(b);
 }
 
-function executeMove(bunny) {
-  gameState = "moving";
-  let currentPos = parseInt(bunny.dataset.pos);
-  let newPos = currentPos + diceResult;
+function executeMove(b) {
+  state = "move";
+  if (b.pos === -1) b.pos = 31; // Entra in pista
+  b.pos -= diceNum; // Sottrae perché va verso lo 0
 
-  // Controllo Vittoria
-  if (newPos >= 29) {
-    bunny.dataset.pos = 29;
-    updateBunnyPosition(bunny);
-    gameOver(bunny.dataset.type);
+  if (b.pos <= 0) {
+    b.pos = 0;
+    updatePosPrize(b);
+    info.innerHTML = turn === "player" ? "🏆 HAI PRESO LA CAROTA!" : "🤖 CPU HA VINTO";
+    setTimeout(() => location.reload(), 4000);
     return;
   }
 
-  bunny.dataset.pos = newPos;
-  updateBunnyPosition(bunny);
-
-  // Controllo Buco
-  if (holePositions.includes(newPos + 1)) {
-    setTimeout(() => {
-      bunny.dataset.pos = -1;
-      updateBunnyPosition(bunny);
-      statusBar.innerHTML = "🌀 Splash! Caduto nel buco.";
-    }, 700);
+  updatePos(b);
+  if (holes.includes(b.pos)) {
+    setTimeout(() => { b.pos = -1; updatePos(b); info.innerHTML = "🌀 Splash! In tana."; }, 700);
   }
-
-  setTimeout(switchTurn, 1000);
+  setTimeout(nextTurn, 1000);
 }
 
-function cpuTurn() {
-  const cpuBunnies = bunnies.filter(b => b.dataset.type === "cpu");
-  // La CPU muove il coniglio più avanti
-  const bestBunny = cpuBunnies.sort((a, b) => b.dataset.pos - a.dataset.pos)[0];
-  executeMove(bestBunny);
+function updatePosPrize(b) {
+    b.style.position = "absolute";
+    b.style.left = "50%"; b.style.top = "50%";
+    b.style.transform = "translate(-50%, -50%)";
+    garden.appendChild(b);
 }
 
-function switchTurn() {
-  currentPlayer = (currentPlayer === "player") ? "cpu" : "player";
-  gameState = "waiting";
-  statusBar.innerHTML = (currentPlayer === "player") ? "Tocca a te!" : "🤖 CPU sta pensando...";
-  diceBtn.disabled = (currentPlayer === "cpu");
-  
-  if (currentPlayer === "cpu") {
-    setTimeout(rollDice, 800);
-  }
+function cpuAction() {
+  let targets = bunnies.filter(b => b.type === "cpu");
+  let b = targets.sort((a,b) => a.pos - b.pos)[0]; // Sceglie il più vicino allo 0
+  executeMove(b);
 }
 
-function gameOver(winner) {
-  statusBar.innerHTML = winner === "player" ? "🏆 TRIONFO! HAI VINTO!" : "🤖 LA CPU HA VINTO!";
-  diceBtn.style.display = "none";
-  setTimeout(() => location.reload(), 5000);
+function nextTurn() {
+  turn = turn === "player" ? "cpu" : "player";
+  state = "wait";
+  info.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 CPU sta saltando...";
+  diceBtn.disabled = (turn === "cpu");
+  if (turn === "cpu") setTimeout(roll, 600);
 }
-
-/* --- AVVIO --- */
-createSpiralPath();
-renderBoard();
-setupBunnies();
 </script>
 </body>
 </html>
