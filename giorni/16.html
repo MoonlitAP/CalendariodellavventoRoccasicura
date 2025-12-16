@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🐰 Carrera de Conejos - Fibonacci Edition</title>
+<title>🐰 Carrera de Conejos - Fibonacci</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root { --bg: #e8f5e9; --wood: #d2a679; --grass: #81c784; }
@@ -15,100 +15,93 @@
     height: 100vh; padding: 10px; overflow: hidden;
   }
 
-  /* Finestra Spiegazione Iniziale */
   .overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
     display: flex; align-items: center; justify-content: center; z-index: 100;
   }
   .modal {
-    background: #fffdf5; padding: 25px; border-radius: 30px; border: 6px solid var(--wood);
-    width: 90%; max-width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    background: #fffdf5; padding: 20px; border-radius: 25px; border: 5px solid var(--wood);
+    width: 90%; max-width: 340px; text-align: center;
   }
-  .modal h2 { color: #2e7d32; margin-top: 0; }
-  .modal p { color: #5d4037; line-height: 1.5; font-size: 15px; text-align: left; }
 
-  /* Tabellone */
   #game-container {
-    position: relative; width: 95vmin; height: 95vmin; max-width: 450px; max-height: 450px;
+    position: relative; width: 95vmin; height: 85vmin; max-width: 500px;
     display: flex; align-items: center; justify-content: center;
   }
   #board {
-    width: 80%; height: 80%; background: var(--grass); border-radius: 50%; 
-    position: relative; border: 6px solid #4a8c4d; box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
+    width: 80%; height: 85%; background: var(--grass); border-radius: 50%; 
+    position: relative; border: 5px solid #4a8c4d; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   }
 
-  /* Caselle */
   .cell { 
-    width: 10%; height: 10%; background: #fdf5e6; border-radius: 20%; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 3vmin; 
-    font-weight: bold; color: #5d4037; border: 1.5px solid #deb887;
+    width: 9%; height: 9%; background: #fdf5e6; border-radius: 15%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 2.8vmin; 
+    font-weight: bold; color: #5d4037; border: 1px solid #deb887;
     transform: translate(-50%, -50%); z-index: 2;
   }
-  .hole { background: #222 !important; border: none; box-shadow: inset 0 3px 5px #000; color: transparent !important; }
+  .hole { background: #222 !important; border: none; box-shadow: inset 0 2px 4px #000; color: transparent !important; }
 
+  /* CAROTA PICCOLA AL CENTRO */
   #carrot { 
-    width: 18%; height: 18%; background: #ffa726; border-radius: 50%; position: absolute; 
-    top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; 
-    justify-content: center; font-size: 8vmin; z-index: 5; border: 3px solid #fb8c00;
+    width: 10%; height: 10%; position: absolute; 
+    top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 5vmin; z-index: 1;
   }
 
-  /* Coniglietti */
   .rabbit { 
-    width: 9%; height: 9%; position: absolute; z-index: 10;
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+    width: 8%; height: 8%; position: absolute; z-index: 10;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
     transform: translate(-50%, -50%);
     background-size: contain; background-repeat: no-repeat; background-position: center;
   }
   .player { background-image: url('../img/rabbit_1.png'); }
   .cpu { background-image: url('../img/rabbit_2.png'); }
   
-  .active-move { animation: jump 0.6s infinite alternate; filter: drop-shadow(0 0 8px #fff); }
-  @keyframes jump { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -65%) scale(1.1); } }
+  .active-move { animation: jump 0.5s infinite alternate; filter: drop-shadow(0 0 5px #fff); }
+  @keyframes jump { from { margin-top: 0; } to { margin-top: -8px; } }
 
-  /* Basi Esterne (Dritte) */
   .base { 
-    position: absolute; display: flex; flex-direction: column; gap: 10px; 
-    padding: 10px; background: rgba(255,255,255,0.3); border-radius: 15px;
+    position: absolute; display: flex; flex-direction: column; gap: 8px; 
+    padding: 10px; background: rgba(255,255,255,0.4); border-radius: 20px;
+    width: 50px; align-items: center; top: 50%; transform: translateY(-50%);
   }
-  .p-base { left: 0%; top: 50%; transform: translateY(-50%); }
-  .c-base { right: 0%; top: 50%; transform: translateY(-50%); }
-  .base .rabbit { position: static; transform: none; width: 40px; height: 40px; }
+  .p-base { left: 1%; }
+  .c-base { right: 1%; }
+  .base .rabbit { position: static; transform: none; width: 35px; height: 35px; }
 
-  /* UI Inferiore */
-  .controls { margin-top: 10px; text-align: center; width: 100%; }
+  .controls { margin-top: 10px; width: 90%; max-width: 400px; text-align: center; }
   #msg {
     background: white; padding: 10px; border-radius: 15px; border: 2px solid var(--wood);
-    font-weight: bold; margin-bottom: 10px; color: #2e7d32; min-height: 44px;
+    font-weight: bold; margin-bottom: 8px; color: #2e7d32; font-size: 14px; min-height: 40px;
   }
   .btn {
-    padding: 12px 30px; border: none; border-radius: 25px;
+    padding: 12px 35px; border: none; border-radius: 25px;
     background: #ff9800; color: white; font-size: 18px; font-weight: bold;
     box-shadow: 0 4px 0 #e65100; cursor: pointer;
   }
-  .btn:disabled { background: #ccc; box-shadow: 0 4px 0 #999; }
 </style>
 </head>
 <body>
 
 <div id="startUI" class="overlay">
   <div class="modal">
-    <h2>🐰 Benvenuto alla Carrera!</h2>
-    <p>
-      <b>Obiettivo:</b> Porta i tuoi 3 coniglietti alla carota centrale (Casella 1).<br><br>
-      <b>Come si gioca:</b><br>
-      1. Tira il dado e scegli quale coniglio muovere.<br>
-      2. Il percorso va dal <b>30</b> fino all'<b>1</b>.<br>
-      3. Se esce <b>6</b>, i buchi neri cambiano posizione!<br>
-      4. Se cadi in un buco, torni alla base.
+    <h2 style="color:#2e7d32">🐰</h2>
+    <p style="text-align:left; font-size:14px; color:#5d4037">
+      Porta i tuoi coniglietti al centro!<br><br>
+      • Inizia dalla casella <b>1 (esterna)</b>.<br>
+      • Raggiungi la casella <b>30 (centrale)</b>.<br>
+      • Con il <b>6</b> i buchi neri saltano!<br>
+      • Se cadi nel buco, torni alla base laterale.
     </p>
-    <button class="btn" onclick="start()">INIZIA LA SFIDA</button>
+    <button class="btn" onclick="start()">GIOCA</button>
   </div>
 </div>
 
 <div id="winUI" class="overlay" style="display:none">
   <div class="modal">
     <h1 id="winTxt">VITTORIA!</h1>
-    <button class="btn" onclick="location.reload()">GIOCA ANCORA</button>
+    <button class="btn" onclick="location.reload()">RIPROVA</button>
   </div>
 </div>
 
@@ -119,7 +112,7 @@
 </div>
 
 <div class="controls">
-  <div id="msg">Tira il dado per iniziare!</div>
+  <div id="msg">Tira il dado!</div>
   <button id="diceBtn" class="btn" onclick="roll()">🎲 TIRA IL DADO</button>
 </div>
 
@@ -132,29 +125,29 @@ let turn = "player";
 let currentDice = 0;
 let state = "wait"; 
 const path = [];
-let holes = [25, 18, 10]; // Buchi iniziali
+let holes = [6, 14, 22]; 
 
 function start() { document.getElementById("startUI").style.display = "none"; }
 
-// Spirale da 30 (esterno) a 1 (centro)
+// Spirale che inizia da fuori (1) e finisce dentro (30)
 function buildPath() {
-  const totalSteps = 30;
-  for (let i = 0; i < totalSteps; i++) {
-    // Calcolo spirale invertita
-    const angle = 0.5 * (totalSteps - i); 
-    const r = 10 + (i * 1.3); // raggio cresce verso l'esterno
+  const steps = 30;
+  for (let i = 0; i < steps; i++) {
+    const angle = 0.5 * i; 
+    const r = 42 - (i * 1.3); // Il raggio diminuisce: i=0 (esterno), i=29 (interno)
     const x = 50 + r * Math.cos(angle);
     const y = 50 + r * Math.sin(angle);
-    // Inseriamo all'inizio dell'array così l'indice 0 è la casella 30 e l'ultimo è la 1
+    // Usiamo unshift per invertire: l'indice 0 sarà il punto più esterno
     path.unshift({ x: x + "%", y: y + "%" });
   }
+  // Ora path[0] è esterno, path[29] è interno
 }
 buildPath();
 
 function draw() {
   document.querySelectorAll('.cell').forEach(c => c.remove());
   path.forEach((p, i) => {
-    const num = i + 1; // Da 1 a 30
+    const num = i + 1; // 1 esterno, 30 interno
     const c = document.createElement("div");
     c.className = "cell" + (holes.includes(num) ? " hole" : "");
     c.style.left = p.x; c.style.top = p.y;
@@ -167,7 +160,7 @@ draw();
 function swapHoles() {
   let h = [];
   while(h.length < 3) {
-    let r = Math.floor(Math.random() * 25) + 2;
+    let r = Math.floor(Math.random() * 26) + 2;
     if(!h.includes(r)) h.push(r);
   }
   holes = h;
@@ -182,7 +175,7 @@ function init() {
     const isP = i < 3;
     const r = document.createElement("div");
     r.className = "rabbit " + (isP ? "player" : "cpu");
-    r.pos = 31; // Partono fuori dal 30
+    r.pos = -1; // -1 significa in base
     r.id = i; r.type = isP ? "player" : "cpu";
     r.onclick = () => tap(r);
     isP ? pb.appendChild(r) : cb.appendChild(r);
@@ -191,13 +184,13 @@ function init() {
 }
 
 function place(r) {
-  if (r.pos > 30) {
+  if (r.pos === -1) {
     const b = r.type === "player" ? document.getElementById("p-base") : document.getElementById("c-base");
     r.style.position = "static"; r.style.transform = "none";
     b.appendChild(r);
   } else {
     r.style.position = "absolute";
-    r.style.left = path[r.pos - 1].x; r.style.top = path[r.pos - 1].y;
+    r.style.left = path[r.pos].x; r.style.top = path[r.pos].y;
     r.style.transform = "translate(-50%, -50%)";
     board.appendChild(r);
   }
@@ -207,11 +200,10 @@ init();
 function roll() {
   currentDice = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
-  msg.innerHTML = `🎲 Risultato: <b>${currentDice}</b>`;
+  msg.innerHTML = `🎲 Dado: <b>${currentDice}</b>`;
   if (currentDice === 6) { 
-    msg.innerHTML = "🎲 <b>6!</b> I buchi si muovono!";
     swapHoles(); 
-    setTimeout(go, 800); 
+    setTimeout(go, 600); 
   } else { go(); }
 }
 
@@ -219,7 +211,8 @@ function go() {
   if (turn === "player") {
     state = "pick";
     conigli.filter(r => r.type === "player").forEach(r => r.classList.add("active-move"));
-  } else { setTimeout(cpu, 1000); }
+    msg.innerHTML += " - Muovi un coniglio!";
+  } else { setTimeout(cpu, 800); }
 }
 
 function tap(r) {
@@ -230,32 +223,29 @@ function tap(r) {
 
 function move(r) {
   state = "move";
-  // Movimento verso il basso (da 30 a 1)
-  if (r.pos > 30) r.pos = 31 - currentDice;
-  else r.pos -= currentDice;
+  r.pos += currentDice;
 
-  if (r.pos <= 1) {
-    r.pos = 1; place(r);
+  if (r.pos >= 29) { // Casella 30 (indice 29)
+    r.pos = 29; place(r);
     setTimeout(() => {
       document.getElementById("winUI").style.display = "flex";
       document.getElementById("winTxt").innerText = turn === "player" ? "🏆 HAI VINTO!" : "🤖 CPU VINCE";
-    }, 500);
+    }, 400);
     return;
   }
 
   place(r);
-  if (holes.includes(r.pos)) {
+  if (holes.includes(r.pos + 1)) {
     setTimeout(() => { 
-        r.pos = 31; place(r); 
-        msg.innerHTML = "🌀 OOOPS! Caduto nel buco!";
-    }, 700);
+        r.pos = -1; place(r); 
+        msg.innerHTML = "🌀 Caduto nel buco! Torni in base.";
+    }, 600);
   }
-  setTimeout(next, 1000);
+  setTimeout(next, 900);
 }
 
 function cpu() {
-  let movable = conigli.filter(r => r.type === "cpu");
-  let r = movable[Math.floor(Math.random() * 3)];
+  let r = conigli.filter(r => r.type === "cpu").sort((a,b) => b.pos - a.pos)[0];
   move(r);
 }
 
@@ -264,7 +254,7 @@ function next() {
   state = "wait";
   msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 Il PC gioca...";
   diceBtn.disabled = (turn === "cpu");
-  if (turn === "cpu") setTimeout(roll, 600);
+  if (turn === "cpu") setTimeout(roll, 500);
 }
 </script>
 </body>
