@@ -6,105 +6,89 @@
 <title>🐰 Carrera de Conejos</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #a8d5ba;
-    --wood: #d2a679;
-    --grass: #5eb061;
-  }
-
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-
+  :root { --bg: #e8f5e9; --wood: #d2a679; --grass: #81c784; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { 
     margin: 0; font-family: 'Ubuntu', sans-serif; background: var(--bg); 
     display: flex; flex-direction: column; align-items: center; justify-content: space-between; 
-    height: 100vh; padding: 10px 0; overflow: hidden;
+    height: 100vh; padding: 15px 0; overflow: hidden;
   }
 
   .overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
-    backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+    display: flex; align-items: center; justify-content: center; z-index: 100;
   }
   .modal {
-    background: #fffdf5; padding: 25px; border-radius: 30px; border: 6px solid var(--wood);
+    background: white; padding: 30px; border-radius: 25px; border: 5px solid var(--wood);
     width: 85%; max-width: 320px; text-align: center;
   }
 
   #game-container {
-    position: relative; width: 92vmin; height: 92vmin; max-width: 400px; max-height: 400px;
-    background: var(--wood); border-radius: 50%; padding: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    position: relative; width: 92vmin; height: 92vmin; max-width: 420px; max-height: 420px;
+    background: #bc8f8f; border-radius: 50%; padding: 12px;
   }
-
   #board {
-    width: 100%; height: 100%; background: var(--grass);
-    border-radius: 50%; position: relative; border: 4px solid #4a8c4d;
+    width: 100%; height: 100%; background: var(--grass); border-radius: 50%; 
+    position: relative; border: 4px solid #4a8c4d;
   }
 
   .cell { 
-    width: 11%; height: 11%; background: #f3e5ab; border-radius: 20%; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 3.2vmin; 
-    font-weight: bold; color: #8d6e63; box-shadow: 0 3px 0 #d7ccc8;
+    width: 12%; height: 12%; background: #fdf5e6; border-radius: 25%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 3.5vmin; 
+    font-weight: bold; color: #5d4037; border: 2px solid #deb887;
     transform: translate(-50%, -50%); z-index: 2;
   }
-  .hole { background: #222 !important; box-shadow: inset 0 3px 8px #000; color: transparent !important; }
+  .hole { background: #333 !important; border: none; color: transparent !important; box-shadow: inset 0 4px 6px #000; }
 
   #carrot { 
-    width: 20%; height: 20%; background: #ffa726; border-radius: 50%; position: absolute; 
+    width: 22%; height: 22%; background: #ffa726; border-radius: 50%; position: absolute; 
     top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; 
-    justify-content: center; font-size: 9vmin; z-index: 5;
+    justify-content: center; font-size: 10vmin; z-index: 5; border: 4px solid #fb8c00;
   }
 
+  /* Rabbit PNG - DIMENSIONE RIDOTTA AL 10% */
   .rabbit { 
-    width: 14%; height: 14%; position: absolute; z-index: 10;
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
-    transform: translate(-50%, -50%); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    width: 10%; height: 10%; position: absolute; z-index: 10;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+    transform: translate(-50%, -50%); filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
     background-size: contain; background-repeat: no-repeat; background-position: center;
   }
+  .player { background-image: url('../img/rabbit_1.png'); }
+  .cpu { background-image: url('../img/rabbit_2.png'); }
   
-  /* Se l'HTML è dentro /giorni/, usa questi percorsi */
-  .player { background-image: url('img/rabbit_1.png'); }
-  .cpu { background-image: url('img/rabbit_2.png'); }
-  
-  .active-move { animation: bounce 0.5s infinite alternate; filter: drop-shadow(0 0 10px #fff); }
-
-  @keyframes bounce { from { margin-top: 0; } to { margin-top: -15px; } }
+  .active-move { animation: bounce 0.6s infinite alternate; filter: drop-shadow(0 0 8px #fff); }
+  @keyframes bounce { from { margin-top: 0; } to { margin-top: -10px; } }
 
   #msg {
-    background: #fffdf5; padding: 12px; border-radius: 15px;
-    border: 3px solid var(--wood); font-size: 16px; font-weight: bold; color: #5d4037;
-    width: 85%; text-align: center;
+    background: white; padding: 12px; border-radius: 20px; border: 3px solid var(--wood);
+    font-weight: bold; width: 85%; text-align: center; color: #2e7d32;
   }
-
   .btn {
     padding: 15px 40px; border: none; border-radius: 35px;
     background: #ff9800; color: white; font-size: 20px; font-weight: bold;
-    box-shadow: 0 6px 0 #e65100; cursor: pointer;
+    box-shadow: 0 5px 0 #e65100; cursor: pointer;
   }
-  .btn:active { transform: translateY(4px); box-shadow: 0 2px #e65100; }
-
   .base { position: absolute; display: flex; gap: 8px; z-index: 20; }
-  .p-base { bottom: -12%; left: 50%; transform: translateX(-50%); }
-  .c-base { top: -12%; left: 50%; transform: translateX(-50%); }
+  .p-base { bottom: -7%; left: 50%; transform: translateX(-50%); }
+  .c-base { top: -7%; left: 50%; transform: translateX(-50%); }
 </style>
 </head>
 <body>
 
 <div id="startUI" class="overlay">
   <div class="modal">
-    <h1 style="color:var(--grass); margin:0;">🐰 </h1>
-    <p>Porta i tuoi coniglietti alla carota!</p>
+    <h2>🐰 Giorno 16</h2>
+    <p>Conduci i tuoi coniglietti alla carota!</p>
     <button class="btn" onclick="start()">INIZIA</button>
   </div>
 </div>
 
-<div id="winUI" class="overlay hidden">
+<div id="winUI" class="overlay" style="display:none">
   <div class="modal">
     <h1 id="winTxt">VITTORIA!</h1>
     <button class="btn" onclick="location.reload()">RIPROVA</button>
   </div>
 </div>
-
-<h2 style="color:#2e7d32; margin:0;">Carrera de Conejos</h2>
 
 <div id="game-container">
   <div class="base c-base" id="c-base"></div>
@@ -124,16 +108,15 @@ let turn = "player";
 let currentDice = 0;
 let state = "wait"; 
 const path = [];
-let holes = [4, 9, 15];
+let holes = [4, 9, 14];
 
-function start() { document.getElementById("startUI").classList.add("hidden"); }
+function start() { document.getElementById("startUI").style.display = "none"; }
 
-// Spirale migliorata per evitare sovrapposizioni al centro
 function buildPath() {
-  const steps = 20; 
+  const steps = 18; 
   for (let i = 0; i < steps; i++) {
-    const angle = 1.0 * i; 
-    const r = 40 - (i * 1.85); 
+    const angle = 1.15 * i; 
+    const r = 40 - (i * 2.1); 
     const x = 50 + r * Math.cos(angle);
     const y = 50 + r * Math.sin(angle);
     path.push({ x: x + "%", y: y + "%" });
@@ -157,7 +140,7 @@ draw();
 function swapHoles() {
   let h = [];
   while(h.length < 3) {
-    let r = Math.floor(Math.random() * 12) + 4;
+    let r = Math.floor(Math.random() * 10) + 5;
     if(!h.includes(r)) h.push(r);
   }
   holes = h;
@@ -195,7 +178,7 @@ init();
 function roll() {
   currentDice = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
-  msg.innerHTML = `🎲 Dado: <b>${currentDice}</b>`;
+  msg.innerHTML = `🎲 Risultato: <b>${currentDice}</b>`;
   if (currentDice === 6) { swapHoles(); setTimeout(go, 600); } 
   else { go(); }
 }
@@ -204,7 +187,7 @@ function go() {
   if (turn === "player") {
     state = "pick";
     conigli.filter(r => r.type === "player").forEach(r => r.classList.add("active-move"));
-    msg.innerHTML += " - Muovi!";
+    msg.innerHTML += " - Scegli un coniglio!";
   } else { setTimeout(cpu, 800); }
 }
 
@@ -220,16 +203,16 @@ function move(r) {
   if (r.pos >= path.length - 1) {
     r.pos = path.length - 1; place(r);
     setTimeout(() => {
-      document.getElementById("winUI").classList.remove("hidden");
-      document.getElementById("winTxt").innerText = turn === "player" ? "🏆 VITTORIA!" : "🤖 CPU VINCE";
+      document.getElementById("winUI").style.display = "flex";
+      document.getElementById("winTxt").innerText = turn === "player" ? "🏆 VITTORIA!" : "🤖 CPU HA VINTO";
     }, 400);
     return;
   }
   place(r);
   if (holes.includes(r.pos + 1)) {
-    setTimeout(() => { r.pos = -1; place(r); msg.innerHTML = "🌀 <b>BUCO!</b>"; }, 600);
+    setTimeout(() => { r.pos = -1; place(r); msg.innerHTML = "🌀 <b>CADUTO!</b>"; }, 600);
   }
-  setTimeout(next, 800);
+  setTimeout(next, 900);
 }
 
 function cpu() {
@@ -240,7 +223,7 @@ function cpu() {
 function next() {
   turn = turn === "player" ? "cpu" : "player";
   state = "wait";
-  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "Computer...";
+  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 Il PC sta pensando...";
   diceBtn.disabled = (turn === "cpu");
   if (turn === "cpu") setTimeout(roll, 500);
 }
