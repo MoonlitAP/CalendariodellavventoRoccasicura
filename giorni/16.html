@@ -84,7 +84,7 @@ body{
   font-size:20px;
 }
 
-/* ===== MESSAGE ===== */
+/* ===== HUD / ISTRUZIONI ===== */
 .message{
   padding:14px;
   text-align:center;
@@ -95,6 +95,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  font-size:16px;
 }
 
 /* ===== BUTTON ===== */
@@ -108,8 +109,8 @@ body{
 }
 .action:disabled{background:#9e9e9e;}
 
-/* ===== MODAL REGALO ===== */
-#giftModal{
+/* ===== MODAL ===== */
+.modal{
   display:none;
   position:fixed;
   inset:0;
@@ -118,16 +119,30 @@ body{
   justify-content:center;
   z-index:1000;
 }
-#giftModal .box{
+.modal .box{
   background:#fff;
   padding:20px;
   border-radius:16px;
   text-align:center;
+  max-width:320px;
 }
-#giftModal button{
-  margin:8px;
-  padding:10px 16px;
+.modal button{
+  margin-top:12px;
+  padding:12px 18px;
   font-size:16px;
+}
+
+/* ===== EFFETTO DADO ===== */
+.dice-rolling{
+  animation: shake 0.3s infinite;
+}
+
+@keyframes shake{
+  0%{transform:rotate(0deg);}
+  25%{transform:rotate(8deg);}
+  50%{transform:rotate(-8deg);}
+  75%{transform:rotate(8deg);}
+  100%{transform:rotate(0deg);}
 }
 </style>
 </head>
@@ -140,19 +155,35 @@ body{
   <h1>🎄 Christmas Garden Race</h1>
   <div class="status">
     <span id="turno">Turno: TU 🐰</span>
-    <span id="dado">Dado: —</span>
+    <span id="dado">🎲 —</span>
   </div>
 </header>
 
 <main class="board" id="board"></main>
 
-<div class="message" id="message">🎯 Tira il dado</div>
-<button class="action" id="actionBtn">🎲 TIRA IL DADO</button>
+<div class="message" id="message">🎄 Benvenuta!</div>
+<button class="action" id="actionBtn" disabled>🎲 TIRA IL DADO</button>
 
 </div>
 
-<!-- MODAL REGALO -->
-<div id="giftModal">
+<!-- INTRO -->
+<div class="modal" id="introModal">
+  <div class="box">
+    <h2>🎄 Christmas Garden Race</h2>
+    <p>
+      🐰 TU vs 🎅 Babbo Natale<br><br>
+      🎲 Tira il dado e avanza nel giardino<br>
+      ⚫ Buco nero → torni allo START<br>
+      🎁 Regalo → scegli −1 o +2<br>
+      ❄️ Ghiaccio → salti un turno<br><br>
+      🥕 Arriva alla carota per vincere!
+    </p>
+    <button onclick="startGame()">▶️ AVVIA</button>
+  </div>
+</div>
+
+<!-- REGALO -->
+<div class="modal" id="giftModal">
   <div class="box">
     <h3>🎁 Regalo!</h3>
     <p>Scegli cosa fare:</p>
@@ -163,41 +194,37 @@ body{
 
 <script>
 /* ===== ELEMENTI ===== */
-const board=document.getElementById("board");
-const msg=document.getElementById("message");
-const btn=document.getElementById("actionBtn");
-const turnoEl=document.getElementById("turno");
-const dadoEl=document.getElementById("dado");
+const board = document.getElementById("board");
+const msg = document.getElementById("message");
+const btn = document.getElementById("actionBtn");
+const turnoEl = document.getElementById("turno");
+const dadoEl = document.getElementById("dado");
 
 /* ===== STATO ===== */
-let currentPlayer=1;
-let dado=0;
+let gameStarted = false;
+let currentPlayer = 1;
+let dado = 0;
 
-const players={
-  1:{pos:0,icon:"🐰",skip:false},
-  2:{pos:0,icon:"🎅",skip:false}
+const players = {
+  1: { pos: 0, icon: "🐰", skip: false },
+  2: { pos: 0, icon: "🎅", skip: false }
 };
 
-/* ===== SPECIALI ===== */
-let blackHoles=[8,13,19];
-const gifts=[6,18];
-const ice=[12,25];
+/* ===== CASELLE SPECIALI ===== */
+let blackHoles = [8,13,19];
+const gifts = [6,18];
+const ice = [12,25];
 
-/* ===== CREA GRIGLIA 0–30 ===== */
+/* ===== CREA GRIGLIA ===== */
 for(let i=30;i>=0;i--){
   const c=document.createElement("div");
   c.className="cell";
   c.dataset.num=i;
 
-  if(i===0){
-    c.classList.add("start");
-    c.textContent="START";
-  }else if(i===30){
-    c.classList.add("finish");
-    c.textContent="🥕";
-  }else{
-    c.textContent=i;
-  }
+  if(i===0){ c.classList.add("start"); c.textContent="START"; }
+  else if(i===30){ c.classList.add("finish"); c.textContent="🥕"; }
+  else c.textContent=i;
+
   board.appendChild(c);
 }
 
@@ -219,23 +246,48 @@ function render(){
       const box=document.createElement("div");
       box.className="players";
       here.forEach(p=>{
-        const span=document.createElement("span");
-        span.textContent=p.icon;
-        box.appendChild(span);
+        const s=document.createElement("span");
+        s.textContent=p.icon;
+        box.appendChild(s);
       });
       cell.appendChild(box);
     }
   }
 }
 
-/* ===== LOGICA ===== */
+/* ===== AVVIO ===== */
+function startGame(){
+  document.getElementById("introModal").style.display="none";
+  gameStarted=true;
+  msg.textContent="🎯 Tira il dado";
+  btn.disabled=false;
+}
+
+/* ===== EFFETTO DADO ===== */
 function rollDice(){
-  dado=Math.floor(Math.random()*6)+1;
-  dadoEl.textContent="Dado: "+dado;
-  if(dado===6){
-    randomizeBlackHoles();
-    msg.textContent="🎲 6! I buchi neri si spostano!";
-  }
+  let count=0;
+  btn.disabled=true;
+  dadoEl.classList.add("dice-rolling");
+
+  const rolling=setInterval(()=>{
+    const fake=Math.floor(Math.random()*6)+1;
+    dadoEl.textContent="🎲 "+fake;
+    count++;
+  },100);
+
+  setTimeout(()=>{
+    clearInterval(rolling);
+    dado=Math.floor(Math.random()*6)+1;
+    dadoEl.textContent="🎲 "+dado;
+    dadoEl.classList.remove("dice-rolling");
+
+    if(dado===6){
+      randomizeBlackHoles();
+      msg.textContent="🎲 6! I buchi neri si spostano!";
+    }
+
+    btn.disabled=false;
+  },700);
 }
 
 function randomizeBlackHoles(){
@@ -280,7 +332,7 @@ function checkIce(p){
 
 /* ===== TURNO TU ===== */
 btn.onclick=()=>{
-  if(currentPlayer!==1) return;
+  if(!gameStarted || currentPlayer!==1) return;
 
   if(players[1].skip){
     players[1].skip=false;
@@ -290,16 +342,18 @@ btn.onclick=()=>{
   }
 
   rollDice();
-  players[1].pos=Math.min(30,players[1].pos+dado);
-  render();
-
   setTimeout(()=>{
-    if(checkBlackHole(1)){render();nextTurn();return;}
-    if(checkGift(1)) return;
-    checkIce(1);
+    players[1].pos=Math.min(30,players[1].pos+dado);
     render();
-    nextTurn();
-  },600);
+
+    setTimeout(()=>{
+      if(checkBlackHole(1)){render();nextTurn();return;}
+      if(checkGift(1)) return;
+      checkIce(1);
+      render();
+      nextTurn();
+    },400);
+  },750);
 };
 
 /* ===== TURNO PC ===== */
@@ -316,20 +370,22 @@ function pcTurn(){
     }
 
     rollDice();
-    players[2].pos=Math.min(30,players[2].pos+dado);
-    render();
-
     setTimeout(()=>{
-      if(checkBlackHole(2)){render();nextTurn();return;}
-      if(checkGift(2)){
-        giftChoice(Math.random()<0.5?-1:2);
-        return;
-      }
-      checkIce(2);
+      players[2].pos=Math.min(30,players[2].pos+dado);
       render();
-      nextTurn();
-    },600);
-  },800);
+
+      setTimeout(()=>{
+        if(checkBlackHole(2)){render();nextTurn();return;}
+        if(checkGift(2)){
+          giftChoice(Math.random()<0.5?-1:2);
+          return;
+        }
+        checkIce(2);
+        render();
+        nextTurn();
+      },400);
+    },750);
+  },600);
 }
 
 /* ===== CAMBIO TURNO ===== */
@@ -343,7 +399,7 @@ function nextTurn(){
   }
 
   currentPlayer=currentPlayer===1?2:1;
-  dadoEl.textContent="Dado: —";
+  dadoEl.textContent="🎲 —";
 
   if(currentPlayer===1){
     turnoEl.textContent="Turno: TU 🐰";
@@ -356,6 +412,7 @@ function nextTurn(){
 }
 
 /* ===== START ===== */
+document.getElementById("introModal").style.display="flex";
 render();
 </script>
 
