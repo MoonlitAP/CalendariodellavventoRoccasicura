@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐰 Giorno 16 – Carrera de Conejos</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  background: #eaf6e6;
+  text-align: center;
+}
+
+h1 {
+  margin: 10px 0;
+}
+
+#board {
+  margin: 15px auto;
+  width: 320px;
+  height: 320px;
+  position: relative;
+  background: #4caf50;
+  border-radius: 50%;
+  border: 6px solid #2e7d32;
+}
+
+.cell {
+  width: 26px;
+  height: 26px;
+  background: #ffeb3b;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.hole {
+  background: #000;
+}
+
+#carrot {
+  width: 42px;
+  height: 42px;
+  background: orange;
+  border-radius: 50%;
+  position: absolute;
+  top: 139px;
+  left: 139px;
+  line-height: 42px;
+  font-size: 20px;
+}
+
+.rabbit {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 5;
+}
+
+.player {
+  background: hotpink;
+}
+
+.cpu {
+  background: purple;
+}
+
+#controls {
+  margin-top: 10px;
+}
+
+button {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 20px;
+  background: #ff9800;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+#info {
+  margin-top: 10px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🐰 Giorno 16 – Carrera de Conejos</h1>
+
+<div id="board">
+  <div id="carrot">🥕</div>
+</div>
+
+<div id="controls">
+  <button id="diceBtn" onclick="rollDice()">🎲 Tira il dado</button>
+</div>
+
+<div id="info">Turno: Giocatore</div>
+
+<script>
+const board = document.getElementById("board");
+const info = document.getElementById("info");
+const diceBtn = document.getElementById("diceBtn");
+
+let turn = "player";
+let dice = 0;
+
+/* PERCORSO A SPIRALE */
+const path = [];
+const holes = [6, 13, 19]; // buchi fissi
+
+function createPath() {
+  const radii = [135, 110, 85, 60];
+  let index = 0;
+
+  radii.forEach(r => {
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const x = 160 + r * Math.cos(angle) - 13;
+      const y = 160 + r * Math.sin(angle) - 13;
+      path.push({ x, y, index });
+      index++;
+    }
+  });
+}
+
+createPath();
+
+/* DISEGNO CASELLE */
+path.forEach((p, i) => {
+  const c = document.createElement("div");
+  c.className = "cell" + (holes.includes(i) ? " hole" : "");
+  c.style.left = p.x + "px";
+  c.style.top = p.y + "px";
+  board.appendChild(c);
+});
+
+/* CONIGLI */
+let rabbits = [];
+
+function createRabbits(type) {
+  for (let i = 0; i < 4; i++) {
+    const r = document.createElement("div");
+    r.className = "rabbit " + type;
+    r.pos = -1;
+    r.type = type;
+    board.appendChild(r);
+    rabbits.push(r);
+  }
+}
+
+createRabbits("player");
+createRabbits("cpu");
+
+function updateRabbit(r) {
+  if (r.pos >= 0) {
+    r.style.left = path[r.pos].x + 4 + "px";
+    r.style.top = path[r.pos].y + 4 + "px";
+  } else {
+    r.style.left = "150px";
+    r.style.top = r.type === "player" ? "300px" : "0px";
+  }
+}
+
+rabbits.forEach(updateRabbit);
+
+/* DADO */
+function rollDice() {
+  diceBtn.disabled = true;
+  dice = Math.floor(Math.random() * 6) + 1;
+  info.textContent = `🎲 È uscito ${dice}`;
+  setTimeout(playTurn, 900);
+}
+
+/* TURNO */
+function playTurn() {
+  const active = rabbits.filter(r => r.type === turn);
+
+  // sceglie il coniglio più avanti
+  let r = active.sort((a, b) => b.pos - a.pos)[0];
+
+  r.pos += dice;
+
+  // vittoria
+  if (r.pos >= path.length) {
+    endGame(turn);
+    return;
+  }
+
+  // buco solo se esce 6
+  if (dice === 6 && holes.includes(r.pos)) {
+    r.pos = -1;
+  }
+
+  updateRabbit(r);
+
+  turn = turn === "player" ? "cpu" : "player";
+  info.textContent += ` | Turno: ${turn === "player" ? "Giocatore" : "Computer"}`;
+
+  diceBtn.disabled = turn === "cpu";
+
+  if (turn === "cpu") {
+    setTimeout(rollDice, 1200);
+  }
+}
+
+/* FINE GIOCO */
+function endGame(winner) {
+  alert(winner === "player"
+    ? "🐰 HAI VINTO! Hai raggiunto la carota!"
+    : "🤖 IL COMPUTER HA VINTO!");
+  location.reload();
+}
+</script>
+
+</body>
+</html>
