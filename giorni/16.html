@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐰 Carrera de Conejos - Wood Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐰 Carrera de Conejos - Mobile Wood</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -14,103 +14,107 @@
     --cpu-color: #7e57c2;
   }
 
+  * { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; /* Toglie il flash azzurro al tocco su mobile */
+    touch-action: manipulation; /* Evita il ritardo del clic e lo zoom */
+  }
+
   body { 
     margin: 0; font-family: 'Ubuntu', sans-serif; background: var(--bg-color); 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    min-height: 100vh; overflow: hidden; /* Evita lo scrolling della pagina */
   }
 
   /* Schermate di Overlay */
   .overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
     display: flex; align-items: center; justify-content: center; z-index: 100;
   }
   .modal {
-    background: #fffdf5; padding: 30px; border-radius: 30px; border: 6px solid var(--wood-border);
-    max-width: 350px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    background: #fffdf5; padding: 20px; border-radius: 25px; border: 5px solid var(--wood-border);
+    width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   }
   .hidden { display: none !important; }
 
-  /* Tabellone in legno */
+  /* Tabellone Responsive: usa 'vmin' per adattarsi sia in verticale che in orizzontale */
   #board-container {
-    position: relative; padding: 20px; background: var(--wood-border);
-    border-radius: 50%; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.2), 0 10px 30px rgba(0,0,0,0.3);
+    position: relative; padding: 10px; background: var(--wood-border);
+    border-radius: 50%; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.3);
+    width: 90vmin; height: 90vmin; max-width: 440px; max-height: 440px;
+    display: flex; align-items: center; justify-content: center;
   }
 
   #board {
-    width: 440px; height: 440px; background: var(--board-green);
-    border-radius: 50%; position: relative; border: 4px solid #4a8c4d;
+    width: 100%; height: 100%; background: var(--board-green);
+    border-radius: 50%; position: relative; border: 3px solid #4a8c4d;
   }
 
-  /* Caselle stile "tessera di legno" */
+  /* Caselle Responsive */
   .cell { 
-    width: 36px; height: 36px; background: #f3e5ab; border-radius: 8px; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #8d6e63; 
-    box-shadow: 0 4px 0 #d7ccc8, 0 6px 10px rgba(0,0,0,0.1); transition: all 0.3s ease;
+    width: 8%; height: 8%; background: #f3e5ab; border-radius: 20%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 2.5vmin; font-weight: bold; color: #8d6e63; 
+    box-shadow: 0 2px 0 #d7ccc8; transform: translate(-50%, -50%); /* Centra rispetto alle coordinate */
   }
-  .hole { background: #1a1a1a !important; box-shadow: inset 0 4px 10px #000; border: none; }
+  .hole { background: #1a1a1a !important; box-shadow: inset 0 2px 5px #000; border: none; color: transparent !important; }
 
   #carrot-center { 
-    width: 70px; height: 70px; background: #ffa726; border-radius: 50%; position: absolute; 
-    top: 185px; left: 185px; display: flex; align-items: center; justify-content: center;
-    font-size: 35px; box-shadow: 0 6px 0 #ef6c00, 0 8px 15px rgba(0,0,0,0.2); z-index: 5;
+    width: 15%; height: 15%; background: #ffa726; border-radius: 50%; position: absolute; 
+    top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center;
+    font-size: 6vmin; box-shadow: 0 3px 0 #ef6c00; z-index: 5;
   }
 
   /* Conigli */
   .rabbit { 
-    width: 32px; height: 32px; border-radius: 50%; position: absolute; z-index: 10; border: 3px solid white; 
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    width: 7%; height: 7%; border-radius: 50%; position: absolute; z-index: 10; border: 2px solid white; 
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3); transform: translate(-50%, -50%);
   }
   .player { background: var(--player-color); }
   .cpu { background: var(--cpu-color); }
-  .can-move { animation: bounce 0.6s infinite alternate; box-shadow: 0 0 20px #fff; }
+  .can-move { animation: bounce 0.6s infinite alternate; }
 
-  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+  @keyframes bounce { from { margin-top: 0; } to { margin-top: -10px; } }
 
-  /* UI */
+  /* UI Pannello */
   #info-panel {
-    margin-top: 20px; background: #fffdf5; padding: 15px 40px; border-radius: 20px;
-    border: 3px solid var(--wood-border); font-size: 20px; font-weight: bold; color: #5d4037;
+    margin-top: 15px; background: #fffdf5; padding: 10px 20px; border-radius: 15px;
+    border: 2px solid var(--wood-border); font-size: 18px; font-weight: bold; color: #5d4037; text-align: center;
+    width: 80%; max-width: 300px;
   }
 
   #dice-btn {
-    margin-top: 20px; padding: 15px 40px; border: none; border-radius: 40px;
-    background: #ff9800; color: white; font-size: 22px; font-weight: bold;
-    box-shadow: 0 6px 0 #e65100; cursor: pointer; transition: 0.1s;
+    margin: 15px 0; padding: 12px 30px; border: none; border-radius: 30px;
+    background: #ff9800; color: white; font-size: 20px; font-weight: bold;
+    box-shadow: 0 5px 0 #e65100; cursor: pointer;
   }
-  #dice-btn:active { transform: translateY(4px); box-shadow: 0 2px #e65100; }
-  #dice-btn:disabled { background: #bcaaa4; box-shadow: 0 6px 0 #8d6e63; opacity: 0.7; }
+  #dice-btn:active { transform: translateY(3px); box-shadow: 0 2px #e65100; }
 
-  /* Basi di partenza */
-  .base { position: absolute; background: rgba(255,255,255,0.2); border-radius: 15px; padding: 5px; display: flex; flex-direction: column; gap: 5px; }
-  .base-player { left: -60px; top: 280px; }
-  .base-cpu { right: -60px; top: 100px; }
+  /* Basi Responsive */
+  .base { position: absolute; display: flex; flex-direction: column; gap: 4px; z-index: 20; }
+  .base-player { left: 5%; bottom: 5%; }
+  .base-cpu { right: 5%; top: 5%; }
 </style>
 </head>
 <body>
 
 <div id="startOverlay" class="overlay">
   <div class="modal">
-    <h2 style="color:#5eb061">🐰 Wood Carrera</h2>
-    <p>Porta i tuoi coniglietti alla carota centrale!</p>
-    <ul style="text-align:left; font-size: 14px; color: #5d4037;">
-      <li>Tira il dado e scegli quale coniglio muovere.</li>
-      <li>Con il <b>6</b> i buchi neri si spostano!</li>
-      <li>Evita i buchi o tornerai alla base.</li>
-    </ul>
-    <button id="dice-btn" onclick="startGame()">GIOCA ORA</button>
+    <h2 style="color:#5eb061; margin:0 0 10px 0;">🐰 Wood Carrera</h2>
+    <p style="font-size:14px;">Arriva alla carota! Se esce 6 i buchi ruotano.</p>
+    <button id="dice-btn" onclick="startGame()">GIOCA</button>
   </div>
 </div>
 
 <div id="endOverlay" class="overlay hidden">
   <div class="modal">
-    <h1 id="winner-text">🏆 VITTORIA!</h1>
+    <h1 id="winner-text" style="margin:0 0 15px 0;">🏆 VITTORIA!</h1>
     <button id="dice-btn" onclick="location.reload()">RIPROVA</button>
   </div>
 </div>
 
-<h1 style="color: #2e7d32; margin-bottom: 0;">🐰 Carrera de Conejos</h1>
+<h2 style="color: #2e7d32; margin: 10px 0 5px 0; font-size: 22px;">🐰 Carrera de Conejos</h2>
 
 <div id="board-container">
   <div class="base base-player" id="p-base"></div>
@@ -132,20 +136,19 @@ let turn = "player";
 let currentDice = 0;
 let gameState = "waiting"; 
 const path = [];
-let holes = [5, 12, 20];
+let holes = [5, 12, 19];
 
 function startGame() { document.getElementById("startOverlay").classList.add("hidden"); }
 
-// Creazione percorso a spirale leggibile
 function createPath() {
   const totalSteps = 28;
-  const centerX = 220, centerY = 220;
+  // Usiamo percentuali (50% è il centro del board)
   for (let i = 0; i < totalSteps; i++) {
     const angle = 0.7 * i;
-    const r = 185 - (i * 6); 
-    const x = centerX + r * Math.cos(angle) - 18;
-    const y = centerY + r * Math.sin(angle) - 18;
-    path.push({ x, y });
+    const r = 42 - (i * 1.3); // raggio espresso in percentuale
+    const x = 50 + r * Math.cos(angle);
+    const y = 50 + r * Math.sin(angle);
+    path.push({ x: x + "%", y: y + "%" });
   }
 }
 createPath();
@@ -156,7 +159,7 @@ function renderCells() {
     const cellNum = i + 1;
     const c = document.createElement("div");
     c.className = "cell" + (holes.includes(cellNum) ? " hole" : "");
-    c.style.left = p.x + "px"; c.style.top = p.y + "px";
+    c.style.left = p.x; c.style.top = p.y;
     if (!holes.includes(cellNum)) c.textContent = cellNum;
     board.appendChild(c);
   });
@@ -175,7 +178,7 @@ function moveHoles() {
 
 let rabbits = [];
 function initRabbits() {
-  for (let i = 0; i < 6; i++) { // 3 per parte per non affollare
+  for (let i = 0; i < 6; i++) {
     const isPlayer = i < 3;
     const r = document.createElement("div");
     r.className = "rabbit " + (isPlayer ? "player" : "cpu");
@@ -189,15 +192,16 @@ function initRabbits() {
 
 function updatePosition(r) {
   if (r.pos === -1) {
-    // Posizionamento nelle basi laterali
     const base = r.dataset.type === "player" ? document.getElementById("p-base") : document.getElementById("c-base");
-    r.style.position = "static";
-    r.style.margin = "5px";
+    r.style.position = "relative";
+    r.style.left = "0"; r.style.top = "0";
+    r.style.transform = "none";
     base.appendChild(r);
   } else {
     r.style.position = "absolute";
-    r.style.left = path[r.pos].x + 2 + "px";
-    r.style.top = path[r.pos].y + 2 + "px";
+    r.style.left = path[r.pos].x;
+    r.style.top = path[r.pos].y;
+    r.style.transform = "translate(-50%, -50%)";
     board.appendChild(r);
   }
 }
@@ -207,23 +211,16 @@ function rollDice() {
   currentDice = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
   info.innerHTML = `🎲 Risultato: <b>${currentDice}</b>`;
-  
-  if (currentDice === 6) {
-    moveHoles();
-    setTimeout(startSelection, 800);
-  } else {
-    startSelection();
-  }
+  if (currentDice === 6) { moveHoles(); setTimeout(startSelection, 800); } 
+  else { startSelection(); }
 }
 
 function startSelection() {
   if (turn === "player") {
     gameState = "selecting";
     rabbits.filter(r => r.dataset.type === "player").forEach(r => r.classList.add("can-move"));
-    info.innerHTML += " - Muovi un coniglio!";
-  } else {
-    setTimeout(cpuLogic, 800);
-  }
+    info.innerHTML += "<br>Tocca un coniglio!";
+  } else { setTimeout(cpuLogic, 800); }
 }
 
 function handleRabbitClick(r) {
@@ -235,27 +232,18 @@ function handleRabbitClick(r) {
 function moveRabbit(r) {
   gameState = "moving";
   r.pos += currentDice;
-  
   if (r.pos >= path.length - 1) {
-    r.pos = path.length - 1;
-    updatePosition(r);
+    r.pos = path.length - 1; updatePosition(r);
     setTimeout(() => {
       document.getElementById("endOverlay").classList.remove("hidden");
       document.getElementById("winner-text").innerText = turn === "player" ? "🏆 HAI VINTO!" : "🤖 CPU VINCE";
     }, 500);
     return;
   }
-  
   updatePosition(r);
-  
   if (holes.includes(r.pos + 1)) {
-    setTimeout(() => {
-      r.pos = -1;
-      updatePosition(r);
-      info.innerHTML = "🌀 <b>CADUTO!</b>";
-    }, 600);
+    setTimeout(() => { r.pos = -1; updatePosition(r); info.innerHTML = "🌀 <b>CADUTO!</b>"; }, 600);
   }
-  
   setTimeout(nextTurn, 1000);
 }
 
