@@ -2,7 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🐰 Giorno 16 – Garden Race 30 → 0</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
@@ -18,8 +19,10 @@
   --win:#ffeb3b;
 }
 
+/* RESET */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
+/* BODY */
 body{
   margin:0;
   font-family:'Ubuntu',sans-serif;
@@ -28,9 +31,11 @@ body{
   flex-direction:column;
   align-items:center;
   padding:10px;
+  padding-bottom:160px; /* spazio per barra dado */
   overflow:hidden;
 }
 
+/* TITOLO */
 h1{
   margin:6px 0 8px;
   font-size:22px;
@@ -38,6 +43,7 @@ h1{
   font-weight:800;
 }
 
+/* WRAP */
 .wrap{
   width:100%;
   max-width:520px;
@@ -66,6 +72,7 @@ h1{
   justify-content:center;
   gap:6px;
   position:relative;
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
 }
 
 .baseLabel{
@@ -103,6 +110,7 @@ h1{
   color:#3e2723;
   border-bottom:6px solid var(--tile-edge);
   box-shadow:0 6px 0 rgba(0,0,0,.1);
+  user-select:none;
 }
 
 .hole{
@@ -112,8 +120,9 @@ h1{
 }
 .hole span{display:none}
 
-/* ZERO */
+/* ZERO (ARRIVO) */
 #finish{
+  margin-top:8px;
   width:80px;
   height:80px;
   background:var(--win);
@@ -148,32 +157,50 @@ h1{
   box-shadow:0 0 0 6px rgba(255,152,0,.4);
 }
 
-/* UI */
+/* ===== BARRA FISSA DADO (SAFE AREA iOS) ===== */
 .controls{
-  width:100%;
-  max-width:520px;
-  margin-top:8px;
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top, #e3f2fd 70%, transparent);
+  z-index:999;
 }
+
 #msg{
+  max-width:520px;
+  margin:0 auto 10px;
   background:#fff;
   padding:14px;
   border-radius:60px;
   border:3px solid var(--grass-dark);
   font-weight:800;
+  text-align:center;
 }
+
 button{
+  max-width:520px;
+  margin:0 auto;
+  display:block;
   width:100%;
-  margin-top:8px;
-  padding:16px;
+  padding:18px;
   border:none;
   border-radius:60px;
   background:#ff9800;
   color:#fff;
-  font-size:20px;
+  font-size:22px;
   font-weight:900;
   box-shadow:0 8px 0 #e65100;
 }
-button:disabled{background:#ccc;box-shadow:0 6px 0 #999}
+button:active{
+  transform:translateY(4px);
+  box-shadow:0 4px 0 #e65100;
+}
+button:disabled{
+  background:#ccc;
+  box-shadow:0 6px 0 #999;
+}
 </style>
 </head>
 
@@ -185,7 +212,9 @@ button:disabled{background:#ccc;box-shadow:0 6px 0 #999}
 
   <!-- TANA PC -->
   <div class="baseRow">
-    <div class="base" id="cpuBase"><div class="baseLabel">TANA PC</div></div>
+    <div class="base" id="cpuBase">
+      <div class="baseLabel">TANA PC</div>
+    </div>
     <div style="width:160px"></div>
   </div>
 
@@ -198,53 +227,58 @@ button:disabled{background:#ccc;box-shadow:0 6px 0 #999}
     <div class="zero">0</div>
   </div>
 
-  <!-- TANA PLAYER -->
+  <!-- TANA TUA -->
   <div class="baseRow">
     <div style="width:160px"></div>
-    <div class="base" id="playerBase"><div class="baseLabel">TANA TUA</div></div>
+    <div class="base" id="playerBase">
+      <div class="baseLabel">TANA TUA</div>
+    </div>
   </div>
 
 </div>
 
+<!-- CONTROLLI FISSI -->
 <div class="controls">
   <div id="msg">Tira il dado per iniziare!</div>
   <button id="diceBtn">🎲 TIRA IL DADO</button>
 </div>
 
 <script>
-const board=document.getElementById("board");
-const diceBtn=document.getElementById("diceBtn");
-const msg=document.getElementById("msg");
-const playerBase=document.getElementById("playerBase");
-const cpuBase=document.getElementById("cpuBase");
+/* ELEMENTI */
+const board = document.getElementById("board");
+const diceBtn = document.getElementById("diceBtn");
+const msg = document.getElementById("msg");
+const playerBase = document.getElementById("playerBase");
+const cpuBase = document.getElementById("cpuBase");
 
-/* MAPPA 30 → 1 */
-const pos={
-30:[15,10],29:[40,10],28:[65,10],27:[85,14],
-24:[85,28],23:[65,28],22:[40,28],21:[15,28],
-20:[15,42],19:[40,42],18:[65,42],17:[85,42],
-14:[85,56],13:[65,56],12:[40,56],11:[15,56],
-10:[15,70],9:[40,70],8:[65,70],7:[85,70],
-6:[85,86],5:[65,86],4:[40,86],3:[25,86],2:[15,90],1:[10,90]
+/* POSIZIONI CASELLE (30 → 1) */
+const pos = {
+  30:[15,10],29:[40,10],28:[65,10],27:[85,14],
+  24:[85,28],23:[65,28],22:[40,28],21:[15,28],
+  20:[15,42],19:[40,42],18:[65,42],17:[85,42],
+  14:[85,56],13:[65,56],12:[40,56],11:[15,56],
+  10:[15,70],9:[40,70],8:[65,70],7:[85,70],
+  6:[85,86],5:[65,86],4:[40,86],3:[25,86],2:[15,90],1:[10,90]
 };
 
-const holes=[18,9,5];
-const bunnies=[];
-let turn="player",state="idle",dice=0;
+/* BUCHI (ATTIVI SOLO CON 6) */
+const holes = [18,9,5];
 
-/* DISEGNA CASELLE */
+/* DISEGNO CASELLE */
 for(let n=30;n>=1;n--){
-  if(!pos[n])continue;
+  if(!pos[n]) continue;
   const d=document.createElement("div");
   d.className="tile"+(holes.includes(n)?" hole":"");
   d.style.left=`calc(${pos[n][0]}% - 27px)`;
-  d.style.top=`calc(${pos[n][1]}% - 27px)`;
-  const s=document.createElement("span");s.textContent=n;
+  d.style.top =`calc(${pos[n][1]}% - 27px)`;
+  const s=document.createElement("span");
+  s.textContent=n;
   d.appendChild(s);
   board.appendChild(d);
 }
 
-/* CREA CONIGLI */
+/* CONIGLI */
+const bunnies=[];
 function makeBunny(owner,i){
   const b=document.createElement("div");
   b.className=`bunny ${owner}`;
@@ -255,21 +289,26 @@ function makeBunny(owner,i){
   (owner==="player"?playerBase:cpuBase).appendChild(b);
   bunnies.push(b);
 }
-for(let i=0;i<4;i++){makeBunny("player",i);makeBunny("cpu",i);}
+for(let i=0;i<4;i++){
+  makeBunny("player",i);
+  makeBunny("cpu",i);
+}
 
-/* AGGIORNA POS */
+/* UPDATE POSIZIONE CONIGLIO */
 function update(b){
   const p=+b.dataset.pos;
-  if(p===-1)return;
+  if(p===-1) return;
   board.appendChild(b);
   const [x,y]=p===0?[50,105]:pos[p];
   b.style.left=`calc(${x}% - 20px)`;
-  b.style.top=`calc(${y}% - 20px)`;
+  b.style.top =`calc(${y}% - 20px)`;
 }
 
-/* DADO */
+/* LOGICA GIOCO */
+let turn="player", state="idle", dice=0;
+
 diceBtn.onclick=()=>{
-  if(state!=="idle")return;
+  if(state!=="idle") return;
   dice=Math.floor(Math.random()*6)+1;
   msg.innerHTML=`🎲 È uscito <b>${dice}</b>`;
   state="move";
@@ -277,26 +316,28 @@ diceBtn.onclick=()=>{
 };
 
 function pick(){
-  msg.innerHTML+="<br>Tocca un coniglio";
+  msg.innerHTML+="<br>Tocca un tuo coniglio";
   bunnies.forEach(b=>{
-    if(b.dataset.owner==="player")b.classList.add("pickable");
+    if(b.dataset.owner==="player") b.classList.add("pickable");
   });
 }
 
 function select(b){
-  if(state!=="move"||b.dataset.owner!=="player")return;
+  if(state!=="move" || b.dataset.owner!=="player") return;
   bunnies.forEach(x=>x.classList.remove("pickable"));
   move(b);
 }
 
 function move(b){
   let p=+b.dataset.pos;
-  if(p===-1)p=30;
+  if(p===-1) p=30;
   let n=p-dice;
-  if(n<=0){b.dataset.pos=0;update(b);win(b.dataset.owner);return;}
-  b.dataset.pos=n;update(b);
-  if(dice===6&&holes.includes(n)){
-    setTimeout(()=>{b.dataset.pos=-1;location.reload()},600);
+  if(n<=0){
+    b.dataset.pos=0; update(b); win(b.dataset.owner); return;
+  }
+  b.dataset.pos=n; update(b);
+  if(dice===6 && holes.includes(n)){
+    setTimeout(()=>{ b.dataset.pos=-1; location.reload(); },600);
   }
   endTurn();
 }
@@ -310,7 +351,7 @@ function endTurn(){
   turn=turn==="player"?"cpu":"player";
   state="idle";
   msg.textContent=turn==="player"?"Tocca a te":"Turno PC";
-  if(turn==="cpu")setTimeout(()=>diceBtn.onclick(),600);
+  if(turn==="cpu") setTimeout(()=>diceBtn.onclick(),600);
 }
 
 function win(w){
