@@ -5,115 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎄 Christmas Garden Race</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 /* ===== BASE ===== */
-body {
-  margin: 0;
-  font-family: 'Ubuntu', sans-serif;
-  background: linear-gradient(#1b5e20, #2e7d32);
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#1b5e20,#2e7d32);
 }
 
-.game {
-  max-width: 430px;
-  margin: 0 auto;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #fefefe;
+.game{
+  max-width:430px;
+  margin:0 auto;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#fff;
 }
 
 /* ===== HEADER ===== */
-.header {
-  background: linear-gradient(135deg, #b71c1c, #e53935);
-  color: #fff;
-  padding: 14px;
-  text-align: center;
-  border-bottom: 3px solid gold;
+.header{
+  background:linear-gradient(135deg,#b71c1c,#e53935);
+  color:#fff;
+  padding:14px;
+  text-align:center;
+  border-bottom:3px solid gold;
+}
+.header h1{margin:0;font-size:22px;}
+.status{
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+  margin-top:6px;
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 22px;
+/* ===== BOARD ===== */
+.board{
+  flex:1;
+  margin:10px;
+  padding:10px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  background:#7bc96f;
+  border-radius:16px;
 }
 
-.status {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  margin-top: 6px;
-}
-
-/* ===== BOARD GRID ===== */
-.board {
-  flex: 1;
-  padding: 12px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  background: #7bc96f;
-  border-radius: 16px;
-  margin: 10px;
-}
-
-/* ===== CELLS ===== */
-.cell {
-  background: #fff8e1;
-  border-radius: 16px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  position: relative;
+/* ===== CELLE ===== */
+.cell{
+  height:64px;
+  background:#fff8e1;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  position:relative;
   box-shadow: inset 0 0 0 2px #c62828;
 }
 
-.cell.start { background: #e3f2fd; }
-.cell.finish { background: #fff3e0; }
-
-.cell.special {
-  background: #e8f5e9;
+.cell.start{background:#e3f2fd;}
+.cell.finish{
+  background:linear-gradient(135deg,#ffcc80,#ffb300);
+  box-shadow: inset 0 0 0 3px #f57c00;
 }
 
-.cell .icon {
-  position: absolute;
-  top: 4px;
-  left: 6px;
-  font-size: 16px;
-}
+.cell.black{background:#000;color:#fff;}
+.cell.gift{background:#e8f5e9;}
+.cell.ice{background:#e3f2fd;}
 
-.players {
-  position: absolute;
-  bottom: 4px;
-  right: 6px;
-  font-size: 20px;
+.players{
+  position:absolute;
+  bottom:4px;
+  right:6px;
+  display:flex;
+  gap:4px;
+}
+.players img{
+  width:22px;
+  height:22px;
 }
 
 /* ===== MESSAGE ===== */
-.message {
-  background: #ffffff;
-  padding: 12px;
-  text-align: center;
-  font-weight: bold;
-  border-top: 2px solid #c62828;
+.message{
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+  border-top:2px solid #c62828;
 }
 
 /* ===== BUTTON ===== */
-.action {
-  background: linear-gradient(135deg, #2e7d32, #43a047);
-  color: #fff;
-  border: none;
-  padding: 16px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
+.action{
+  background:linear-gradient(135deg,#2e7d32,#43a047);
+  color:#fff;
+  border:none;
+  padding:16px;
+  font-size:18px;
+  font-weight:bold;
 }
+.action:disabled{background:#9e9e9e;}
 
-.action:disabled {
-  background: #9e9e9e;
+/* ===== MODAL REGALO ===== */
+#giftModal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+#giftModal .box{
+  background:#fff;
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
+}
+#giftModal button{
+  margin:8px;
+  padding:10px 16px;
+  font-size:16px;
 }
 </style>
 </head>
@@ -133,129 +143,217 @@ body {
 <main class="board" id="board"></main>
 
 <div class="message" id="message">🎯 Tira il dado</div>
-
 <button class="action" id="actionBtn">🎲 TIRA IL DADO</button>
 
 </div>
 
+<!-- MODAL REGALO -->
+<div id="giftModal">
+  <div class="box">
+    <h3>🎁 Regalo!</h3>
+    <p>Scegli cosa fare:</p>
+    <button onclick="giftChoice(-1)">➖ −1</button>
+    <button onclick="giftChoice(2)">➕ +2</button>
+  </div>
+</div>
+
 <script>
 /* ===== ELEMENTI ===== */
-const board = document.getElementById("board");
-const message = document.getElementById("message");
-const actionBtn = document.getElementById("actionBtn");
-const turnoEl = document.getElementById("turno");
-const dadoEl = document.getElementById("dado");
+const board=document.getElementById("board");
+const msg=document.getElementById("message");
+const btn=document.getElementById("actionBtn");
+const turnoEl=document.getElementById("turno");
+const dadoEl=document.getElementById("dado");
 
 /* ===== STATO ===== */
-let currentPlayer = 1;
-let dado = 0;
+let currentPlayer=1;
+let dado=0;
 
-const players = {
-  1: { pos: 0, icon: "🐰", skip: false },
-  2: { pos: 0, icon: "🎅", skip: false }
+const players={
+  1:{pos:0,img:"giorni/img/rabbit_1.png",skip:false},
+  2:{pos:0,img:"giorni/img/rabbit_2.png",skip:false}
 };
 
-/* ===== CASELLE SPECIALI ===== */
-const specialCells = {
-  6:  { icon: "🎁", effect: "bonus" },
-  13: { icon: "❄️", effect: "skip" },
-  18: { icon: "🎄", effect: "bonus" },
-  25: { icon: "⛔", effect: "skip" }
-};
+/* ===== SPECIALI ===== */
+let blackHoles=[8,13,19];       // buco nero
+const gifts=[6,18];            // regalo
+const ice=[12,25];             // ghiaccio
 
 /* ===== CREA GRIGLIA 0–30 ===== */
-for (let i = 30; i >= 0; i--) {
-  const cell = document.createElement("div");
-  cell.className = "cell";
-  cell.dataset.num = i;
-  cell.textContent = i;
+for(let i=30;i>=0;i--){
+  const c=document.createElement("div");
+  c.className="cell";
+  c.dataset.num=i;
 
-  if (i === 0) cell.classList.add("start");
-  if (i === 30) cell.classList.add("finish");
-
-  if (specialCells[i]) {
-    cell.classList.add("special");
-    const icon = document.createElement("span");
-    icon.className = "icon";
-    icon.textContent = specialCells[i].icon;
-    cell.appendChild(icon);
+  if(i===0){
+    c.classList.add("start");
+    c.textContent="START";
+  }else if(i===30){
+    c.classList.add("finish");
+    c.textContent="🥕";
+  }else{
+    c.textContent=i;
   }
-
-  board.appendChild(cell);
+  board.appendChild(c);
 }
 
 /* ===== RENDER ===== */
-function render() {
-  document.querySelectorAll(".players").forEach(p => p.remove());
+function render(){
+  document.querySelectorAll(".players").forEach(p=>p.remove());
+  document.querySelectorAll(".cell").forEach(c=>{
+    c.classList.remove("black","gift","ice");
+    const n=+c.dataset.num;
+    if(blackHoles.includes(n)) c.classList.add("black");
+    if(gifts.includes(n)) c.classList.add("gift");
+    if(ice.includes(n)) c.classList.add("ice");
+  });
 
-  for (let i = 0; i <= 30; i++) {
-    const cell = document.querySelector(`.cell[data-num="${i}"]`);
-    const here = Object.values(players).filter(p => p.pos === i);
-
-    if (here.length) {
-      const box = document.createElement("div");
-      box.className = "players";
-      here.forEach(p => box.textContent += p.icon);
+  for(let i=0;i<=30;i++){
+    const cell=document.querySelector(`.cell[data-num="${i}"]`);
+    const here=Object.values(players).filter(p=>p.pos===i);
+    if(here.length){
+      const box=document.createElement("div");
+      box.className="players";
+      here.forEach(p=>{
+        const img=document.createElement("img");
+        img.src=p.img;
+        box.appendChild(img);
+      });
       cell.appendChild(box);
     }
   }
 }
 
 /* ===== LOGICA ===== */
-function rollDice() {
-  dado = Math.floor(Math.random() * 6) + 1;
-  dadoEl.textContent = "Dado: " + dado;
+function rollDice(){
+  dado=Math.floor(Math.random()*6)+1;
+  dadoEl.textContent="Dado: "+dado;
+  if(dado===6){
+    randomizeBlackHoles();
+    msg.textContent="🎲 6! I buchi neri si spostano!";
+  }
 }
 
-function applySpecial(player) {
-  const cell = specialCells[players[player].pos];
-  if (!cell) return;
-
-  if (cell.effect === "bonus") {
-    players[player].pos = Math.min(30, players[player].pos + 2);
-    message.textContent = "🎁 Bonus! +2";
+function randomizeBlackHoles(){
+  blackHoles=[];
+  while(blackHoles.length<3){
+    const r=Math.floor(Math.random()*28)+1;
+    if(!blackHoles.includes(r)) blackHoles.push(r);
   }
-  if (cell.effect === "skip") {
-    players[player].skip = true;
-    message.textContent = "❄️ Salti un turno";
+}
+
+function checkBlackHole(p){
+  if(blackHoles.includes(players[p].pos)){
+    players[p].pos=0;
+    msg.textContent="⚫ Buco nero! Torni alla partenza";
+    return true;
+  }
+  return false;
+}
+
+function checkGift(p){
+  if(gifts.includes(players[p].pos)){
+    document.getElementById("giftModal").style.display="flex";
+    return true;
+  }
+  return false;
+}
+
+function giftChoice(v){
+  document.getElementById("giftModal").style.display="none";
+  players[currentPlayer].pos=Math.max(0,Math.min(30,players[currentPlayer].pos+v));
+  msg.textContent=v>0?"🎁 Avanzi di 2":"🎁 Torni indietro di 1";
+  render();
+  nextTurn();
+}
+
+function checkIce(p){
+  if(ice.includes(players[p].pos)){
+    players[p].skip=true;
+    msg.textContent="❄️ Ghiaccio! Salti il turno";
   }
 }
 
 /* ===== TURNO TU ===== */
-actionBtn.onclick = () => {
-  if (currentPlayer !== 1) return;
+btn.onclick=()=>{
+  if(currentPlayer!==1) return;
 
-  if (players[1].skip) {
-    players[1].skip = false;
-    message.textContent = "⏭ Turno saltato";
+  if(players[1].skip){
+    players[1].skip=false;
+    msg.textContent="⏭ Turno saltato";
     nextTurn();
     return;
   }
 
   rollDice();
-  players[1].pos = Math.min(30, players[1].pos + dado);
-  message.textContent = "🐰 Avanzi di " + dado;
+  players[1].pos=Math.min(30,players[1].pos+dado);
   render();
 
-  setTimeout(() => {
-    applySpecial(1);
+  setTimeout(()=>{
+    if(checkBlackHole(1)){render();nextTurn();return;}
+    if(checkGift(1)) return;
+    checkIce(1);
     render();
     nextTurn();
-  }, 900);
+  },600);
 };
 
 /* ===== TURNO PC ===== */
-function pcTurn() {
-  turnoEl.textContent = "Turno: PC";
-  actionBtn.disabled = true;
+function pcTurn(){
+  turnoEl.textContent="Turno: PC";
+  btn.disabled=true;
 
-  setTimeout(() => {
-    if (players[2].skip) {
-      players[2].skip = false;
-      message.textContent = "🎅 PC salta il turno";
+  setTimeout(()=>{
+    if(players[2].skip){
+      players[2].skip=false;
+      msg.textContent="🎅 PC salta il turno";
       nextTurn();
       return;
     }
 
     rollDice();
-    players[2].
+    players[2].pos=Math.min(30,players[2].pos+dado);
+    render();
+
+    setTimeout(()=>{
+      if(checkBlackHole(2)){render();nextTurn();return;}
+      if(checkGift(2)){
+        giftChoice(Math.random()<0.5?-1:2);
+        return;
+      }
+      checkIce(2);
+      render();
+      nextTurn();
+    },600);
+  },800);
+}
+
+/* ===== CAMBIO TURNO ===== */
+function nextTurn(){
+  if(players[currentPlayer].pos>=30){
+    msg.textContent=currentPlayer===1
+      ?"🥕 HAI PRESO LA CAROTA! BUON NATALE!"
+      :"🎅 BABBO NATALE HA PRESO LA CAROTA!";
+    btn.disabled=true;
+    return;
+  }
+
+  currentPlayer=currentPlayer===1?2:1;
+  dadoEl.textContent="Dado: —";
+
+  if(currentPlayer===1){
+    turnoEl.textContent="Turno: TU";
+    msg.textContent="🎯 Tira il dado";
+    btn.disabled=false;
+  }else{
+    msg.textContent="🎅 Turno del PC…";
+    pcTurn();
+  }
+}
+
+/* ===== START ===== */
+render();
+</script>
+
+</body>
+</html>
