@@ -2,274 +2,269 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐰 Carrera de Conejos - Wood Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐰 Carrera de Conejos - Fibonacci Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg-color: #a8d5ba;
-    --wood-border: #d2a679;
-    --board-green: #5eb061;
-    --player-color: #ff4081;
-    --cpu-color: #7e57c2;
-  }
-
+  :root { --bg: #e8f5e9; --wood: #d2a679; --grass: #81c784; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
   body { 
-    margin: 0; font-family: 'Ubuntu', sans-serif; background: var(--bg-color); 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;
+    margin: 0; font-family: 'Ubuntu', sans-serif; background: var(--bg); 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    height: 100vh; padding: 10px; overflow: hidden;
   }
 
-  /* Schermate di Overlay */
+  /* Finestra Spiegazione Iniziale */
   .overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
     display: flex; align-items: center; justify-content: center; z-index: 100;
   }
   .modal {
-    background: #fffdf5; padding: 30px; border-radius: 30px; border: 6px solid var(--wood-border);
-    max-width: 350px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    background: #fffdf5; padding: 25px; border-radius: 30px; border: 6px solid var(--wood);
+    width: 90%; max-width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
   }
-  .hidden { display: none !important; }
+  .modal h2 { color: #2e7d32; margin-top: 0; }
+  .modal p { color: #5d4037; line-height: 1.5; font-size: 15px; text-align: left; }
 
-  /* Tabellone in legno */
-  #board-container {
-    position: relative; padding: 20px; background: var(--wood-border);
-    border-radius: 50%; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.2), 0 10px 30px rgba(0,0,0,0.3);
+  /* Tabellone */
+  #game-container {
+    position: relative; width: 95vmin; height: 95vmin; max-width: 450px; max-height: 450px;
+    display: flex; align-items: center; justify-content: center;
   }
-
   #board {
-    width: 440px; height: 440px; background: var(--board-green);
-    border-radius: 50%; position: relative; border: 4px solid #4a8c4d;
+    width: 80%; height: 80%; background: var(--grass); border-radius: 50%; 
+    position: relative; border: 6px solid #4a8c4d; box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
   }
 
-  /* Caselle stile "tessera di legno" */
+  /* Caselle */
   .cell { 
-    width: 36px; height: 36px; background: #f3e5ab; border-radius: 8px; position: absolute; 
-    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #8d6e63; 
-    box-shadow: 0 4px 0 #d7ccc8, 0 6px 10px rgba(0,0,0,0.1); transition: all 0.3s ease;
+    width: 10%; height: 10%; background: #fdf5e6; border-radius: 20%; position: absolute; 
+    display: flex; align-items: center; justify-content: center; font-size: 3vmin; 
+    font-weight: bold; color: #5d4037; border: 1.5px solid #deb887;
+    transform: translate(-50%, -50%); z-index: 2;
   }
-  .hole { background: #1a1a1a !important; box-shadow: inset 0 4px 10px #000; border: none; }
+  .hole { background: #222 !important; border: none; box-shadow: inset 0 3px 5px #000; color: transparent !important; }
 
-  #carrot-center { 
-    width: 70px; height: 70px; background: #ffa726; border-radius: 50%; position: absolute; 
-    top: 185px; left: 185px; display: flex; align-items: center; justify-content: center;
-    font-size: 35px; box-shadow: 0 6px 0 #ef6c00, 0 8px 15px rgba(0,0,0,0.2); z-index: 5;
+  #carrot { 
+    width: 18%; height: 18%; background: #ffa726; border-radius: 50%; position: absolute; 
+    top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; 
+    justify-content: center; font-size: 8vmin; z-index: 5; border: 3px solid #fb8c00;
   }
 
-  /* Conigli */
+  /* Coniglietti */
   .rabbit { 
-    width: 32px; height: 32px; border-radius: 50%; position: absolute; z-index: 10; border: 3px solid white; 
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    width: 9%; height: 9%; position: absolute; z-index: 10;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+    transform: translate(-50%, -50%);
+    background-size: contain; background-repeat: no-repeat; background-position: center;
   }
-  .player { background: var(--player-color); }
-  .cpu { background: var(--cpu-color); }
-  .can-move { animation: bounce 0.6s infinite alternate; box-shadow: 0 0 20px #fff; }
+  .player { background-image: url('../img/rabbit_1.png'); }
+  .cpu { background-image: url('../img/rabbit_2.png'); }
+  
+  .active-move { animation: jump 0.6s infinite alternate; filter: drop-shadow(0 0 8px #fff); }
+  @keyframes jump { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -65%) scale(1.1); } }
 
-  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-
-  /* UI */
-  #info-panel {
-    margin-top: 20px; background: #fffdf5; padding: 15px 40px; border-radius: 20px;
-    border: 3px solid var(--wood-border); font-size: 20px; font-weight: bold; color: #5d4037;
+  /* Basi Esterne (Dritte) */
+  .base { 
+    position: absolute; display: flex; flex-direction: column; gap: 10px; 
+    padding: 10px; background: rgba(255,255,255,0.3); border-radius: 15px;
   }
+  .p-base { left: 0%; top: 50%; transform: translateY(-50%); }
+  .c-base { right: 0%; top: 50%; transform: translateY(-50%); }
+  .base .rabbit { position: static; transform: none; width: 40px; height: 40px; }
 
-  #dice-btn {
-    margin-top: 20px; padding: 15px 40px; border: none; border-radius: 40px;
-    background: #ff9800; color: white; font-size: 22px; font-weight: bold;
-    box-shadow: 0 6px 0 #e65100; cursor: pointer; transition: 0.1s;
+  /* UI Inferiore */
+  .controls { margin-top: 10px; text-align: center; width: 100%; }
+  #msg {
+    background: white; padding: 10px; border-radius: 15px; border: 2px solid var(--wood);
+    font-weight: bold; margin-bottom: 10px; color: #2e7d32; min-height: 44px;
   }
-  #dice-btn:active { transform: translateY(4px); box-shadow: 0 2px #e65100; }
-  #dice-btn:disabled { background: #bcaaa4; box-shadow: 0 6px 0 #8d6e63; opacity: 0.7; }
-
-  /* Basi di partenza */
-  .base { position: absolute; background: rgba(255,255,255,0.2); border-radius: 15px; padding: 5px; display: flex; flex-direction: column; gap: 5px; }
-  .base-player { left: -60px; top: 280px; }
-  .base-cpu { right: -60px; top: 100px; }
+  .btn {
+    padding: 12px 30px; border: none; border-radius: 25px;
+    background: #ff9800; color: white; font-size: 18px; font-weight: bold;
+    box-shadow: 0 4px 0 #e65100; cursor: pointer;
+  }
+  .btn:disabled { background: #ccc; box-shadow: 0 4px 0 #999; }
 </style>
 </head>
 <body>
 
-<div id="startOverlay" class="overlay">
+<div id="startUI" class="overlay">
   <div class="modal">
-    <h2 style="color:#5eb061">🐰 Wood Carrera</h2>
-    <p>Porta i tuoi coniglietti alla carota centrale!</p>
-    <ul style="text-align:left; font-size: 14px; color: #5d4037;">
-      <li>Tira il dado e scegli quale coniglio muovere.</li>
-      <li>Con il <b>6</b> i buchi neri si spostano!</li>
-      <li>Evita i buchi o tornerai alla base.</li>
-    </ul>
-    <button id="dice-btn" onclick="startGame()">GIOCA ORA</button>
+    <h2>🐰 Benvenuto alla Carrera!</h2>
+    <p>
+      <b>Obiettivo:</b> Porta i tuoi 3 coniglietti alla carota centrale (Casella 1).<br><br>
+      <b>Come si gioca:</b><br>
+      1. Tira il dado e scegli quale coniglio muovere.<br>
+      2. Il percorso va dal <b>30</b> fino all'<b>1</b>.<br>
+      3. Se esce <b>6</b>, i buchi neri cambiano posizione!<br>
+      4. Se cadi in un buco, torni alla base.
+    </p>
+    <button class="btn" onclick="start()">INIZIA LA SFIDA</button>
   </div>
 </div>
 
-<div id="endOverlay" class="overlay hidden">
+<div id="winUI" class="overlay" style="display:none">
   <div class="modal">
-    <h1 id="winner-text">🏆 VITTORIA!</h1>
-    <button id="dice-btn" onclick="location.reload()">RIPROVA</button>
+    <h1 id="winTxt">VITTORIA!</h1>
+    <button class="btn" onclick="location.reload()">GIOCA ANCORA</button>
   </div>
 </div>
 
-<h1 style="color: #2e7d32; margin-bottom: 0;">🐰 Carrera de Conejos</h1>
-
-<div id="board-container">
-  <div class="base base-player" id="p-base"></div>
-  <div class="base base-cpu" id="c-base"></div>
-  <div id="board">
-    <div id="carrot-center">🥕</div>
-  </div>
+<div id="game-container">
+  <div class="base p-base" id="p-base"></div>
+  <div id="board"><div id="carrot">🥕</div></div>
+  <div class="base c-base" id="c-base"></div>
 </div>
 
-<div id="info-panel">Tira il dado!</div>
-<button id="dice-btn" onclick="rollDice()">🎲 TIRA IL DADO</button>
+<div class="controls">
+  <div id="msg">Tira il dado per iniziare!</div>
+  <button id="diceBtn" class="btn" onclick="roll()">🎲 TIRA IL DADO</button>
+</div>
 
 <script>
 const board = document.getElementById("board");
-const info = document.getElementById("info-panel");
-const diceBtn = document.getElementById("dice-btn");
+const msg = document.getElementById("msg");
+const diceBtn = document.getElementById("diceBtn");
 
 let turn = "player";
 let currentDice = 0;
-let gameState = "waiting"; 
+let state = "wait"; 
 const path = [];
-let holes = [5, 12, 20];
+let holes = [25, 18, 10]; // Buchi iniziali
 
-function startGame() { document.getElementById("startOverlay").classList.add("hidden"); }
+function start() { document.getElementById("startUI").style.display = "none"; }
 
-// Creazione percorso a spirale leggibile
-function createPath() {
-  const totalSteps = 28;
-  const centerX = 220, centerY = 220;
+// Spirale da 30 (esterno) a 1 (centro)
+function buildPath() {
+  const totalSteps = 30;
   for (let i = 0; i < totalSteps; i++) {
-    const angle = 0.7 * i;
-    const r = 185 - (i * 6); 
-    const x = centerX + r * Math.cos(angle) - 18;
-    const y = centerY + r * Math.sin(angle) - 18;
-    path.push({ x, y });
+    // Calcolo spirale invertita
+    const angle = 0.5 * (totalSteps - i); 
+    const r = 10 + (i * 1.3); // raggio cresce verso l'esterno
+    const x = 50 + r * Math.cos(angle);
+    const y = 50 + r * Math.sin(angle);
+    // Inseriamo all'inizio dell'array così l'indice 0 è la casella 30 e l'ultimo è la 1
+    path.unshift({ x: x + "%", y: y + "%" });
   }
 }
-createPath();
+buildPath();
 
-function renderCells() {
+function draw() {
   document.querySelectorAll('.cell').forEach(c => c.remove());
   path.forEach((p, i) => {
-    const cellNum = i + 1;
+    const num = i + 1; // Da 1 a 30
     const c = document.createElement("div");
-    c.className = "cell" + (holes.includes(cellNum) ? " hole" : "");
-    c.style.left = p.x + "px"; c.style.top = p.y + "px";
-    if (!holes.includes(cellNum)) c.textContent = cellNum;
+    c.className = "cell" + (holes.includes(num) ? " hole" : "");
+    c.style.left = p.x; c.style.top = p.y;
+    if (!holes.includes(num)) c.textContent = num;
     board.appendChild(c);
   });
 }
-renderCells();
+draw();
 
-function moveHoles() {
-  let newHoles = [];
-  while(newHoles.length < 3) {
-    let r = Math.floor(Math.random() * 20) + 4;
-    if(!newHoles.includes(r)) newHoles.push(r);
+function swapHoles() {
+  let h = [];
+  while(h.length < 3) {
+    let r = Math.floor(Math.random() * 25) + 2;
+    if(!h.includes(r)) h.push(r);
   }
-  holes = newHoles;
-  renderCells();
+  holes = h;
+  draw();
 }
 
-let rabbits = [];
-function initRabbits() {
-  for (let i = 0; i < 6; i++) { // 3 per parte per non affollare
-    const isPlayer = i < 3;
+let conigli = [];
+function init() {
+  const pb = document.getElementById("p-base");
+  const cb = document.getElementById("c-base");
+  for (let i = 0; i < 6; i++) {
+    const isP = i < 3;
     const r = document.createElement("div");
-    r.className = "rabbit " + (isPlayer ? "player" : "cpu");
-    r.pos = -1; r.id = i; r.dataset.type = isPlayer ? "player" : "cpu";
-    r.onclick = () => handleRabbitClick(r);
-    board.appendChild(r);
-    rabbits.push(r);
-    updatePosition(r);
+    r.className = "rabbit " + (isP ? "player" : "cpu");
+    r.pos = 31; // Partono fuori dal 30
+    r.id = i; r.type = isP ? "player" : "cpu";
+    r.onclick = () => tap(r);
+    isP ? pb.appendChild(r) : cb.appendChild(r);
+    conigli.push(r);
   }
 }
 
-function updatePosition(r) {
-  if (r.pos === -1) {
-    // Posizionamento nelle basi laterali
-    const base = r.dataset.type === "player" ? document.getElementById("p-base") : document.getElementById("c-base");
-    r.style.position = "static";
-    r.style.margin = "5px";
-    base.appendChild(r);
+function place(r) {
+  if (r.pos > 30) {
+    const b = r.type === "player" ? document.getElementById("p-base") : document.getElementById("c-base");
+    r.style.position = "static"; r.style.transform = "none";
+    b.appendChild(r);
   } else {
     r.style.position = "absolute";
-    r.style.left = path[r.pos].x + 2 + "px";
-    r.style.top = path[r.pos].y + 2 + "px";
+    r.style.left = path[r.pos - 1].x; r.style.top = path[r.pos - 1].y;
+    r.style.transform = "translate(-50%, -50%)";
     board.appendChild(r);
   }
 }
-initRabbits();
+init();
 
-function rollDice() {
+function roll() {
   currentDice = Math.floor(Math.random() * 6) + 1;
   diceBtn.disabled = true;
-  info.innerHTML = `🎲 Risultato: <b>${currentDice}</b>`;
-  
-  if (currentDice === 6) {
-    moveHoles();
-    setTimeout(startSelection, 800);
-  } else {
-    startSelection();
-  }
+  msg.innerHTML = `🎲 Risultato: <b>${currentDice}</b>`;
+  if (currentDice === 6) { 
+    msg.innerHTML = "🎲 <b>6!</b> I buchi si muovono!";
+    swapHoles(); 
+    setTimeout(go, 800); 
+  } else { go(); }
 }
 
-function startSelection() {
+function go() {
   if (turn === "player") {
-    gameState = "selecting";
-    rabbits.filter(r => r.dataset.type === "player").forEach(r => r.classList.add("can-move"));
-    info.innerHTML += " - Muovi un coniglio!";
-  } else {
-    setTimeout(cpuLogic, 800);
-  }
+    state = "pick";
+    conigli.filter(r => r.type === "player").forEach(r => r.classList.add("active-move"));
+  } else { setTimeout(cpu, 1000); }
 }
 
-function handleRabbitClick(r) {
-  if (gameState !== "selecting" || r.dataset.type !== "player") return;
-  rabbits.forEach(rb => rb.classList.remove("can-move"));
-  moveRabbit(r);
+function tap(r) {
+  if (state !== "pick" || r.type !== "player") return;
+  conigli.forEach(c => c.classList.remove("active-move"));
+  move(r);
 }
 
-function moveRabbit(r) {
-  gameState = "moving";
-  r.pos += currentDice;
-  
-  if (r.pos >= path.length - 1) {
-    r.pos = path.length - 1;
-    updatePosition(r);
+function move(r) {
+  state = "move";
+  // Movimento verso il basso (da 30 a 1)
+  if (r.pos > 30) r.pos = 31 - currentDice;
+  else r.pos -= currentDice;
+
+  if (r.pos <= 1) {
+    r.pos = 1; place(r);
     setTimeout(() => {
-      document.getElementById("endOverlay").classList.remove("hidden");
-      document.getElementById("winner-text").innerText = turn === "player" ? "🏆 HAI VINTO!" : "🤖 CPU VINCE";
+      document.getElementById("winUI").style.display = "flex";
+      document.getElementById("winTxt").innerText = turn === "player" ? "🏆 HAI VINTO!" : "🤖 CPU VINCE";
     }, 500);
     return;
   }
-  
-  updatePosition(r);
-  
-  if (holes.includes(r.pos + 1)) {
-    setTimeout(() => {
-      r.pos = -1;
-      updatePosition(r);
-      info.innerHTML = "🌀 <b>CADUTO!</b>";
-    }, 600);
+
+  place(r);
+  if (holes.includes(r.pos)) {
+    setTimeout(() => { 
+        r.pos = 31; place(r); 
+        msg.innerHTML = "🌀 OOOPS! Caduto nel buco!";
+    }, 700);
   }
-  
-  setTimeout(nextTurn, 1000);
+  setTimeout(next, 1000);
 }
 
-function cpuLogic() {
-  let r = rabbits.filter(r => r.dataset.type === "cpu").sort((a,b) => b.pos - a.pos)[0];
-  moveRabbit(r);
+function cpu() {
+  let movable = conigli.filter(r => r.type === "cpu");
+  let r = movable[Math.floor(Math.random() * 3)];
+  move(r);
 }
 
-function nextTurn() {
+function next() {
   turn = turn === "player" ? "cpu" : "player";
-  gameState = "waiting";
-  info.innerHTML = turn === 'player' ? "Tocca a te!" : "Il Computer pensa...";
+  state = "wait";
+  msg.innerHTML = turn === 'player' ? "Tocca a te!" : "🤖 Il PC gioca...";
   diceBtn.disabled = (turn === "cpu");
-  if (turn === "cpu") setTimeout(rollDice, 600);
+  if (turn === "cpu") setTimeout(roll, 600);
 }
 </script>
 </body>
