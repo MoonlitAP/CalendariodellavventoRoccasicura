@@ -3,66 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🌲 Giorno 17 – Il Bosco dei Quadrati 🎲</title>
+<title>🌲 Giorno 17 – Il Bosco dei Triangoli 🔺</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin: 0;
-  background: linear-gradient(#e8f5e9, #c8e6c9);
+  background: linear-gradient(#eef7ee, #dcedc8);
   font-family: 'Ubuntu', sans-serif;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 #game {
-  background: #ffffff;
+  background: #fff;
   width: 95%;
   max-width: 420px;
-  border-radius: 18px;
-  padding: 15px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   text-align: center;
 }
 
 h1 {
   font-size: 20px;
-  margin: 6px 0 10px;
+  margin: 6px 0 8px;
+}
+
+#top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  margin-bottom: 6px;
 }
 
 #dice {
   font-size: 26px;
-  margin: 10px 0;
 }
 
 button {
   background: #2e7d32;
   color: white;
   border: none;
-  padding: 12px 18px;
-  font-size: 16px;
-  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 14px;
   cursor: pointer;
 }
 
 button:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 canvas {
-  margin-top: 14px;
-  background: #f1f8e9;
-  border-radius: 14px;
+  margin: 14px auto;
+  display: block;
+  background: #f3f9e9;
+  border-radius: 16px;
   touch-action: none;
 }
 
 #info {
   font-size: 14px;
-  margin-top: 10px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 </style>
 </head>
@@ -70,18 +77,21 @@ canvas {
 <body>
 
 <div id="game">
-  <h1>🌲 Giorno 17 – Il Bosco dei Quadrati 🎲</h1>
+  <h1>🌲 Giorno 17 – Il Bosco dei Triangoli 🔺</h1>
 
-  <div id="dice">🎲 Premi per lanciare</div>
+  <div id="top">
+    <div id="dice">🎲 -</div>
+    <div>🔺 <b id="score">0</b></div>
+  </div>
+
   <button onclick="rollDice()">🎲 Lancia il dado</button>
 
   <canvas id="canvas" width="360" height="360"></canvas>
 
   <div id="info">
     🎯 <b>Obiettivo</b><br>
-    Collega gli 🌲 alberi secondo il numero del 🎲 dado.<br><br>
-    ✅ Figura giusta = punto<br>
-    ❌ Figura sbagliata = turno perso
+    Collega gli 🌲 alberi e trova più 🔺 triangoli possibile.<br><br>
+    🔺 Triangolo chiuso = +1 punto
   </div>
 </div>
 
@@ -91,7 +101,8 @@ const ctx = canvas.getContext("2d");
 
 let diceValue = 0;
 let selected = [];
-let lines = [];
+let edges = [];
+let trianglesFound = 0;
 
 const trees = [
   {x:60,y:60},{x:180,y:60},{x:300,y:60},
@@ -101,15 +112,19 @@ const trees = [
 
 draw();
 
+/* 🎲 LANCIO DADO */
 function rollDice(){
-  diceValue = Math.floor(Math.random()*6)+1;
+  diceValue = Math.floor(Math.random()*6) + 2;
   document.getElementById("dice").textContent = "🎲 " + diceValue;
   selected = [];
-  lines = [];
+  edges = [];
   draw();
 }
 
-canvas.addEventListener("click", e=>{
+/* 🖱️ + 👆 */
+canvas.addEventListener("pointerdown", handlePointer);
+
+function handlePointer(e){
   if(!diceValue) return;
 
   const rect = canvas.getBoundingClientRect();
@@ -117,40 +132,63 @@ canvas.addEventListener("click", e=>{
   const y = e.clientY - rect.top;
 
   trees.forEach((t,i)=>{
-    if(Math.hypot(t.x-x,t.y-y) < 22 && !selected.includes(i)){
-      selected.push(i);
-      if(selected.length > 1){
-        lines.push([selected[selected.length-2], i]);
+    if(Math.hypot(t.x-x,t.y-y) < 22){
+      if(selected.length === 0 || selected[selected.length-1] !== i){
+        if(selected.length < diceValue){
+          selected.push(i);
+          if(selected.length > 1){
+            edges.push([selected[selected.length-2], i]);
+            checkTriangles();
+          }
+          draw();
+        }
       }
-      draw();
-      checkFigure();
     }
   });
-});
+}
 
-function checkFigure(){
-  if(selected.length === diceValue){
-    setTimeout(()=>{
-      alert("✅ Figura completata! 🌟");
-      rollDice();
-    },200);
+/* 🔺 CONTROLLO TRIANGOLI */
+function checkTriangles(){
+  const n = selected.length;
+  if(n < 3) return;
+
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      for(let k=j+1;k<n;k++){
+        if(hasEdge(i,j) && hasEdge(j,k) && hasEdge(i,k)){
+          trianglesFound++;
+          document.getElementById("score").textContent = trianglesFound;
+          selected = [];
+          edges = [];
+          diceValue = 0;
+          document.getElementById("dice").textContent = "🎲 -";
+          draw();
+          return;
+        }
+      }
+    }
   }
 }
 
+function hasEdge(a,b){
+  return edges.some(e =>
+    (e[0]===a && e[1]===b) || (e[0]===b && e[1]===a)
+  );
+}
+
+/* 🎨 DISEGNO */
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // linee
-  lines.forEach(l=>{
+  edges.forEach(e=>{
     ctx.strokeStyle = "#1b5e20";
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(trees[l[0]].x, trees[l[0]].y);
-    ctx.lineTo(trees[l[1]].x, trees[l[1]].y);
+    ctx.moveTo(trees[e[0]].x, trees[e[0]].y);
+    ctx.lineTo(trees[e[1]].x, trees[e[1]].y);
     ctx.stroke();
   });
 
-  // alberi emoji
   ctx.font = "32px serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
