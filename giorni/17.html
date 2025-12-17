@@ -36,6 +36,7 @@ h1{font-size:20px;margin:0 0 8px;}
 }
 #turn{margin:8px 0;font-weight:700;}
 #dice{font-size:24px;}
+
 canvas{
   margin:14px auto;
   display:block;
@@ -44,7 +45,7 @@ canvas{
   touch-action:none;
 }
 
-/* MODALS */
+/* MODAL */
 .modal{
   position:absolute;
   inset:0;
@@ -96,7 +97,8 @@ canvas{
       <p>
         🌲 Collega gli alberi con delle linee<br>
         🎲 Il dado decide quante linee puoi tracciare<br>
-        🔺 Ogni triangolo chiuso = +1 punto<br>
+        🔺 Triangolo chiuso = +1 punto<br>
+        ❌ Una linea non può saltare un albero<br>
         ❌ Nessuna linea può essere ripetuta
       </p>
       <button onclick="startGame()">🎲 Inizia partita</button>
@@ -106,11 +108,11 @@ canvas{
   <!-- MODAL END -->
   <div class="modal" id="endModal" style="display:none;">
     <div class="modalContent">
-      <h2>🔺 Il triangolo</h2>
+      <h2>🔺 Forma preferita</h2>
       <p>
-        Il triangolo è la forma geometrica più semplice e stabile.<br>
-        Per questo è usato in ponti, tetti e strutture portanti.<br><br>
-        🧠 Trovare triangoli è sempre una buona strategia!
+        <b>Con soli 9 punti si possono formare fino a 84 triangoli.</b><br>
+        Una forma piccola e semplice,<br>
+        ma fondamentale per costruire strutture solide e complesse.
       </p>
       <p>
         👤 <b id="fp">0</b> triangoli<br>
@@ -142,8 +144,8 @@ draw();
 /* START GAME */
 function startGame(){
   document.getElementById("startModal").style.display="none";
-  rollDice();
   turn="player";
+  rollDice();
   updateUI();
 }
 
@@ -214,11 +216,18 @@ function pcTurn(){
   draw();
 }
 
-/* END GAME */
-function endGame(){
-  document.getElementById("fp").textContent=playerScore;
-  document.getElementById("fc").textContent=pcScore;
-  document.getElementById("endModal").style.display="flex";
+/* BLOCCO LINEE (non saltare alberi) */
+function isBlocked(a,b){
+  const A=trees[a], B=trees[b];
+  for(let c=0;c<trees.length;c++){
+    if(c===a||c===b) continue;
+    const C=trees[c];
+    const cross=(B.x-A.x)*(C.y-A.y)-(B.y-A.y)*(C.x-A.x);
+    if(Math.abs(cross)>0.01) continue;
+    const dot=(C.x-A.x)*(C.x-B.x)+(C.y-A.y)*(C.y-B.y);
+    if(dot<0) return true;
+  }
+  return false;
 }
 
 /* LOGIC */
@@ -227,7 +236,7 @@ function getFreeEdges(){
   for(let i=0;i<9;i++){
     for(let j=i+1;j<9;j++){
       const k=[i,j].sort().join("-");
-      if(!edges.has(k)) list.push([i,j]);
+      if(!edges.has(k)&&!isBlocked(i,j)) list.push([i,j]);
     }
   }
   return list;
@@ -237,9 +246,9 @@ function findTriangleMove(){
     for(let j=i+1;j<9;j++){
       for(let k=j+1;k<9;k++){
         const need=[];
-        if(!has(i,j)) need.push([i,j]);
-        if(!has(j,k)) need.push([j,k]);
-        if(!has(i,k)) need.push([i,k]);
+        if(!has(i,j)&&!isBlocked(i,j)) need.push([i,j]);
+        if(!has(j,k)&&!isBlocked(j,k)) need.push([j,k]);
+        if(!has(i,k)&&!isBlocked(i,k)) need.push([i,k]);
         if(need.length>0 && need.length<=movesLeft) return need;
       }
     }
@@ -247,7 +256,7 @@ function findTriangleMove(){
   return null;
 }
 function addEdge(a,b){
-  if(a===b) return false;
+  if(a===b||isBlocked(a,b)) return false;
   const k=[a,b].sort().join("-");
   if(edges.has(k)) return false;
   edges.add(k);
@@ -271,6 +280,13 @@ function checkTriangles(who){
     }
   }
   updateUI();
+}
+
+/* END */
+function endGame(){
+  document.getElementById("fp").textContent=playerScore;
+  document.getElementById("fc").textContent=pcScore;
+  document.getElementById("endModal").style.display="flex";
 }
 
 /* UI */
@@ -312,4 +328,3 @@ function draw(){
 
 </body>
 </html>
-
