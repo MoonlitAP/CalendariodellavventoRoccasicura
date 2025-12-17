@@ -25,21 +25,17 @@ body{
   padding:18px;
   box-shadow:0 10px 25px rgba(0,0,0,.15);
   text-align:center;
+  position:relative;
 }
-h1{font-size:20px;margin:0 0 10px;}
+h1{font-size:20px;margin:0 0 8px;}
 #top{
   display:flex;
   justify-content:space-between;
   align-items:center;
   font-size:15px;
 }
-#turn{
-  margin:8px 0;
-  font-weight:700;
-}
-#dice{
-  font-size:26px;
-}
+#turn{margin:8px 0;font-weight:700;}
+#dice{font-size:24px;}
 canvas{
   margin:14px auto;
   display:block;
@@ -47,7 +43,26 @@ canvas{
   border-radius:18px;
   touch-action:none;
 }
-button{
+
+/* MODALS */
+.modal{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+.modalContent{
+  background:#fff;
+  padding:20px;
+  border-radius:18px;
+  width:90%;
+  max-width:330px;
+  text-align:center;
+}
+.modalContent button{
   background:#2e7d32;
   color:#fff;
   border:none;
@@ -55,10 +70,6 @@ button{
   font-size:15px;
   border-radius:14px;
   cursor:pointer;
-}
-#info{
-  font-size:14px;
-  line-height:1.5;
 }
 </style>
 </head>
@@ -74,23 +85,44 @@ button{
     <div>🖥️ 🔺 <b id="pcScore">0</b></div>
   </div>
 
-  <div id="turn">Premi Start</div>
-
-  <button onclick="startGame()">🎲 Start</button>
+  <div id="turn">–</div>
 
   <canvas id="canvas" width="330" height="330"></canvas>
 
-  <div id="info">
-    🎯 <b>Obiettivo</b><br>
-    Il dado decide quante linee puoi tracciare.<br>
-    🔺 Triangolo chiuso = +1 punto<br>
-    ❌ Nessuna linea può essere ripetuta
+  <!-- MODAL START -->
+  <div class="modal" id="startModal">
+    <div class="modalContent">
+      <h2>🎯 Come si gioca</h2>
+      <p>
+        🌲 Collega gli alberi con delle linee<br>
+        🎲 Il dado decide quante linee puoi tracciare<br>
+        🔺 Ogni triangolo chiuso = +1 punto<br>
+        ❌ Nessuna linea può essere ripetuta
+      </p>
+      <button onclick="startGame()">🎲 Inizia partita</button>
+    </div>
+  </div>
+
+  <!-- MODAL END -->
+  <div class="modal" id="endModal" style="display:none;">
+    <div class="modalContent">
+      <h2>🔺 Il triangolo</h2>
+      <p>
+        Il triangolo è la forma geometrica più semplice e stabile.<br>
+        Per questo è usato in ponti, tetti e strutture portanti.<br><br>
+        🧠 Trovare triangoli è sempre una buona strategia!
+      </p>
+      <p>
+        👤 <b id="fp">0</b> triangoli<br>
+        🖥️ <b id="fc">0</b> triangoli
+      </p>
+    </div>
   </div>
 </div>
 
 <script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
 const trees=[
  {x:55,y:55},{x:165,y:55},{x:275,y:55},
@@ -107,19 +139,15 @@ let movesLeft=0;
 
 draw();
 
-/* START */
+/* START GAME */
 function startGame(){
-  edges.clear();
-  triangles.clear();
-  playerScore=pcScore=0;
-  selected=null;
-  turn="player";
+  document.getElementById("startModal").style.display="none";
   rollDice();
+  turn="player";
   updateUI();
-  draw();
 }
 
-/* 🎲 DADO */
+/* DADO */
 function rollDice(){
   movesLeft=Math.floor(Math.random()*6)+1;
   document.getElementById("dice").textContent="🎲 "+movesLeft;
@@ -146,6 +174,7 @@ canvas.addEventListener("pointerdown",e=>{
         selected=null;
         draw();
         if(movesLeft===0){
+          if(edges.size===36) return endGame();
           turn="pc";
           updateUI();
           setTimeout(pcTurn,700);
@@ -178,13 +207,31 @@ function pcTurn(){
     free=getFreeEdges();
   }
 
+  if(edges.size===36) return endGame();
   turn="player";
   rollDice();
   updateUI();
   draw();
 }
 
-/* TRIANGOLI */
+/* END GAME */
+function endGame(){
+  document.getElementById("fp").textContent=playerScore;
+  document.getElementById("fc").textContent=pcScore;
+  document.getElementById("endModal").style.display="flex";
+}
+
+/* LOGIC */
+function getFreeEdges(){
+  const list=[];
+  for(let i=0;i<9;i++){
+    for(let j=i+1;j<9;j++){
+      const k=[i,j].sort().join("-");
+      if(!edges.has(k)) list.push([i,j]);
+    }
+  }
+  return list;
+}
 function findTriangleMove(){
   for(let i=0;i<9;i++){
     for(let j=i+1;j<9;j++){
@@ -198,17 +245,6 @@ function findTriangleMove(){
     }
   }
   return null;
-}
-
-/* UTILS */
-function getFreeEdges(){
-  const list=[];
-  for(let i=0;i<9;i++){
-    for(let j=i+1;j<9;j++){
-      if(!edges.has([i,j].join("-"))) list.push([i,j]);
-    }
-  }
-  return list;
 }
 function addEdge(a,b){
   if(a===b) return false;
@@ -276,3 +312,4 @@ function draw(){
 
 </body>
 </html>
+
