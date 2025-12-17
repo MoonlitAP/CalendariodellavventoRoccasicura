@@ -10,8 +10,8 @@
 <style>
 body{
   margin:0;
-  font-family: 'Ubuntu', sans-serif;
-  background: linear-gradient(#eef7ee,#dcedc8);
+  font-family:'Ubuntu',sans-serif;
+  background:linear-gradient(#eef7ee,#dcedc8);
   min-height:100vh;
   display:flex;
   justify-content:center;
@@ -26,12 +26,26 @@ body{
   box-shadow:0 10px 25px rgba(0,0,0,.15);
   text-align:center;
 }
-h1{ font-size:20px; margin:0 0 10px; }
+h1{font-size:20px;margin:0 0 10px;}
 #top{
   display:flex;
   justify-content:space-between;
-  font-size:16px;
-  margin-bottom:10px;
+  align-items:center;
+  font-size:15px;
+}
+#turn{
+  margin:8px 0;
+  font-weight:700;
+}
+#dice{
+  font-size:26px;
+}
+canvas{
+  margin:14px auto;
+  display:block;
+  background:#f3f9e9;
+  border-radius:18px;
+  touch-action:none;
 }
 button{
   background:#2e7d32;
@@ -41,13 +55,6 @@ button{
   font-size:15px;
   border-radius:14px;
   cursor:pointer;
-}
-canvas{
-  margin:16px auto;
-  display:block;
-  background:#f3f9e9;
-  border-radius:18px;
-  touch-action:none;
 }
 #info{
   font-size:14px;
@@ -63,16 +70,19 @@ canvas{
 
   <div id="top">
     <div>👤 🔺 <b id="pScore">0</b></div>
+    <div id="dice">🎲</div>
     <div>🖥️ 🔺 <b id="pcScore">0</b></div>
   </div>
 
-  <button onclick="startGame()">🎲 Inizia partita</button>
+  <div id="turn">Premi Start</div>
+
+  <button onclick="startGame()">🎲 Start</button>
 
   <canvas id="canvas" width="330" height="330"></canvas>
 
   <div id="info">
     🎯 <b>Obiettivo</b><br>
-    A turno aggiungete una linea.<br>
+    Il dado decide quante linee puoi tracciare.<br>
     🔺 Triangolo chiuso = +1 punto<br>
     ❌ Nessuna linea può essere ripetuta
   </div>
@@ -82,18 +92,18 @@ canvas{
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const trees = [
-  {x:55,y:55},{x:165,y:55},{x:275,y:55},
-  {x:55,y:165},{x:165,y:165},{x:275,y:165},
-  {x:55,y:275},{x:165,y:275},{x:275,y:275}
+const trees=[
+ {x:55,y:55},{x:165,y:55},{x:275,y:55},
+ {x:55,y:165},{x:165,y:165},{x:275,y:165},
+ {x:55,y:275},{x:165,y:275},{x:275,y:275}
 ];
 
-let edges = new Set();
-let triangles = new Set();
-let playerScore = 0;
-let pcScore = 0;
-let turn = "player";
-let lastNode = null;
+let edges=new Set();
+let triangles=new Set();
+let playerScore=0, pcScore=0;
+let turn=null;
+let selected=null;
+let movesLeft=0;
 
 draw();
 
@@ -101,92 +111,138 @@ draw();
 function startGame(){
   edges.clear();
   triangles.clear();
-  playerScore = pcScore = 0;
-  lastNode = null;
-  turn = "player";
-  updateScore();
+  playerScore=pcScore=0;
+  selected=null;
+  turn="player";
+  rollDice();
+  updateUI();
   draw();
 }
 
-/* PLAYER MOVE */
-canvas.addEventListener("pointerdown", e=>{
-  if(turn !== "player") return;
+/* 🎲 DADO */
+function rollDice(){
+  movesLeft=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").textContent="🎲 "+movesLeft;
+}
 
-  const r = canvas.getBoundingClientRect();
-  const x = e.clientX - r.left;
-  const y = e.clientY - r.top;
+/* PLAYER */
+canvas.addEventListener("pointerdown",e=>{
+  if(turn!=="player"||movesLeft===0) return;
+
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  const y=e.clientY-r.top;
 
   trees.forEach((t,i)=>{
     if(Math.hypot(t.x-x,t.y-y)<22){
-      if(lastNode === null){
-        lastNode = i;
-      } else {
-        if(addEdge(lastNode, i)){
+      if(selected===null){
+        selected=i;
+        draw();
+      }else{
+        if(addEdge(selected,i)){
           checkTriangles("player");
-          lastNode = null;
-          turn = "pc";
-          draw();
-          setTimeout(pcMove, 600);
+          movesLeft--;
+        }
+        selected=null;
+        draw();
+        if(movesLeft===0){
+          turn="pc";
+          updateUI();
+          setTimeout(pcTurn,700);
         }
       }
     }
   });
 });
 
-/* ADD EDGE */
-function addEdge(a,b){
-  if(a === b) return false;
-  const key = [a,b].sort().join("-");
-  if(edges.has(key)) return false;
-  edges.add(key);
-  return true;
-}
+/* PC */
+function pcTurn(){
+  rollDice();
+  let free=getFreeEdges();
 
-/* PC MOVE */
-function pcMove(){
-  const possible = [];
-  for(let i=0;i<9;i++){
-    for(let j=i+1;j<9;j++){
-      const k = [i,j].join("-");
-      if(!edges.has(k)) possible.push([i,j]);
+  while(movesLeft>0 && free.length){
+    const tri=findTriangleMove();
+    if(tri){
+      tri.forEach(e=>{
+        if(movesLeft>0 && addEdge(e[0],e[1])){
+          checkTriangles("pc");
+          movesLeft--;
+        }
+      });
+    }else{
+      const e=free[Math.floor(Math.random()*free.length)];
+      addEdge(e[0],e[1]);
+      checkTriangles("pc");
+      movesLeft--;
     }
+    free=getFreeEdges();
   }
 
-  if(possible.length === 0){
-    endGame();
-    return;
-  }
-
-  const move = possible[Math.floor(Math.random()*possible.length)];
-  addEdge(move[0], move[1]);
-  checkTriangles("pc");
-  turn = "player";
+  turn="player";
+  rollDice();
+  updateUI();
   draw();
 }
 
-/* TRIANGLES */
+/* TRIANGOLI */
+function findTriangleMove(){
+  for(let i=0;i<9;i++){
+    for(let j=i+1;j<9;j++){
+      for(let k=j+1;k<9;k++){
+        const need=[];
+        if(!has(i,j)) need.push([i,j]);
+        if(!has(j,k)) need.push([j,k]);
+        if(!has(i,k)) need.push([i,k]);
+        if(need.length>0 && need.length<=movesLeft) return need;
+      }
+    }
+  }
+  return null;
+}
+
+/* UTILS */
+function getFreeEdges(){
+  const list=[];
+  for(let i=0;i<9;i++){
+    for(let j=i+1;j<9;j++){
+      if(!edges.has([i,j].join("-"))) list.push([i,j]);
+    }
+  }
+  return list;
+}
+function addEdge(a,b){
+  if(a===b) return false;
+  const k=[a,b].sort().join("-");
+  if(edges.has(k)) return false;
+  edges.add(k);
+  return true;
+}
+function has(a,b){
+  return edges.has([a,b].sort().join("-"));
+}
 function checkTriangles(who){
   for(let i=0;i<9;i++){
     for(let j=i+1;j<9;j++){
       for(let k=j+1;k<9;k++){
-        if(
-          hasEdge(i,j)&&hasEdge(j,k)&&hasEdge(i,k)
-        ){
-          const t = [i,j,k].join("-");
+        if(has(i,j)&&has(j,k)&&has(i,k)){
+          const t=[i,j,k].join("-");
           if(!triangles.has(t)){
             triangles.add(t);
-            if(who==="player") playerScore++;
-            else pcScore++;
-            updateScore();
+            who==="player"?playerScore++:pcScore++;
           }
         }
       }
     }
   }
+  updateUI();
 }
 
-function hasEdge(a,b){
-  return edges.has([a,b].sort().join("-"));
+/* UI */
+function updateUI(){
+  document.getElementById("pScore").textContent=playerScore;
+  document.getElementById("pcScore").textContent=pcScore;
+  document.getElementById("turn").textContent=
+    turn==="player"?"👤 Tocca a te":"🖥️ Turno PC";
 }
 
 /* DRAW */
@@ -194,7 +250,7 @@ function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   edges.forEach(e=>{
-    const [a,b] = e.split("-").map(Number);
+    const[a,b]=e.split("-").map(Number);
     ctx.strokeStyle="#1b5e20";
     ctx.lineWidth=4;
     ctx.beginPath();
@@ -203,24 +259,18 @@ function draw(){
     ctx.stroke();
   });
 
+  if(selected!==null){
+    ctx.strokeStyle="#2e7d32";
+    ctx.lineWidth=4;
+    ctx.beginPath();
+    ctx.arc(trees[selected].x,trees[selected].y,22,0,Math.PI*2);
+    ctx.stroke();
+  }
+
   ctx.font="30px serif";
   ctx.textAlign="center";
   ctx.textBaseline="middle";
   trees.forEach(t=>ctx.fillText("🌲",t.x,t.y));
-}
-
-/* UI */
-function updateScore(){
-  document.getElementById("pScore").textContent = playerScore;
-  document.getElementById("pcScore").textContent = pcScore;
-}
-
-function endGame(){
-  let msg = "🏁 Fine partita!\n";
-  msg += playerScore>pcScore ? "🏆 Hai vinto!" :
-         playerScore<pcScore ? "😅 Vince il PC!" :
-         "🤝 Pareggio!";
-  alert(msg);
 }
 </script>
 
