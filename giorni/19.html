@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🎄 Giorno 19 – Trova le parole di Natale</title>
+<title>🎄 Giorno 19 – Trova le parole</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
@@ -18,14 +18,26 @@ body{
   touch-action:manipulation;
 }
 
-h1{color:#ffd700;font-size:1.4em;margin-bottom:6px}
-p{margin:6px 0}
-.timer{color:#ffd54f;font-size:1.1em;margin-bottom:12px}
+h1{color:#ffd700;font-size:1.4em;margin-bottom:4px}
+p{margin:4px 0}
+.timer{color:#ffd54f;font-size:1.1em;margin-bottom:10px}
 
-/* 📱 GRIGLIA MOBILE */
+/* Bottone PAROLE */
+.btn-parole{
+  margin:10px auto 14px;
+  padding:10px 26px;
+  border-radius:22px;
+  border:none;
+  font-weight:bold;
+  font-size:1em;
+  background:#ffd700;
+  color:#7b0412;
+}
+
+/* Griglia */
 .grid{
   display:grid;
-  grid-template-columns:repeat(12, 1fr);
+  grid-template-columns:repeat(12,1fr);
   gap:4px;
   max-width:360px;
   margin:0 auto;
@@ -40,63 +52,90 @@ p{margin:6px 0}
   align-items:center;
   justify-content:center;
   border-radius:6px;
-  font-size:1em;
   user-select:none;
 }
 
 .cell.highlight{background:#ffd54f}
 .cell.found{background:#00bfff;color:white}
 
-/* 📱 PAROLE */
-.word-list{
-  margin-top:16px;
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:8px;
-}
-
-.word{
-  font-size:.85em;
-  padding:6px 12px;
-  border-radius:20px;
-  background:rgba(255,255,255,.15);
-  border:1px solid #f5d97c;
-}
-
-.word.found{
-  text-decoration:line-through;
-  opacity:.6;
-  background:rgba(0,191,255,.3);
-}
-
-/* FINE */
+/* Fine */
 .completed{
-  margin-top:16px;
+  margin-top:14px;
   color:#00ff99;
   font-size:1.1em;
 }
 
-.leaderboard{
-  margin-top:20px;
-  background:rgba(255,255,255,.1);
-  padding:10px;
-  border-radius:10px;
-  display:none;
-}
-
-table{width:100%;border-collapse:collapse}
-td,th{padding:6px;border-bottom:1px solid #f5d97c;font-size:.9em}
-
 .btn-back{
   display:inline-block;
   margin-top:20px;
-  padding:12px 26px;
+  padding:12px 28px;
   background:#f3e4e4;
   color:black;
   border-radius:30px;
   font-weight:700;
   text-decoration:none;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+
+.modal.show{display:flex}
+
+.modal-box{
+  background:#fff;
+  color:#000;
+  width:90%;
+  max-width:360px;
+  max-height:70vh;
+  overflow-y:auto;
+  border-radius:18px;
+  padding:16px;
+  transform:scale(.9) translateY(20px);
+  opacity:0;
+  transition:all .25s ease;
+}
+
+.modal.show .modal-box{
+  transform:scale(1) translateY(0);
+  opacity:1;
+}
+
+.modal-box h3{text-align:center;margin-top:0}
+
+.counter{
+  text-align:center;
+  font-weight:bold;
+  margin-bottom:10px;
+  color:#7b0412;
+}
+
+.word-modal{
+  padding:8px 12px;
+  margin-bottom:6px;
+  border-radius:14px;
+  font-weight:bold;
+}
+
+.word-ok{background:#c8f7dc}
+.word-no{background:#f7c8c8}
+
+.close-btn{
+  margin-top:12px;
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:20px;
+  background:#7b0412;
+  color:white;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -107,45 +146,55 @@ td,th{padding:6px;border-bottom:1px solid #f5d97c;font-size:.9em}
 <p>🎅 Buona fortuna, <span id="nome"></span></p>
 <div class="timer" id="timer">⏱ Tempo: 0s</div>
 
+<button id="btnParole" class="btn-parole">📜 PAROLE</button>
+
 <div class="grid" id="grid"></div>
-<div class="word-list" id="word-list"></div>
 
 <div id="messaggio" class="completed"></div>
 
-<div class="leaderboard" id="leaderboard">
-  <h3>🏆 Classifica</h3>
-  <table id="score-table">
-    <tr><th>Nome</th><th>Tempo</th></tr>
-  </table>
-</div>
+<a href="../calendario.html" class="btn-back">← Calendario</a>
 
-<a href="../calendario.html" class="btn-back">⬅ Calendario</a>
+<!-- MODAL PAROLE -->
+<div id="modalParole" class="modal">
+  <div class="modal-box">
+    <h3>📜 Parole da trovare</h3>
+    <div id="contatoreParole" class="counter"></div>
+    <div id="listaParoleModal"></div>
+    <button class="close-btn" onclick="chiudiParole()">Chiudi</button>
+  </div>
+</div>
 
 <script>
 const nome = localStorage.getItem("utente") || "Ospite";
 document.getElementById("nome").textContent = nome;
 
-const parole=[
-"ROCCASICURA","NATALE","FAMIGLIA","REGALO","BABBO",
-"NEVE","LUCE","STELLA","ALBERO","AMICIZIA",
-"COMUNITA","PRESEPE","INVERNO","CANTO","BAMBINO"
+/* Parole */
+const parole = [
+  "ROCCASICURA","NATALE","FAMIGLIA","AMICIZIA","BABBO",
+  "NEVE","LUCE","STELLA","ALBERO","BAMBINO",
+  "COMUNITA","PRESEPE","INVERNO","CANTO","REGALO"
 ];
 
 const words = parole.sort(()=>Math.random()-0.5).slice(0,10);
-const size=12;
-const grid=[...Array(size)].map(()=>Array(size).fill(""));
 
-words.forEach(w=>{
-  let ok=false;
-  while(!ok){
-    let r=Math.floor(Math.random()*size);
-    let c=Math.floor(Math.random()*size);
-    let h=Math.random()<.5;
-    if(h && c+w.length<=size && grid[r].slice(c,c+w.length).every(x=>!x)){
-      [...w].forEach((l,i)=>grid[r][c+i]=l); ok=true;
+/* Griglia */
+const size = 12;
+const grid = Array.from({length:size},()=>Array(size).fill(""));
+
+words.forEach(word=>{
+  let placed=false;
+  while(!placed){
+    const r=Math.floor(Math.random()*size);
+    const c=Math.floor(Math.random()*size);
+    const h=Math.random()<0.5;
+
+    if(h && c+word.length<=size && grid[r].slice(c,c+word.length).every(x=>!x)){
+      [...word].forEach((l,i)=>grid[r][c+i]=l);
+      placed=true;
     }
-    if(!h && r+w.length<=size && grid.slice(r,r+w.length).every(x=>!x[c])){
-      [...w].forEach((l,i)=>grid[r+i][c]=l); ok=true;
+    if(!h && r+word.length<=size && grid.slice(r,r+word.length).every(x=>!x[c])){
+      [...word].forEach((l,i)=>grid[r+i][c]=l);
+      placed=true;
     }
   }
 });
@@ -153,6 +202,7 @@ words.forEach(w=>{
 const ABC="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 grid.forEach((row,r)=>row.forEach((c,i)=>{if(!c)grid[r][i]=ABC[Math.floor(Math.random()*26)]}));
 
+/* Render griglia */
 const gridEl=document.getElementById("grid");
 grid.flat().forEach(l=>{
   const d=document.createElement("div");
@@ -161,29 +211,24 @@ grid.flat().forEach(l=>{
   gridEl.appendChild(d);
 });
 
-const list=document.getElementById("word-list");
-words.forEach(w=>{
-  const s=document.createElement("div");
-  s.className="word";
-  s.textContent=w;
-  list.appendChild(s);
-});
-
+/* Timer */
 let time=0;
 const t=setInterval(()=>{time++;timer.textContent=`⏱ Tempo: ${time}s`},1000);
 
-let selecting=false, sel=[];
+/* Selezione */
+let selecting=false, selected=[];
 
 gridEl.addEventListener("pointerdown",e=>{
-  if(!e.target.classList.contains("cell"))return;
-  selecting=true; sel=[e.target];
+  if(!e.target.classList.contains("cell")||e.target.classList.contains("found"))return;
+  selecting=true;
+  selected=[e.target];
   e.target.classList.add("highlight");
 });
 
 gridEl.addEventListener("pointermove",e=>{
-  if(!selecting||!e.target.classList.contains("cell"))return;
-  if(!sel.includes(e.target)){
-    sel.push(e.target);
+  if(!selecting||!e.target.classList.contains("cell")||e.target.classList.contains("found"))return;
+  if(!selected.includes(e.target)){
+    selected.push(e.target);
     e.target.classList.add("highlight");
   }
 });
@@ -191,18 +236,55 @@ gridEl.addEventListener("pointermove",e=>{
 window.addEventListener("pointerup",()=>{
   if(!selecting)return;
   selecting=false;
-  const w=sel.map(x=>x.textContent).join("");
-  const r=w.split("").reverse().join("");
-  const f=words.find(x=>x===w||x===r);
-  if(f){
-    sel.forEach(c=>c.classList.add("found"));
-    document.querySelectorAll(".word").forEach(x=>x.textContent===f&&x.classList.add("found"));
-  }else sel.forEach(c=>c.classList.remove("highlight"));
-  if(document.querySelectorAll(".word.found").length===words.length){
-    clearInterval(t);
-    messaggio.textContent=`🎉 Bravo ${nome}! ${time}s`;
+
+  const letters=selected.map(c=>c.textContent).join("");
+  const rev=letters.split("").reverse().join("");
+  const found=words.find(w=>w===letters||w===rev);
+
+  if(found){
+    selected.forEach(c=>{
+      c.classList.remove("highlight");
+      c.classList.add("found");
+      c.dataset.word = found; // ⭐ IMPORTANTISSIMO
+    });
+  }else{
+    selected.forEach(c=>c.classList.remove("highlight"));
+  }
+
+  if(document.querySelectorAll(".cell.found").length){
+    if(words.every(w=>document.querySelector(`.cell.found[data-word="${w}"]`))){
+      clearInterval(t);
+      messaggio.textContent=`🎉 Complimenti ${nome}! Hai completato in ${time}s`;
+    }
   }
 });
+
+/* MODAL PAROLE */
+const modal=document.getElementById("modalParole");
+const listaModal=document.getElementById("listaParoleModal");
+
+document.getElementById("btnParole").onclick=()=>{
+  listaModal.innerHTML="";
+  let trovate=0;
+
+  words.forEach(w=>{
+    const ok=document.querySelector(`.cell.found[data-word="${w}"]`);
+    if(ok) trovate++;
+    const div=document.createElement("div");
+    div.className="word-modal "+(ok?"word-ok":"word-no");
+    div.textContent=w;
+    listaModal.appendChild(div);
+  });
+
+  document.getElementById("contatoreParole").textContent =
+    `🔎 Parole mancanti: ${words.length-trovate} / ${words.length}`;
+
+  modal.classList.add("show");
+};
+
+function chiudiParole(){
+  modal.classList.remove("show");
+}
 </script>
 
 </body>
