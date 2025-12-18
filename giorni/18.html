@@ -18,20 +18,27 @@ body{
 
 h1{
   color:#ffd700;
-  margin:10px 0;
+  margin:10px 0 6px;
 }
 
-#top{
-  display:flex;
-  justify-content:space-between;
-  padding:0 20px;
-  font-size:1.1em;
+/* OBIETTIVO */
+#obiettivo{
+  margin-bottom:10px;
+}
+#target{
+  font-size:36px;
+  font-weight:700;
   color:#ffd700;
 }
+#progress{
+  font-size:18px;
+  color:#fffaf2;
+}
 
+/* CANVAS */
 canvas{
   display:block;
-  margin:20px auto;
+  margin:18px auto;
   background:#fffaf2;
   border:3px solid #f5d97c;
   border-radius:12px;
@@ -40,7 +47,7 @@ canvas{
 
 #sum{
   font-size:1.2em;
-  margin-bottom:10px;
+  margin-bottom:14px;
 }
 
 /* MODALS */
@@ -104,9 +111,11 @@ button:hover{
 
 <h1>🎄 Giorno 18 – Il Numero Preferito</h1>
 
-<div id="top">
-  <div>🎯 <span id="target">0</span></div>
-  <div>⭐ <span id="score">0</span>/10</div>
+<!-- OBIETTIVO VISIBILE -->
+<div id="obiettivo">
+  🎯 Numero da raggiungere<br>
+  <span id="target">0</span><br>
+  ⭐ <span id="score">0</span>/10
 </div>
 
 <canvas id="canvas" width="330" height="330"></canvas>
@@ -200,12 +209,12 @@ canvas.addEventListener("pointerdown", e=>{
       if(sum === target){
         score++;
         document.getElementById("score").textContent = score;
-        game.classList.add("success");
-        setTimeout(()=>{ game.classList.remove("success"); startRound(); },600);
+        document.body.classList.add("success");
+        setTimeout(()=>{ document.body.classList.remove("success"); startRound(); },600);
       }
       else if(sum > target){
-        game.classList.add("error");
-        setTimeout(()=>{ game.classList.remove("error"); startRound(); },600);
+        document.body.classList.add("error");
+        setTimeout(()=>{ document.body.classList.remove("error"); startRound(); },600);
       }
 
       draw();
@@ -221,10 +230,20 @@ function endGame(){
 
   if(score === 10){
     title.textContent = "🏆 Hai vinto!";
-    text.innerHTML = "10 su 10 ⭐<br><br>In matematica conta il percorso,<br>non solo il risultato.";
+    text.innerHTML = `
+      Hai completato <b>10 su 10</b> sfide ⭐<br><br>
+      Anche una semplice addizione<br>
+      può avere molte soluzioni.<br>
+      In matematica conta il percorso,<br>
+      non solo il risultato.
+    `;
   }else{
     title.textContent = "✨ Ci sei quasi!";
-    text.innerHTML = `Hai fatto ${score} su 10 ⭐<br><br>Riprova e migliora la strategia.`;
+    text.innerHTML = `
+      Hai completato <b>${score} su 10</b> sfide ⭐<br><br>
+      Riprova: ogni tentativo<br>
+      allena la mente e migliora la strategia.
+    `;
   }
 
   modal.style.display = "flex";
