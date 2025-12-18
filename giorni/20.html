@@ -13,7 +13,6 @@ body{
   background:#8fd3ff;
   font-family:'Ubuntu',sans-serif;
   text-align:center;
-  color:#333;
 }
 
 h1{
@@ -59,7 +58,7 @@ canvas{
 <h1>🎄 Giorno 20 – Roccasicura Run</h1>
 
 <div id="hud">
-  <div>⭐ <span id="score">0</span></div>
+  <div>🎁 <span id="score">0</span></div>
   <div>🚦 Livello <span id="level">1</span></div>
 </div>
 
@@ -70,49 +69,55 @@ canvas{
 <a href="../calendario.html" class="btn-back">← Calendario</a>
 
 <script>
+/* ====== ASSET ====== */
+const imgBabbo = new Image();
+imgBabbo.src = "img/babbo_sacco.png";
+
+const imgGift = new Image();
+imgGift.src = "img/gift.png";
+
+const imgOlaf = new Image();
+imgOlaf.src = "img/olaf.png";
+
+const imgSnow = new Image();
+imgSnow.src = "img/snow.png";
+
+/* ====== SETUP ====== */
 const nome = localStorage.getItem("utente") || "Ospite";
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* PLAYER */
+let playerX = 100;
 let playerY = 330;
-const playerX = 110;
 
-/* STATO */
 let speed = 2.5;
 let level = 1;
 let score = 0;
 let running = true;
 
-/* OGGETTI */
 let obstacles = [];
-let coins = [];
+let gifts = [];
 let snow = [];
 
-/* NEVE */
-for(let i=0;i<40;i++){
-  snow.push({
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    s:1+Math.random()*2
-  });
+/* ====== NEVE ====== */
+function initSnow(){
+  snow.length = 0;
+  for(let i=0;i<35;i++){
+    snow.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height,
+      s:1+Math.random()*2
+    });
+  }
 }
+initSnow();
 
-/* BACKGROUND */
+/* ====== BACKGROUND ====== */
 function drawBackground(){
-  // cielo
   ctx.fillStyle="#8fd3ff";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // nuvole
-  ctx.fillStyle="white";
-  ctx.beginPath();
-  ctx.arc(60,80,25,0,Math.PI*2);
-  ctx.arc(90,80,30,0,Math.PI*2);
-  ctx.arc(120,80,22,0,Math.PI*2);
-  ctx.fill();
-
-  // collina gialla
+  // collina
   ctx.fillStyle="#f6d54a";
   ctx.beginPath();
   ctx.moveTo(0,260);
@@ -122,122 +127,136 @@ function drawBackground(){
   ctx.closePath();
   ctx.fill();
 
-  // bordo verde
   ctx.strokeStyle="#3aa655";
   ctx.lineWidth=10;
   ctx.stroke();
 }
 
-/* NEVE */
+/* ====== NEVE ====== */
 function drawSnow(){
-  ctx.fillStyle="white";
   snow.forEach(f=>{
-    ctx.beginPath();
-    ctx.arc(f.x,f.y,f.s,0,Math.PI*2);
-    ctx.fill();
-    f.y+=f.s;
-    if(f.y>canvas.height){f.y=0;f.x=Math.random()*canvas.width;}
+    ctx.drawImage(imgSnow, f.x, f.y, 12, 12);
+    f.y += f.s;
+    if(f.y > canvas.height){
+      f.y = -10;
+      f.x = Math.random()*canvas.width;
+    }
   });
 }
 
-/* PLAYER */
+/* ====== PLAYER ====== */
 function drawPlayer(){
-  ctx.font="34px serif";
-  ctx.fillText("🎅", playerX, playerY);
+  ctx.drawImage(imgBabbo, playerX-24, playerY-36, 48, 72);
 }
 
-/* OSTACOLI */
-const obstacleTypes=["🏠","🌲","⛪","🚧"];
+/* ====== SPAWN ====== */
+function spawnGift(){
+  gifts.push({
+    x: canvas.width + 20,
+    y: 260 + Math.random()*90
+  });
+}
+
+function spawnOlaf(){
+  obstacles.push({
+    x: canvas.width + 20,
+    y: 260 + Math.random()*90,
+    type: "olaf"
+  });
+}
 
 function spawnObstacle(){
   obstacles.push({
-    x:canvas.width+20,
-    y:280+Math.random()*90,
-    type:obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)]
+    x: canvas.width + 20,
+    y: 260 + Math.random()*90,
+    type: "rock"
   });
 }
 
-/* MONETE ANIMATE */
-function spawnCoin(){
-  coins.push({
-    x:canvas.width+20,
-    y:260+Math.random()*90,
-    frame:0
+/* ====== DISEGNO OGGETTI ====== */
+function drawGifts(){
+  gifts.forEach(g=>{
+    ctx.drawImage(imgGift, g.x-16, g.y-16, 32, 32);
+    g.x -= speed;
   });
 }
 
-function drawCoins(){
-  ctx.font="28px serif";
-  coins.forEach(c=>{
-    const spin=["🪙","💰","🪙"];
-    ctx.fillText(spin[Math.floor(c.frame)%3], c.x, c.y);
-    c.frame+=0.2;
-    c.x-=speed;
-  });
-}
-
-/* OSTACOLI */
 function drawObstacles(){
-  ctx.font="28px serif";
   obstacles.forEach(o=>{
-    ctx.fillText(o.type, o.x, o.y);
-    o.x-=speed;
+    if(o.type==="olaf"){
+      ctx.drawImage(imgOlaf, o.x-20, o.y-28, 40, 56);
+    }else{
+      ctx.fillStyle="#795548";
+      ctx.fillRect(o.x-14, o.y-14, 28, 28);
+    }
+    o.x -= speed;
   });
 }
 
-/* COLLISIONI */
+/* ====== COLLISIONI ====== */
 function checkCollision(){
-  obstacles.forEach(o=>{
-    if(Math.abs(o.x-playerX)<26 && Math.abs(o.y-playerY)<26){
-      running=false;
-      document.getElementById("msg").textContent =
-        `💥 Game Over ${nome}! Punteggio: ${score}`;
+
+  // 🎁 REGALI
+  gifts.forEach(g=>{
+    if(Math.abs(g.x-playerX)<30 && Math.abs(g.y-playerY)<30){
+      score++;
+      document.getElementById("score").textContent = score;
+      g.x = -100;
+
+      if(score % 5 === 0){
+        level++;
+        speed += 0.6;
+        document.getElementById("level").textContent = level;
+      }
     }
   });
 
-  coins.forEach(c=>{
-    if(Math.abs(c.x-playerX)<26 && Math.abs(c.y-playerY)<26){
-      score++;
-      document.getElementById("score").textContent=score;
-      c.x=-100;
-
-      if(score%5===0){
-        level++;
-        speed+=0.6;
-        document.getElementById("level").textContent=level;
+  // ⛔ OSTACOLI
+  obstacles.forEach(o=>{
+    if(Math.abs(o.x-playerX)<30 && Math.abs(o.y-playerY)<30){
+      if(o.type==="olaf"){
+        speed = Math.max(2, speed - 1);
+        snow.length = 0;
+        setTimeout(initSnow, 4000);
+        o.x = -100;
+      }else{
+        running = false;
+        document.getElementById("msg").textContent =
+          `💥 Game Over ${nome}! Regali raccolti: ${score}`;
       }
     }
   });
 }
 
-/* LOOP */
+/* ====== LOOP ====== */
 function loop(){
   if(!running) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawBackground();
   drawSnow();
-  drawCoins();
+  drawGifts();
   drawObstacles();
   drawPlayer();
   checkCollision();
   requestAnimationFrame(loop);
 }
 
-/* SPAWN */
-setInterval(()=>{if(running) spawnObstacle();},1400);
-setInterval(()=>{if(running) spawnCoin();},900);
-
-/* CONTROLLI */
+/* ====== CONTROLLI ====== */
 window.addEventListener("keydown",e=>{
-  if(e.key==="ArrowUp") playerY-=30;
-  if(e.key==="ArrowDown") playerY+=30;
+  if(e.key==="ArrowUp") playerY -= 30;
+  if(e.key==="ArrowDown") playerY += 30;
 });
 
 canvas.addEventListener("touchstart",e=>{
-  const y=e.touches[0].clientY;
-  if(y<canvas.height/2) playerY-=30;
-  else playerY+=30;
+  const y = e.touches[0].clientY;
+  if(y < canvas.height/2) playerY -= 30;
+  else playerY += 30;
 });
+
+/* ====== TIMER SPAWN ====== */
+setInterval(()=>{ if(running) spawnGift(); }, 900);
+setInterval(()=>{ if(running && Math.random()<0.35) spawnOlaf(); }, 2200);
+setInterval(()=>{ if(running) spawnObstacle(); }, 1700);
 
 /* START */
 loop();
