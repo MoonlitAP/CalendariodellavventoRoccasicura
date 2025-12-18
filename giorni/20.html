@@ -10,15 +10,15 @@
 <style>
 body{
   margin:0;
-  background:#0b2d20;
-  color:white;
+  background:#8fd3ff;
   font-family:'Ubuntu',sans-serif;
   text-align:center;
+  color:#333;
 }
 
 h1{
   margin:10px 0 4px;
-  color:#ffd700;
+  color:#c62828;
   font-size:1.4em;
 }
 
@@ -30,39 +30,27 @@ h1{
 }
 
 canvas{
-  background:linear-gradient(#2e7d32,#1b5e20);
-  border-radius:12px;
+  border-radius:16px;
+  background:#8fd3ff;
   touch-action:manipulation;
 }
 
 #msg{
-  margin-top:8px;
+  margin-top:6px;
   font-size:1.1em;
-  color:#00ff99;
+  color:#2e7d32;
 }
 
 .btn-back{
   display:inline-block;
   margin:12px auto;
   padding:10px 24px;
-  background:#f3e4e4;
+  background:#fff;
   color:black;
   border-radius:30px;
   font-weight:bold;
   text-decoration:none;
 }
-
-.leaderboard{
-  margin-top:10px;
-  background:rgba(255,255,255,.15);
-  padding:10px;
-  border-radius:12px;
-  display:none;
-}
-
-.leaderboard h3{margin-top:0}
-table{width:100%;border-collapse:collapse}
-td,th{padding:6px;border-bottom:1px solid #ffd700}
 </style>
 </head>
 
@@ -79,179 +67,180 @@ td,th{padding:6px;border-bottom:1px solid #ffd700}
 
 <div id="msg"></div>
 
-<div class="leaderboard" id="leaderboard">
-  <h3>🏆 Classifica</h3>
-  <table id="scoreTable">
-    <tr><th>Nome</th><th>Punti</th></tr>
-  </table>
-</div>
-
 <a href="../calendario.html" class="btn-back">← Calendario</a>
 
 <script>
-/* DATI BASE */
 const nome = localStorage.getItem("utente") || "Ospite";
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const lanesX = [90, 180, 270];
-let lane = 1;
-let yPlayer = 420;
+/* PLAYER */
+let playerY = 330;
+const playerX = 110;
 
-let speed = 3;
+/* STATO */
+let speed = 2.5;
 let level = 1;
 let score = 0;
 let running = true;
 
-const obstacles = [];
-const snowflakes = [];
+/* OGGETTI */
+let obstacles = [];
+let coins = [];
+let snow = [];
 
 /* NEVE */
 for(let i=0;i<40;i++){
-  snowflakes.push({
+  snow.push({
     x:Math.random()*canvas.width,
     y:Math.random()*canvas.height,
     s:1+Math.random()*2
   });
 }
 
+/* BACKGROUND */
+function drawBackground(){
+  // cielo
+  ctx.fillStyle="#8fd3ff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // nuvole
+  ctx.fillStyle="white";
+  ctx.beginPath();
+  ctx.arc(60,80,25,0,Math.PI*2);
+  ctx.arc(90,80,30,0,Math.PI*2);
+  ctx.arc(120,80,22,0,Math.PI*2);
+  ctx.fill();
+
+  // collina gialla
+  ctx.fillStyle="#f6d54a";
+  ctx.beginPath();
+  ctx.moveTo(0,260);
+  ctx.quadraticCurveTo(180,230,360,300);
+  ctx.lineTo(360,520);
+  ctx.lineTo(0,520);
+  ctx.closePath();
+  ctx.fill();
+
+  // bordo verde
+  ctx.strokeStyle="#3aa655";
+  ctx.lineWidth=10;
+  ctx.stroke();
+}
+
+/* NEVE */
 function drawSnow(){
   ctx.fillStyle="white";
-  snowflakes.forEach(f=>{
+  snow.forEach(f=>{
     ctx.beginPath();
     ctx.arc(f.x,f.y,f.s,0,Math.PI*2);
     ctx.fill();
-    f.y += f.s;
+    f.y+=f.s;
     if(f.y>canvas.height){f.y=0;f.x=Math.random()*canvas.width;}
   });
-}
-
-/* STRADA */
-function drawRoad(){
-  ctx.fillStyle="#555";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.strokeStyle="#fff";
-  ctx.setLineDash([12,12]);
-  ctx.beginPath();
-  ctx.moveTo(120,0); ctx.lineTo(120,canvas.height);
-  ctx.moveTo(240,0); ctx.lineTo(240,canvas.height);
-  ctx.stroke();
-  ctx.setLineDash([]);
 }
 
 /* PLAYER */
 function drawPlayer(){
   ctx.font="34px serif";
-  ctx.fillText("🎅", lanesX[lane]-16, yPlayer);
+  ctx.fillText("🎅", playerX, playerY);
 }
 
 /* OSTACOLI */
-const obstacleTypes = ["🏠","🌲","⛪","🚧","⭐"];
+const obstacleTypes=["🏠","🌲","⛪","🚧"];
 
 function spawnObstacle(){
-  const type = obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)];
   obstacles.push({
-    x: lanesX[Math.floor(Math.random()*3)],
-    y: -40,
-    type
+    x:canvas.width+20,
+    y:280+Math.random()*90,
+    type:obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)]
   });
 }
 
-function updateObstacles(){
-  obstacles.forEach(o=>o.y+=speed);
+/* MONETE ANIMATE */
+function spawnCoin(){
+  coins.push({
+    x:canvas.width+20,
+    y:260+Math.random()*90,
+    frame:0
+  });
 }
 
+function drawCoins(){
+  ctx.font="28px serif";
+  coins.forEach(c=>{
+    const spin=["🪙","💰","🪙"];
+    ctx.fillText(spin[Math.floor(c.frame)%3], c.x, c.y);
+    c.frame+=0.2;
+    c.x-=speed;
+  });
+}
+
+/* OSTACOLI */
 function drawObstacles(){
-  ctx.font="30px serif";
+  ctx.font="28px serif";
   obstacles.forEach(o=>{
-    ctx.fillText(o.type, o.x-14, o.y);
+    ctx.fillText(o.type, o.x, o.y);
+    o.x-=speed;
   });
 }
 
 /* COLLISIONI */
 function checkCollision(){
   obstacles.forEach(o=>{
-    if(Math.abs(o.y - yPlayer) < 26 && o.x === lanesX[lane]){
-      if(o.type === "⭐"){
-        score++;
-        document.getElementById("score").textContent = score;
-        o.y = canvas.height + 100;
+    if(Math.abs(o.x-playerX)<26 && Math.abs(o.y-playerY)<26){
+      running=false;
+      document.getElementById("msg").textContent =
+        `💥 Game Over ${nome}! Punteggio: ${score}`;
+    }
+  });
 
-        if(score % 5 === 0){
-          speed++;
-          level++;
-          document.getElementById("level").textContent = level;
-        }
-      }else{
-        running=false;
-        endGame();
+  coins.forEach(c=>{
+    if(Math.abs(c.x-playerX)<26 && Math.abs(c.y-playerY)<26){
+      score++;
+      document.getElementById("score").textContent=score;
+      c.x=-100;
+
+      if(score%5===0){
+        level++;
+        speed+=0.6;
+        document.getElementById("level").textContent=level;
       }
     }
   });
 }
 
 /* LOOP */
-function gameLoop(){
+function loop(){
   if(!running) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawRoad();
+  drawBackground();
   drawSnow();
-  drawPlayer();
+  drawCoins();
   drawObstacles();
-  updateObstacles();
+  drawPlayer();
   checkCollision();
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(loop);
 }
 
-setInterval(()=>{
-  if(running) spawnObstacle();
-},1100);
+/* SPAWN */
+setInterval(()=>{if(running) spawnObstacle();},1400);
+setInterval(()=>{if(running) spawnCoin();},900);
 
 /* CONTROLLI */
 window.addEventListener("keydown",e=>{
-  if(e.key==="ArrowLeft" && lane>0) lane--;
-  if(e.key==="ArrowRight" && lane<2) lane++;
+  if(e.key==="ArrowUp") playerY-=30;
+  if(e.key==="ArrowDown") playerY+=30;
 });
 
 canvas.addEventListener("touchstart",e=>{
-  const x = e.touches[0].clientX;
-  const rect = canvas.getBoundingClientRect();
-  const rel = x - rect.left;
-
-  if(rel < canvas.width/3) lane=0;
-  else if(rel < canvas.width*2/3) lane=1;
-  else lane=2;
+  const y=e.touches[0].clientY;
+  if(y<canvas.height/2) playerY-=30;
+  else playerY+=30;
 });
 
-/* FINE GIOCO + CLASSIFICA */
-function endGame(){
-  document.getElementById("msg").textContent =
-    `💥 Game Over ${nome}! Punteggio: ${score}`;
-  saveScore();
-  showLeaderboard();
-}
-
-function saveScore(){
-  const key="rcc_run_scores";
-  const list=JSON.parse(localStorage.getItem(key))||[];
-  list.push({nome,score});
-  list.sort((a,b)=>b.score-a.score);
-  localStorage.setItem(key,JSON.stringify(list.slice(0,10)));
-}
-
-function showLeaderboard(){
-  const table=document.getElementById("scoreTable");
-  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
-  const list=JSON.parse(localStorage.getItem("rcc_run_scores"))||[];
-  list.forEach(s=>{
-    table.innerHTML+=`<tr><td>${s.nome}</td><td>${s.score}</td></tr>`;
-  });
-  document.getElementById("leaderboard").style.display="block";
-}
-
 /* START */
-gameLoop();
+loop();
 </script>
 
 </body>
