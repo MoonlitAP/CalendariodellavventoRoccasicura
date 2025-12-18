@@ -3,92 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎄 Giorno 18 – Il Numero Preferito 🔢</title>
+<title>🎄 Giorno 18 – Il Numero Preferito</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+/* ===== BASE ===== */
 body{
   margin:0;
+  background-color:#7b0412;
   font-family:'Ubuntu',sans-serif;
-  background:linear-gradient(#fce4ec,#e8f5e9);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-#game{
-  background:#fff;
-  width:95%;
-  max-width:420px;
-  border-radius:22px;
-  padding:18px;
-  box-shadow:0 10px 25px rgba(0,0,0,.15);
+  color:#fff;
   text-align:center;
+}
+
+/* ===== TITOLO ===== */
+h1{
+  color:#ffd700;
+  margin:10px 0;
+}
+
+/* ===== CONTENITORE ===== */
+#game{
+  max-width:420px;
+  margin:0 auto;
+  padding:10px;
   position:relative;
 }
-h1{font-size:20px;margin:0 0 8px;}
 
+/* ===== INFO ===== */
 #top{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-}
-#target{
-  font-size:30px;
-  font-weight:700;
-  color:#d32f2f;
-}
-#score{
-  font-size:18px;
+  font-size:1.1em;
+  color:#ffd700;
 }
 
+/* ===== CANVAS ===== */
 canvas{
-  background:#f9fbe7;
-  border-radius:18px;
   display:block;
-  margin:12px auto;
+  margin:20px auto;
+  background:#fffaf2;
+  border:3px solid #f5d97c;
+  border-radius:12px;
   touch-action:none;
 }
 
+/* ===== SOMMA ===== */
 #sum{
-  font-size:18px;
+  font-size:1.2em;
+  margin-bottom:10px;
+  color:#fffaf2;
 }
 
-/* MODALS */
+/* ===== MODALI ===== */
 .modal{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.45);
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(4px);
   display:flex;
   justify-content:center;
   align-items:center;
-  z-index:10;
+  z-index:999;
 }
-.modalContent{
-  background:#fff;
-  padding:20px;
-  border-radius:18px;
+
+.box{
+  background:#fffaf2;
+  color:#400000;
+  padding:25px;
+  border-radius:20px;
   width:90%;
-  max-width:320px;
-  text-align:center;
+  max-width:380px;
+  border:2px solid #ffd700;
+  animation:popup .4s ease-out;
 }
-.modalContent button{
-  background:#2e7d32;
-  color:#fff;
+
+@keyframes popup{
+  from{transform:scale(.7);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+/* ===== BOTTONI ===== */
+button{
+  margin-top:15px;
+  padding:12px 30px;
+  border-radius:30px;
+  font-weight:bold;
   border:none;
-  padding:12px 22px;
-  font-size:15px;
-  border-radius:14px;
   cursor:pointer;
+  background:#7b0412;
+  color:white;
+  transition:.3s;
 }
-.success{
-  animation: pop .4s ease;
+button:hover{
+  background:#ffd700;
+  color:#000;
 }
-.error{
-  animation: shake .4s ease;
-}
+
+/* ===== ANIMAZIONI ===== */
+.success{animation:pop .4s;}
+.error{animation:shake .4s;}
+
 @keyframes pop{
   0%{transform:scale(1);}
   50%{transform:scale(1.1);}
@@ -106,9 +123,9 @@ canvas{
 
 <body>
 
-<div id="game">
-  <h1>🎄 Giorno 18 – Il Numero Preferito 🔢</h1>
+<h1>🎄 Giorno 18 – Il Numero Preferito</h1>
 
+<div id="game">
   <div id="top">
     <div>🎯 <span id="target">0</span></div>
     <div>⭐ <span id="score">0</span>/10</div>
@@ -117,15 +134,114 @@ canvas{
   <canvas id="canvas" width="330" height="330"></canvas>
 
   <div id="sum">Somma: <b id="currentSum">0</b></div>
+</div>
 
-  <!-- START MODAL -->
-  <div class="modal" id="startModal">
-    <div class="modalContent">
-      <h2>🎯 Come si gioca</h2>
-      <p>
-        Tocca i numeri nel tabellone.<br>
-        ➕ La loro somma deve essere uguale<br>
-        al <b>Numero Preferito</b>.<br><br>
-        ✅ Somma giusta = ⭐ punto<br>
-        ❌ Se superi → errore e si riparte<br>
-        🏁 Dopo <b>10
+<!-- START -->
+<div class="modal" id="startModal">
+  <div class="box">
+    <h2>🎯 Come si gioca</h2>
+    <p>
+      Tocca i numeri.<br>
+      ➕ La somma deve essere uguale<br>
+      al <b>Numero Preferito</b>.<br><br>
+      ✅ Giusto = ⭐ punto<br>
+      ❌ Se superi → errore<br>
+      🏁 10 sfide totali
+    </p>
+    <button onclick="startGame()">▶️ Inizia</button>
+  </div>
+</div>
+
+<!-- END -->
+<div class="modal" id="endModal" style="display:none;">
+  <div class="box">
+    <h2 id="endTitle"></h2>
+    <p id="endText"></p>
+    <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+const cells=[];
+let target=0,sum=0,score=0,round=0;
+const size=3,cellSize=110;
+
+function startGame(){
+  document.getElementById("startModal").style.display="none";
+  startRound();
+}
+
+function startRound(){
+  if(round===10){ endGame(); return; }
+  round++;
+  sum=0;
+  cells.length=0;
+  target=Math.floor(Math.random()*11)+10;
+  document.getElementById("target").textContent=target;
+  document.getElementById("currentSum").textContent=0;
+
+  for(let y=0;y<3;y++)
+    for(let x=0;x<3;x++)
+      cells.push({x:x*cellSize,y:y*cellSize,v:Math.floor(Math.random()*9)+1});
+
+  draw();
+}
+
+canvas.addEventListener("pointerdown",e=>{
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left,y=e.clientY-r.top;
+
+  cells.forEach(c=>{
+    if(x>c.x && x<c.x+cellSize && y>c.y && y<c.y+cellSize){
+      sum+=c.v;
+      document.getElementById("currentSum").textContent=sum;
+
+      if(sum===target){
+        score++;
+        document.getElementById("score").textContent=score;
+        game.classList.add("success");
+        setTimeout(()=>{game.classList.remove("success");startRound();},600);
+      }else if(sum>target){
+        game.classList.add("error");
+        setTimeout(()=>{game.classList.remove("error");startRound();},600);
+      }
+    }
+  });
+});
+
+function endGame(){
+  const title=document.getElementById("endTitle");
+  const text=document.getElementById("endText");
+  document.getElementById("endModal").style.display="flex";
+
+  if(score===10){
+    title.textContent="🏆 Hai vinto!";
+    text.innerHTML="10 su 10 ⭐<br><br>Anche una semplice addizione<br>può avere molte soluzioni.";
+  }else{
+    title.textContent="✨ Ci sei quasi!";
+    text.innerHTML=`Hai fatto ${score} su 10 ⭐<br><br>Riprova e migliora la strategia.`;
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  cells.forEach(c=>{
+    ctx.fillStyle="#fff";
+    ctx.strokeStyle="#7b0412";
+    ctx.lineWidth=3;
+    ctx.fillRect(c.x,c.y,cellSize,cellSize);
+    ctx.strokeRect(c.x,c.y,cellSize,cellSize);
+    ctx.fillStyle="#400000";
+    ctx.font="bold 32px Ubuntu";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(c.v,c.x+cellSize/2,c.y+cellSize/2);
+  });
+}
+</script>
+
+</body>
+</html>
