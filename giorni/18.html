@@ -86,10 +86,20 @@ canvas{
 .success{
   animation: pop .4s ease;
 }
+.error{
+  animation: shake .4s ease;
+}
 @keyframes pop{
   0%{transform:scale(1);}
   50%{transform:scale(1.1);}
   100%{transform:scale(1);}
+}
+@keyframes shake{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-6px);}
+  50%{transform:translateX(6px);}
+  75%{transform:translateX(-6px);}
+  100%{transform:translateX(0);}
 }
 </style>
 </head>
@@ -116,152 +126,6 @@ canvas{
         Tocca i numeri nel tabellone.<br>
         ➕ La loro somma deve essere uguale<br>
         al <b>Numero Preferito</b>.<br><br>
-        🔁 Puoi toccare di nuovo un numero<br>
-        per toglierlo dalla somma.<br><br>
-        ⭐ Somma giusta = 1 punto<br>
-        🏁 Dopo <b>10 sfide</b> il gioco termina
-      </p>
-      <button onclick="startGame()">✨ Inizia</button>
-    </div>
-  </div>
-
-  <!-- END MODAL -->
-  <div class="modal" id="endModal" style="display:none;">
-    <div class="modalContent">
-      <h2 id="endTitle">🏁 Fine gioco</h2>
-      <p id="endText"></p>
-    </div>
-  </div>
-</div>
-
-<script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-const cells=[];
-let selected=[];
-let target=0;
-let sum=0;
-let score=0;
-let round=0;
-
-const size=3;
-const cellSize=110;
-
-/* START */
-function startGame(){
-  document.getElementById("startModal").style.display="none";
-  startRound();
-}
-
-/* ROUND */
-function startRound(){
-  if(round === 10){
-    showEnd();
-    return;
-  }
-
-  round++;
-  cells.length=0;
-  selected=[];
-  sum=0;
-
-  target=Math.floor(Math.random()*11)+10; // 10–20
-  document.getElementById("target").textContent=target;
-  document.getElementById("currentSum").textContent=sum;
-
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      cells.push({
-        x:x*cellSize,
-        y:y*cellSize,
-        v:Math.floor(Math.random()*9)+1
-      });
-    }
-  }
-  draw();
-}
-
-/* CLICK – toggle selezione */
-canvas.addEventListener("pointerdown",e=>{
-  const r=canvas.getBoundingClientRect();
-  const x=e.clientX-r.left;
-  const y=e.clientY-r.top;
-
-  cells.forEach((c,i)=>{
-    if(x>c.x && x<c.x+cellSize && y>c.y && y<c.y+cellSize){
-
-      if(selected.includes(i)){
-        selected = selected.filter(n => n !== i);
-        sum -= c.v;
-      }else{
-        selected.push(i);
-        sum += c.v;
-      }
-
-      document.getElementById("currentSum").textContent=sum;
-
-      if(sum === target){
-        score++;
-        document.getElementById("score").textContent=score;
-        document.getElementById("game").classList.add("success");
-        setTimeout(()=>{
-          document.getElementById("game").classList.remove("success");
-          startRound();
-        },600);
-      }
-
-      draw();
-    }
-  });
-});
-
-/* END GAME */
-function showEnd(){
-  const title = document.getElementById("endTitle");
-  const text = document.getElementById("endText");
-  const modal = document.getElementById("endModal");
-
-  if(score === 10){
-    title.textContent = "🏆 Hai vinto!";
-    text.innerHTML = `
-      Hai risolto <b>10 su 10</b> Numeri Preferiti ⭐<br><br>
-      Anche una semplice addizione<br>
-      può avere molte soluzioni.<br>
-      In matematica conta il percorso,<br>
-      non solo il risultato.
-    `;
-  }else{
-    title.textContent = "✨ Ci sei quasi!";
-    text.innerHTML = `
-      Hai risolto <b>${score} su 10</b> sfide ⭐<br><br>
-      Riprova: ogni tentativo<br>
-      allena la mente e migliora la strategia.
-    `;
-  }
-
-  modal.style.display="flex";
-}
-
-/* DRAW */
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  cells.forEach((c,i)=>{
-    ctx.fillStyle=selected.includes(i)?"#aed581":"#fff";
-    ctx.strokeStyle="#8d6e63";
-    ctx.lineWidth=3;
-    ctx.fillRect(c.x,c.y,cellSize,cellSize);
-    ctx.strokeRect(c.x,c.y,cellSize,cellSize);
-
-    ctx.fillStyle="#000";
-    ctx.font="bold 32px Ubuntu";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.fillText(c.v,c.x+cellSize/2,c.y+cellSize/2);
-  });
-}
-</script>
-
-</body>
-</html>
+        ✅ Somma giusta = ⭐ punto<br>
+        ❌ Se superi → errore e si riparte<br>
+        🏁 Dopo <b>10
