@@ -17,7 +17,6 @@ body{
   justify-content:center;
   align-items:center;
 }
-
 #game{
   background:#fff;
   width:95%;
@@ -26,23 +25,21 @@ body{
   padding:18px;
   box-shadow:0 10px 25px rgba(0,0,0,.15);
   text-align:center;
+  position:relative;
 }
-
-h1{font-size:20px;margin:0 0 10px;}
+h1{font-size:20px;margin:0 0 8px;}
 
 #top{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
-
 #target{
-  font-size:28px;
+  font-size:30px;
   font-weight:700;
   color:#d32f2f;
 }
-
 #score{
   font-size:18px;
 }
@@ -56,8 +53,43 @@ canvas{
 }
 
 #sum{
-  font-size:20px;
-  margin-top:8px;
+  font-size:18px;
+}
+
+/* MODALS */
+.modal{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+.modalContent{
+  background:#fff;
+  padding:20px;
+  border-radius:18px;
+  width:90%;
+  max-width:320px;
+  text-align:center;
+}
+.modalContent button{
+  background:#2e7d32;
+  color:#fff;
+  border:none;
+  padding:12px 22px;
+  font-size:15px;
+  border-radius:14px;
+  cursor:pointer;
+}
+.success{
+  animation: pop .4s ease;
+}
+@keyframes pop{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.1);}
+  100%{transform:scale(1);}
 }
 </style>
 </head>
@@ -69,12 +101,42 @@ canvas{
 
   <div id="top">
     <div>🎯 <span id="target">0</span></div>
-    <div>⭐ <span id="score">0</span></div>
+    <div>⭐ <span id="score">0</span>/10</div>
   </div>
 
   <canvas id="canvas" width="330" height="330"></canvas>
 
   <div id="sum">Somma: <b id="currentSum">0</b></div>
+
+  <!-- START MODAL -->
+  <div class="modal" id="startModal">
+    <div class="modalContent">
+      <h2>🎯 Come si gioca</h2>
+      <p>
+        Scegli alcuni numeri dal tabellone.<br>
+        ➕ La loro somma deve essere uguale<br>
+        al <b>Numero Preferito</b>.<br><br>
+        ✅ Somma giusta = ⭐ punto<br>
+        🔁 Dopo ogni sfida il gioco riparte<br><br>
+        🏁 Dopo <b>10 sfide</b> il gioco termina
+      </p>
+      <button onclick="startGame()">✨ Inizia</button>
+    </div>
+  </div>
+
+  <!-- END MODAL -->
+  <div class="modal" id="endModal" style="display:none;">
+    <div class="modalContent">
+      <h2>🏆 Hai vinto!</h2>
+      <p>
+        Hai risolto <b>10 su 10</b> Numeri Preferiti ⭐<br><br>
+        Anche una semplice addizione<br>
+        può avere molte soluzioni.<br>
+        In matematica conta il percorso,<br>
+        non solo il risultato.
+      </p>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -86,17 +148,29 @@ let selected=[];
 let target=0;
 let sum=0;
 let score=0;
+let round=0;
 
 const size=3;
 const cellSize=110;
 
-startRound();
+/* START */
+function startGame(){
+  document.getElementById("startModal").style.display="none";
+  startRound();
+}
 
-/* NUOVO GIRO */
+/* ROUND */
 function startRound(){
+  if(round === 10){
+    document.getElementById("endModal").style.display="flex";
+    return;
+  }
+
+  round++;
   cells.length=0;
   selected=[];
   sum=0;
+
   target=Math.floor(Math.random()*11)+10; // 10–20
   document.getElementById("target").textContent=target;
   document.getElementById("currentSum").textContent=sum;
@@ -127,11 +201,15 @@ canvas.addEventListener("pointerdown",e=>{
       sum+=c.v;
       document.getElementById("currentSum").textContent=sum;
 
-      if(sum===target){
+      if(sum === target){
         score++;
         document.getElementById("score").textContent=score;
-        setTimeout(startRound,600);
-      }else if(sum>target){
+        document.getElementById("game").classList.add("success");
+        setTimeout(()=>{
+          document.getElementById("game").classList.remove("success");
+          startRound();
+        },600);
+      }else if(sum > target){
         setTimeout(startRound,600);
       }
       draw();
