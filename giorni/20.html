@@ -2,43 +2,104 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🎄 Giorno 20 – Catch the Gifts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 20 – Attento! Riprova!</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 body{
   margin:0;
-  background:#7b0412;
   font-family:'Ubuntu',sans-serif;
-  text-align:center;
+  background:#7b0412;
   color:white;
+  text-align:center;
 }
 
 h1{
-  margin:10px 0 4px;
   color:#ffd700;
+  margin:10px 0 4px;
   font-size:1.4em;
 }
 
-#hud{
+#counter{
+  margin:6px 0 10px;
+  font-weight:bold;
+  color:#ffd700;
+}
+
+/* CONTENITORE GIOCO */
+#game{
+  position:relative;
+  max-width:380px;
+  margin:0 auto;
+  touch-action: manipulation;
+}
+
+#game img{
+  width:100%;
+  display:block;
+  border-radius:12px;
+}
+
+/* OGGETTI DA TROVARE */
+.item{
+  position:absolute;
+  border-radius:50%;
+}
+
+/* TRAPPOLA INVISIBILE */
+#grinchTrap{
+  position:absolute;
+  top:32%;
+  left:55%;
+  width:60px;
+  height:60px;
+}
+
+/* OVERLAY GENERICO */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
   display:flex;
-  justify-content:space-around;
-  margin-bottom:6px;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+}
+
+.overlayBox{
+  background:white;
+  color:#7b0412;
+  padding:20px;
+  border-radius:16px;
+  max-width:300px;
+  text-align:center;
+}
+
+.overlayBox img{
+  width:100%;
+  border-radius:12px;
+}
+
+.overlayBox button{
+  margin-top:12px;
+  padding:10px 22px;
+  border:none;
+  border-radius:20px;
+  background:#7b0412;
+  color:white;
   font-weight:bold;
 }
 
-canvas{
-  background:#a5141c;
-  border-radius:16px;
-  touch-action:manipulation;
+#overlayError{
+  display:none;
 }
 
 #msg{
-  margin-top:10px;
-  font-size:1.1em;
+  margin:10px;
   color:#00ff99;
+  font-size:1.1em;
 }
 
 .btn-back{
@@ -51,156 +112,141 @@ canvas{
   font-weight:bold;
   text-decoration:none;
 }
+
+/* BLOCCO DOPPIO TAP */
+html, body, #game{
+  touch-action: manipulation;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎄 Giorno 20 – Catch the Gifts</h1>
-
-<div id="hud">
-  <div>🎁 <span id="score">0</span></div>
-  <div id="lives">❤️❤️❤️</div>
+<!-- OVERLAY INIZIALE -->
+<div id="startOverlay" class="overlay">
+  <div class="overlayBox">
+    <h2>🎄 Giorno 20</h2>
+    <p>
+      🔍 Trova tutti gli oggetti nascosti nell’immagine.<br><br>
+      🤏 Puoi ingrandire con due dita.<br><br>
+      ⚠️ Attento! Se tocchi il punto sbagliato,<br>
+      dovrai <b>riprovarci</b>.
+    </p>
+    <button onclick="startGame()">Inizia</button>
+  </div>
 </div>
 
-<canvas id="game" width="360" height="520"></canvas>
+<h1>🎄 Giorno 20</h1>
+<div id="counter">🔍 Oggetti trovati: 0 / 10</div>
+
+<div id="game">
+  <!-- IMMAGINE PRINCIPALE -->
+  <img src="img/disegno.jpg" alt="Disegno Natale">
+
+  <!-- OGGETTI DA TROVARE (HOTSPOT INVISIBILI) -->
+  <div class="item" style="top:18%; left:12%; width:30px; height:30px;"></div>
+  <div class="item" style="top:28%; left:62%; width:28px; height:28px;"></div>
+  <div class="item" style="top:45%; left:70%; width:30px; height:30px;"></div>
+  <div class="item" style="top:52%; left:22%; width:28px; height:28px;"></div>
+  <div class="item" style="top:60%; left:48%; width:30px; height:30px;"></div>
+  <div class="item" style="top:67%; left:15%; width:28px; height:28px;"></div>
+  <div class="item" style="top:72%; left:65%; width:30px; height:30px;"></div>
+  <div class="item" style="top:38%; left:40%; width:26px; height:26px;"></div>
+  <div class="item" style="top:80%; left:35%; width:28px; height:28px;"></div>
+  <div class="item" style="top:22%; left:80%; width:26px; height:26px;"></div>
+
+  <!-- TRAPPOLA INVISIBILE -->
+  <div id="grinchTrap"></div>
+</div>
 
 <div id="msg"></div>
 
 <a href="../calendario.html" class="btn-back">← Calendario</a>
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+<!-- OVERLAY ERRORE -->
+<div id="overlayError" class="overlay">
+  <div class="overlayBox">
+    <img src="img/cami.png" alt="Attento">
+    <p>
+      <b>ATTENTO!</b><br>
+      Il Grinch sta rubando gli oggetti…<br>
+      <b>Riprova!</b>
+    </p>
+    <button onclick="restart()">Riprova</button>
+  </div>
+</div>
 
-/* ====== AUDIO (SENZA FILE) ====== */
+<script>
+/* BLOCCO DOPPIO TAP */
+let lastTap = 0;
+document.addEventListener("touchend", e=>{
+  const now = Date.now();
+  if(now - lastTap < 300) e.preventDefault();
+  lastTap = now;
+},{passive:false});
+
+/* AUDIO UH-OH */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playGiftSound(){
+function playUhOh(){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.type = "triangle";
-  osc.frequency.value = 880;
-  gain.gain.value = 0.15;
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start();
-  osc.stop(audioCtx.currentTime + 0.15);
+  osc.stop(audioCtx.currentTime + 0.4);
 }
 
-/* ====== STATO ====== */
-let santaX = canvas.width / 2;
-const santaY = 450;
-let items = [];
-let score = 0;
-let lives = 3;
-let speed = 2.2;
-let running = true;
+/* LOGICA OGGETTI */
+const items = document.querySelectorAll(".item");
+const counter = document.getElementById("counter");
+const totale = items.length;
+let trovati = 0;
 
-/* ====== HUD ====== */
-function updateLives(){
-  document.getElementById("lives").textContent = "❤️".repeat(lives);
-}
+counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
 
-/* ====== SPAWN OGGETTI ====== */
-function spawnItem(){
-  const type = Math.random() < 0.75 ? "gift" : "bomb";
-  items.push({
-    x: Math.random() * (canvas.width - 40) + 20,
-    y: -30,
-    type
-  });
-}
+items.forEach(i=>{
+  i.dataset.found="false";
+  i.addEventListener("click",()=>{
+    if(i.dataset.found==="true") return;
+    i.dataset.found="true";
+    trovati++;
+    i.style.background="rgba(0,255,0,0.35)";
+    counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
 
-setInterval(()=>{
-  if(running) spawnItem();
-},900);
-
-/* ====== DISEGNO BABBO (MIGLIORATO) ====== */
-function drawSanta(){
-  // corpo
-  ctx.fillStyle="#c62828";
-  ctx.fillRect(santaX-20, santaY, 40, 20);
-
-  // testa
-  ctx.fillStyle="#fff";
-  ctx.beginPath();
-  ctx.arc(santaX, santaY-15, 16, 0, Math.PI*2);
-  ctx.fill();
-
-  // cappello
-  ctx.fillStyle="#c62828";
-  ctx.beginPath();
-  ctx.moveTo(santaX-18, santaY-28);
-  ctx.lineTo(santaX+18, santaY-28);
-  ctx.lineTo(santaX, santaY-50);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle="#fff";
-  ctx.beginPath();
-  ctx.arc(santaX, santaY-50, 4, 0, Math.PI*2);
-  ctx.fill();
-}
-
-/* ====== DISEGNO OGGETTI ====== */
-function drawItems(){
-  items.forEach(i=>{
-    ctx.font="28px serif";
-    ctx.fillText(i.type==="gift" ? "🎁" : "💣", i.x, i.y);
-    i.y += speed;
-  });
-}
-
-/* ====== COLLISIONI ====== */
-function checkCollision(){
-  items.forEach(i=>{
-    if(Math.abs(i.x - santaX) < 28 && Math.abs(i.y - santaY) < 28){
-      if(i.type === "gift"){
-        score++;
-        document.getElementById("score").textContent = score;
-        playGiftSound();
-        i.y = canvas.height + 100;
-        if(score % 6 === 0) speed += 0.4;
-      }else{
-        lives--;
-        updateLives();
-        i.y = canvas.height + 100;
-        if(lives <= 0){
-          running = false;
-          document.getElementById("msg").textContent =
-            `💥 Game Over! Regali raccolti: ${score}`;
-        }
-      }
+    if(trovati === totale){
+      document.getElementById("msg").textContent =
+        "🎉 Bravo! Hai trovato tutti gli oggetti!";
     }
   });
-}
-
-/* ====== LOOP ====== */
-function loop(){
-  if(!running) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawSanta();
-  drawItems();
-  checkCollision();
-  requestAnimationFrame(loop);
-}
-
-/* ====== CONTROLLI ====== */
-window.addEventListener("keydown",e=>{
-  if(e.key==="ArrowLeft") santaX -= 30;
-  if(e.key==="ArrowRight") santaX += 30;
-  santaX = Math.max(25, Math.min(canvas.width-25, santaX));
 });
 
-canvas.addEventListener("touchstart",e=>{
-  const x = e.touches[0].clientX;
-  const rect = canvas.getBoundingClientRect();
-  santaX = x - rect.left;
+/* TRAPPOLA */
+document.getElementById("grinchTrap").addEventListener("click",()=>{
+  playUhOh();
+  document.getElementById("overlayError").style.display="flex";
 });
 
 /* START */
-updateLives();
-loop();
+function startGame(){
+  document.getElementById("startOverlay").style.display="none";
+}
+
+/* RESET */
+function restart(){
+  trovati = 0;
+  counter.textContent = `🔍 Oggetti trovati: 0 / ${totale}`;
+  items.forEach(i=>{
+    i.dataset.found="false";
+    i.style.background="transparent";
+  });
+  document.getElementById("msg").textContent="";
+  document.getElementById("overlayError").style.display="none";
+}
 </script>
 
 </body>
