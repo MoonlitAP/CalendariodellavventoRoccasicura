@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🎄 Giorno 20 – Roccasicura Run</title>
+<title>🎄 Giorno 20 – Catch the Gifts</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 body{
   margin:0;
-  background:#8fd3ff;
+  background:#7b0412;
   font-family:'Ubuntu',sans-serif;
   text-align:center;
+  color:white;
 }
 
 h1{
   margin:10px 0 4px;
-  color:#c62828;
+  color:#ffd700;
   font-size:1.4em;
 }
 
@@ -29,22 +30,22 @@ h1{
 }
 
 canvas{
+  background:#a5141c;
   border-radius:16px;
-  background:#8fd3ff;
   touch-action:manipulation;
 }
 
 #msg{
-  margin-top:6px;
+  margin-top:10px;
   font-size:1.1em;
-  color:#2e7d32;
+  color:#00ff99;
 }
 
 .btn-back{
   display:inline-block;
   margin:12px auto;
-  padding:10px 24px;
-  background:#fff;
+  padding:12px 28px;
+  background:#f3e4e4;
   color:black;
   border-radius:30px;
   font-weight:bold;
@@ -55,11 +56,11 @@ canvas{
 
 <body>
 
-<h1>🎄 Giorno 20 – Roccasicura Run</h1>
+<h1>🎄 Giorno 20 – Catch the Gifts</h1>
 
 <div id="hud">
   <div>🎁 <span id="score">0</span></div>
-  <div>🚦 Livello <span id="level">1</span></div>
+  <div id="lives">❤️❤️❤️</div>
 </div>
 
 <canvas id="game" width="360" height="520"></canvas>
@@ -69,160 +70,106 @@ canvas{
 <a href="../calendario.html" class="btn-back">← Calendario</a>
 
 <script>
-/* ====== ASSET ====== */
-const imgBabbo = new Image();
-imgBabbo.src = "img/babbo_sacco.png";
-
-const imgGift = new Image();
-imgGift.src = "img/gift.png";
-
-const imgOlaf = new Image();
-imgOlaf.src = "img/olaf.png";
-
-const imgSnow = new Image();
-imgSnow.src = "img/snow.png";
-
-/* ====== SETUP ====== */
-const nome = localStorage.getItem("utente") || "Ospite";
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let playerX = 100;
-let playerY = 330;
+/* ====== AUDIO (SENZA FILE) ====== */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playGiftSound(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "triangle";
+  osc.frequency.value = 880;
+  gain.gain.value = 0.15;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
 
-let speed = 2.5;
-let level = 1;
+/* ====== STATO ====== */
+let santaX = canvas.width / 2;
+const santaY = 450;
+let items = [];
 let score = 0;
+let lives = 3;
+let speed = 2.2;
 let running = true;
 
-let obstacles = [];
-let gifts = [];
-let snow = [];
-
-/* ====== NEVE ====== */
-function initSnow(){
-  snow.length = 0;
-  for(let i=0;i<35;i++){
-    snow.push({
-      x:Math.random()*canvas.width,
-      y:Math.random()*canvas.height,
-      s:1+Math.random()*2
-    });
-  }
+/* ====== HUD ====== */
+function updateLives(){
+  document.getElementById("lives").textContent = "❤️".repeat(lives);
 }
-initSnow();
 
-/* ====== BACKGROUND ====== */
-function drawBackground(){
-  ctx.fillStyle="#8fd3ff";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+/* ====== SPAWN OGGETTI ====== */
+function spawnItem(){
+  const type = Math.random() < 0.75 ? "gift" : "bomb";
+  items.push({
+    x: Math.random() * (canvas.width - 40) + 20,
+    y: -30,
+    type
+  });
+}
 
-  // collina
-  ctx.fillStyle="#f6d54a";
+setInterval(()=>{
+  if(running) spawnItem();
+},900);
+
+/* ====== DISEGNO BABBO (MIGLIORATO) ====== */
+function drawSanta(){
+  // corpo
+  ctx.fillStyle="#c62828";
+  ctx.fillRect(santaX-20, santaY, 40, 20);
+
+  // testa
+  ctx.fillStyle="#fff";
   ctx.beginPath();
-  ctx.moveTo(0,260);
-  ctx.quadraticCurveTo(180,230,360,300);
-  ctx.lineTo(360,520);
-  ctx.lineTo(0,520);
+  ctx.arc(santaX, santaY-15, 16, 0, Math.PI*2);
+  ctx.fill();
+
+  // cappello
+  ctx.fillStyle="#c62828";
+  ctx.beginPath();
+  ctx.moveTo(santaX-18, santaY-28);
+  ctx.lineTo(santaX+18, santaY-28);
+  ctx.lineTo(santaX, santaY-50);
   ctx.closePath();
   ctx.fill();
 
-  ctx.strokeStyle="#3aa655";
-  ctx.lineWidth=10;
-  ctx.stroke();
-}
-
-/* ====== NEVE ====== */
-function drawSnow(){
-  snow.forEach(f=>{
-    ctx.drawImage(imgSnow, f.x, f.y, 12, 12);
-    f.y += f.s;
-    if(f.y > canvas.height){
-      f.y = -10;
-      f.x = Math.random()*canvas.width;
-    }
-  });
-}
-
-/* ====== PLAYER ====== */
-function drawPlayer(){
-  ctx.drawImage(imgBabbo, playerX-24, playerY-36, 48, 72);
-}
-
-/* ====== SPAWN ====== */
-function spawnGift(){
-  gifts.push({
-    x: canvas.width + 20,
-    y: 260 + Math.random()*90
-  });
-}
-
-function spawnOlaf(){
-  obstacles.push({
-    x: canvas.width + 20,
-    y: 260 + Math.random()*90,
-    type: "olaf"
-  });
-}
-
-function spawnObstacle(){
-  obstacles.push({
-    x: canvas.width + 20,
-    y: 260 + Math.random()*90,
-    type: "rock"
-  });
+  ctx.fillStyle="#fff";
+  ctx.beginPath();
+  ctx.arc(santaX, santaY-50, 4, 0, Math.PI*2);
+  ctx.fill();
 }
 
 /* ====== DISEGNO OGGETTI ====== */
-function drawGifts(){
-  gifts.forEach(g=>{
-    ctx.drawImage(imgGift, g.x-16, g.y-16, 32, 32);
-    g.x -= speed;
-  });
-}
-
-function drawObstacles(){
-  obstacles.forEach(o=>{
-    if(o.type==="olaf"){
-      ctx.drawImage(imgOlaf, o.x-20, o.y-28, 40, 56);
-    }else{
-      ctx.fillStyle="#795548";
-      ctx.fillRect(o.x-14, o.y-14, 28, 28);
-    }
-    o.x -= speed;
+function drawItems(){
+  items.forEach(i=>{
+    ctx.font="28px serif";
+    ctx.fillText(i.type==="gift" ? "🎁" : "💣", i.x, i.y);
+    i.y += speed;
   });
 }
 
 /* ====== COLLISIONI ====== */
 function checkCollision(){
-
-  // 🎁 REGALI
-  gifts.forEach(g=>{
-    if(Math.abs(g.x-playerX)<30 && Math.abs(g.y-playerY)<30){
-      score++;
-      document.getElementById("score").textContent = score;
-      g.x = -100;
-
-      if(score % 5 === 0){
-        level++;
-        speed += 0.6;
-        document.getElementById("level").textContent = level;
-      }
-    }
-  });
-
-  // ⛔ OSTACOLI
-  obstacles.forEach(o=>{
-    if(Math.abs(o.x-playerX)<30 && Math.abs(o.y-playerY)<30){
-      if(o.type==="olaf"){
-        speed = Math.max(2, speed - 1);
-        snow.length = 0;
-        setTimeout(initSnow, 4000);
-        o.x = -100;
+  items.forEach(i=>{
+    if(Math.abs(i.x - santaX) < 28 && Math.abs(i.y - santaY) < 28){
+      if(i.type === "gift"){
+        score++;
+        document.getElementById("score").textContent = score;
+        playGiftSound();
+        i.y = canvas.height + 100;
+        if(score % 6 === 0) speed += 0.4;
       }else{
-        running = false;
-        document.getElementById("msg").textContent =
-          `💥 Game Over ${nome}! Regali raccolti: ${score}`;
+        lives--;
+        updateLives();
+        i.y = canvas.height + 100;
+        if(lives <= 0){
+          running = false;
+          document.getElementById("msg").textContent =
+            `💥 Game Over! Regali raccolti: ${score}`;
+        }
       }
     }
   });
@@ -232,33 +179,27 @@ function checkCollision(){
 function loop(){
   if(!running) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawBackground();
-  drawSnow();
-  drawGifts();
-  drawObstacles();
-  drawPlayer();
+  drawSanta();
+  drawItems();
   checkCollision();
   requestAnimationFrame(loop);
 }
 
 /* ====== CONTROLLI ====== */
 window.addEventListener("keydown",e=>{
-  if(e.key==="ArrowUp") playerY -= 30;
-  if(e.key==="ArrowDown") playerY += 30;
+  if(e.key==="ArrowLeft") santaX -= 30;
+  if(e.key==="ArrowRight") santaX += 30;
+  santaX = Math.max(25, Math.min(canvas.width-25, santaX));
 });
 
 canvas.addEventListener("touchstart",e=>{
-  const y = e.touches[0].clientY;
-  if(y < canvas.height/2) playerY -= 30;
-  else playerY += 30;
+  const x = e.touches[0].clientX;
+  const rect = canvas.getBoundingClientRect();
+  santaX = x - rect.left;
 });
 
-/* ====== TIMER SPAWN ====== */
-setInterval(()=>{ if(running) spawnGift(); }, 900);
-setInterval(()=>{ if(running && Math.random()<0.35) spawnOlaf(); }, 2200);
-setInterval(()=>{ if(running) spawnObstacle(); }, 1700);
-
 /* START */
+updateLives();
 loop();
 </script>
 
