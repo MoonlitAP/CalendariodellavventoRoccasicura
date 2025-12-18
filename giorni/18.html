@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 18 – Il Numero Preferito 🔢</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:linear-gradient(#fce4ec,#e8f5e9);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#game{
+  background:#fff;
+  width:95%;
+  max-width:420px;
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);
+  text-align:center;
+}
+
+h1{font-size:20px;margin:0 0 10px;}
+
+#top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+#target{
+  font-size:28px;
+  font-weight:700;
+  color:#d32f2f;
+}
+
+#score{
+  font-size:18px;
+}
+
+canvas{
+  background:#f9fbe7;
+  border-radius:18px;
+  display:block;
+  margin:12px auto;
+  touch-action:none;
+}
+
+#sum{
+  font-size:20px;
+  margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <h1>🎄 Giorno 18 – Il Numero Preferito 🔢</h1>
+
+  <div id="top">
+    <div>🎯 <span id="target">0</span></div>
+    <div>⭐ <span id="score">0</span></div>
+  </div>
+
+  <canvas id="canvas" width="330" height="330"></canvas>
+
+  <div id="sum">Somma: <b id="currentSum">0</b></div>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const cells=[];
+let selected=[];
+let target=0;
+let sum=0;
+let score=0;
+
+const size=3;
+const cellSize=110;
+
+startRound();
+
+/* NUOVO GIRO */
+function startRound(){
+  cells.length=0;
+  selected=[];
+  sum=0;
+  target=Math.floor(Math.random()*11)+10; // 10–20
+  document.getElementById("target").textContent=target;
+  document.getElementById("currentSum").textContent=sum;
+
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      cells.push({
+        x:x*cellSize,
+        y:y*cellSize,
+        v:Math.floor(Math.random()*9)+1
+      });
+    }
+  }
+  draw();
+}
+
+/* CLICK */
+canvas.addEventListener("pointerdown",e=>{
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  const y=e.clientY-r.top;
+
+  cells.forEach((c,i)=>{
+    if(x>c.x && x<c.x+cellSize && y>c.y && y<c.y+cellSize){
+      if(selected.includes(i)) return;
+
+      selected.push(i);
+      sum+=c.v;
+      document.getElementById("currentSum").textContent=sum;
+
+      if(sum===target){
+        score++;
+        document.getElementById("score").textContent=score;
+        setTimeout(startRound,600);
+      }else if(sum>target){
+        setTimeout(startRound,600);
+      }
+      draw();
+    }
+  });
+});
+
+/* DRAW */
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  cells.forEach((c,i)=>{
+    ctx.fillStyle=selected.includes(i)?"#aed581":"#fff";
+    ctx.strokeStyle="#8d6e63";
+    ctx.lineWidth=3;
+    ctx.fillRect(c.x,c.y,cellSize,cellSize);
+    ctx.strokeRect(c.x,c.y,cellSize,cellSize);
+
+    ctx.fillStyle="#000";
+    ctx.font="bold 32px Ubuntu";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(c.v,c.x+cellSize/2,c.y+cellSize/2);
+  });
+}
+</script>
+
+</body>
+</html>
