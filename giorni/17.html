@@ -45,7 +45,7 @@ canvas{
   touch-action:none;
 }
 
-/* MODAL */
+/* MODALS */
 .modal{
   position:absolute;
   inset:0;
@@ -90,7 +90,7 @@ canvas{
 
   <canvas id="canvas" width="330" height="330"></canvas>
 
-  <!-- MODAL START -->
+  <!-- START MODAL -->
   <div class="modal" id="startModal">
     <div class="modalContent">
       <h2>🎯 Come si gioca</h2>
@@ -105,15 +105,20 @@ canvas{
     </div>
   </div>
 
-  <!-- MODAL END -->
+  <!-- END MODAL -->
   <div class="modal" id="endModal" style="display:none;">
     <div class="modalContent">
-      <h2>🔺 Forma preferita</h2>
+      <h2 id="resultTitle">🏁 Fine partita</h2>
+
       <p>
-        <b>Con soli 9 punti si possono formare fino a 84 triangoli.</b><br>
-        Una forma piccola e semplice,<br>
-        ma fondamentale per costruire strutture solide e complesse.
+        🔺 <b>Spiegazione matematica</b><br><br>
+        Con 9 punti, in teoria si possono formare
+        \( \binom{9}{3} = 84 \) triangoli.<br><br>
+        🌲 In questo bosco però alcune linee sono vietate
+        (non si può saltare un albero).<br>
+        Per questo il massimo reale è <b>36 triangoli</b>.
       </p>
+
       <p>
         👤 <b id="fp">0</b> triangoli<br>
         🖥️ <b id="fc">0</b> triangoli
@@ -123,8 +128,8 @@ canvas{
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
 const trees=[
  {x:55,y:55},{x:165,y:55},{x:275,y:55},
@@ -141,7 +146,7 @@ let movesLeft=0;
 
 draw();
 
-/* START GAME */
+/* START */
 function startGame(){
   document.getElementById("startModal").style.display="none";
   turn="player";
@@ -176,7 +181,7 @@ canvas.addEventListener("pointerdown",e=>{
         selected=null;
         draw();
         if(movesLeft===0){
-          if(edges.size===36) return endGame();
+          if(isGameOver()) return endGame();
           turn="pc";
           updateUI();
           setTimeout(pcTurn,700);
@@ -209,14 +214,14 @@ function pcTurn(){
     free=getFreeEdges();
   }
 
-  if(edges.size===36) return endGame();
+  if(isGameOver()) return endGame();
   turn="player";
   rollDice();
   updateUI();
   draw();
 }
 
-/* BLOCCO LINEE (non saltare alberi) */
+/* BLOCCO LINEE */
 function isBlocked(a,b){
   const A=trees[a], B=trees[b];
   for(let c=0;c<trees.length;c++){
@@ -282,10 +287,19 @@ function checkTriangles(who){
   updateUI();
 }
 
-/* END */
+/* GAME OVER */
+function isGameOver(){
+  return getFreeEdges().length===0;
+}
 function endGame(){
   document.getElementById("fp").textContent=playerScore;
   document.getElementById("fc").textContent=pcScore;
+
+  const title=document.getElementById("resultTitle");
+  if(playerScore>pcScore) title.textContent="🏆 Hai vinto!";
+  else if(playerScore<pcScore) title.textContent="😅 Vince il PC";
+  else title.textContent="🤝 Pareggio";
+
   document.getElementById("endModal").style.display="flex";
 }
 
