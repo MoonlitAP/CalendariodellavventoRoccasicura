@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎄 Giorno 20 – Roccasicura Run</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  background:#0b2d20;
+  color:white;
+  font-family:'Ubuntu',sans-serif;
+  text-align:center;
+}
+
+h1{
+  margin:10px 0 4px;
+  color:#ffd700;
+  font-size:1.4em;
+}
+
+#hud{
+  display:flex;
+  justify-content:space-around;
+  margin-bottom:6px;
+  font-weight:bold;
+}
+
+canvas{
+  background:linear-gradient(#2e7d32,#1b5e20);
+  border-radius:12px;
+  touch-action:manipulation;
+}
+
+#msg{
+  margin-top:8px;
+  font-size:1.1em;
+  color:#00ff99;
+}
+
+.btn-back{
+  display:inline-block;
+  margin:12px auto;
+  padding:10px 24px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+.leaderboard{
+  margin-top:10px;
+  background:rgba(255,255,255,.15);
+  padding:10px;
+  border-radius:12px;
+  display:none;
+}
+
+.leaderboard h3{margin-top:0}
+table{width:100%;border-collapse:collapse}
+td,th{padding:6px;border-bottom:1px solid #ffd700}
+</style>
+</head>
+
+<body>
+
+<h1>🎄 Giorno 20 – Roccasicura Run</h1>
+
+<div id="hud">
+  <div>⭐ <span id="score">0</span></div>
+  <div>🚦 Livello <span id="level">1</span></div>
+</div>
+
+<canvas id="game" width="360" height="520"></canvas>
+
+<div id="msg"></div>
+
+<div class="leaderboard" id="leaderboard">
+  <h3>🏆 Classifica</h3>
+  <table id="scoreTable">
+    <tr><th>Nome</th><th>Punti</th></tr>
+  </table>
+</div>
+
+<a href="../calendario.html" class="btn-back">← Calendario</a>
+
+<script>
+/* DATI BASE */
+const nome = localStorage.getItem("utente") || "Ospite";
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const lanesX = [90, 180, 270];
+let lane = 1;
+let yPlayer = 420;
+
+let speed = 3;
+let level = 1;
+let score = 0;
+let running = true;
+
+const obstacles = [];
+const snowflakes = [];
+
+/* NEVE */
+for(let i=0;i<40;i++){
+  snowflakes.push({
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    s:1+Math.random()*2
+  });
+}
+
+function drawSnow(){
+  ctx.fillStyle="white";
+  snowflakes.forEach(f=>{
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.s,0,Math.PI*2);
+    ctx.fill();
+    f.y += f.s;
+    if(f.y>canvas.height){f.y=0;f.x=Math.random()*canvas.width;}
+  });
+}
+
+/* STRADA */
+function drawRoad(){
+  ctx.fillStyle="#555";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.strokeStyle="#fff";
+  ctx.setLineDash([12,12]);
+  ctx.beginPath();
+  ctx.moveTo(120,0); ctx.lineTo(120,canvas.height);
+  ctx.moveTo(240,0); ctx.lineTo(240,canvas.height);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+/* PLAYER */
+function drawPlayer(){
+  ctx.font="34px serif";
+  ctx.fillText("🎅", lanesX[lane]-16, yPlayer);
+}
+
+/* OSTACOLI */
+const obstacleTypes = ["🏠","🌲","⛪","🚧","⭐"];
+
+function spawnObstacle(){
+  const type = obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)];
+  obstacles.push({
+    x: lanesX[Math.floor(Math.random()*3)],
+    y: -40,
+    type
+  });
+}
+
+function updateObstacles(){
+  obstacles.forEach(o=>o.y+=speed);
+}
+
+function drawObstacles(){
+  ctx.font="30px serif";
+  obstacles.forEach(o=>{
+    ctx.fillText(o.type, o.x-14, o.y);
+  });
+}
+
+/* COLLISIONI */
+function checkCollision(){
+  obstacles.forEach(o=>{
+    if(Math.abs(o.y - yPlayer) < 26 && o.x === lanesX[lane]){
+      if(o.type === "⭐"){
+        score++;
+        document.getElementById("score").textContent = score;
+        o.y = canvas.height + 100;
+
+        if(score % 5 === 0){
+          speed++;
+          level++;
+          document.getElementById("level").textContent = level;
+        }
+      }else{
+        running=false;
+        endGame();
+      }
+    }
+  });
+}
+
+/* LOOP */
+function gameLoop(){
+  if(!running) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawRoad();
+  drawSnow();
+  drawPlayer();
+  drawObstacles();
+  updateObstacles();
+  checkCollision();
+  requestAnimationFrame(gameLoop);
+}
+
+setInterval(()=>{
+  if(running) spawnObstacle();
+},1100);
+
+/* CONTROLLI */
+window.addEventListener("keydown",e=>{
+  if(e.key==="ArrowLeft" && lane>0) lane--;
+  if(e.key==="ArrowRight" && lane<2) lane++;
+});
+
+canvas.addEventListener("touchstart",e=>{
+  const x = e.touches[0].clientX;
+  const rect = canvas.getBoundingClientRect();
+  const rel = x - rect.left;
+
+  if(rel < canvas.width/3) lane=0;
+  else if(rel < canvas.width*2/3) lane=1;
+  else lane=2;
+});
+
+/* FINE GIOCO + CLASSIFICA */
+function endGame(){
+  document.getElementById("msg").textContent =
+    `💥 Game Over ${nome}! Punteggio: ${score}`;
+  saveScore();
+  showLeaderboard();
+}
+
+function saveScore(){
+  const key="rcc_run_scores";
+  const list=JSON.parse(localStorage.getItem(key))||[];
+  list.push({nome,score});
+  list.sort((a,b)=>b.score-a.score);
+  localStorage.setItem(key,JSON.stringify(list.slice(0,10)));
+}
+
+function showLeaderboard(){
+  const table=document.getElementById("scoreTable");
+  table.innerHTML="<tr><th>Nome</th><th>Punti</th></tr>";
+  const list=JSON.parse(localStorage.getItem("rcc_run_scores"))||[];
+  list.forEach(s=>{
+    table.innerHTML+=`<tr><td>${s.nome}</td><td>${s.score}</td></tr>`;
+  });
+  document.getElementById("leaderboard").style.display="block";
+}
+
+/* START */
+gameLoop();
+</script>
+
+</body>
+</html>
