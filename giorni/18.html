@@ -113,11 +113,12 @@ canvas{
     <div class="modalContent">
       <h2>🎯 Come si gioca</h2>
       <p>
-        Scegli alcuni numeri dal tabellone.<br>
+        Tocca i numeri nel tabellone.<br>
         ➕ La loro somma deve essere uguale<br>
         al <b>Numero Preferito</b>.<br><br>
-        ✅ Somma giusta = ⭐ punto<br>
-        🔁 Dopo ogni sfida il gioco riparte<br><br>
+        🔁 Puoi toccare di nuovo un numero<br>
+        per toglierlo dalla somma.<br><br>
+        ⭐ Somma giusta = 1 punto<br>
         🏁 Dopo <b>10 sfide</b> il gioco termina
       </p>
       <button onclick="startGame()">✨ Inizia</button>
@@ -127,14 +128,8 @@ canvas{
   <!-- END MODAL -->
   <div class="modal" id="endModal" style="display:none;">
     <div class="modalContent">
-      <h2>🏆 Hai vinto!</h2>
-      <p>
-        Hai risolto <b>10 su 10</b> Numeri Preferiti ⭐<br><br>
-        Anche una semplice addizione<br>
-        può avere molte soluzioni.<br>
-        In matematica conta il percorso,<br>
-        non solo il risultato.
-      </p>
+      <h2 id="endTitle">🏁 Fine gioco</h2>
+      <p id="endText"></p>
     </div>
   </div>
 </div>
@@ -162,7 +157,7 @@ function startGame(){
 /* ROUND */
 function startRound(){
   if(round === 10){
-    document.getElementById("endModal").style.display="flex";
+    showEnd();
     return;
   }
 
@@ -187,7 +182,7 @@ function startRound(){
   draw();
 }
 
-/* CLICK */
+/* CLICK – toggle selezione */
 canvas.addEventListener("pointerdown",e=>{
   const r=canvas.getBoundingClientRect();
   const x=e.clientX-r.left;
@@ -195,10 +190,15 @@ canvas.addEventListener("pointerdown",e=>{
 
   cells.forEach((c,i)=>{
     if(x>c.x && x<c.x+cellSize && y>c.y && y<c.y+cellSize){
-      if(selected.includes(i)) return;
 
-      selected.push(i);
-      sum+=c.v;
+      if(selected.includes(i)){
+        selected = selected.filter(n => n !== i);
+        sum -= c.v;
+      }else{
+        selected.push(i);
+        sum += c.v;
+      }
+
       document.getElementById("currentSum").textContent=sum;
 
       if(sum === target){
@@ -209,13 +209,39 @@ canvas.addEventListener("pointerdown",e=>{
           document.getElementById("game").classList.remove("success");
           startRound();
         },600);
-      }else if(sum > target){
-        setTimeout(startRound,600);
       }
+
       draw();
     }
   });
 });
+
+/* END GAME */
+function showEnd(){
+  const title = document.getElementById("endTitle");
+  const text = document.getElementById("endText");
+  const modal = document.getElementById("endModal");
+
+  if(score === 10){
+    title.textContent = "🏆 Hai vinto!";
+    text.innerHTML = `
+      Hai risolto <b>10 su 10</b> Numeri Preferiti ⭐<br><br>
+      Anche una semplice addizione<br>
+      può avere molte soluzioni.<br>
+      In matematica conta il percorso,<br>
+      non solo il risultato.
+    `;
+  }else{
+    title.textContent = "✨ Ci sei quasi!";
+    text.innerHTML = `
+      Hai risolto <b>${score} su 10</b> sfide ⭐<br><br>
+      Riprova: ogni tentativo<br>
+      allena la mente e migliora la strategia.
+    `;
+  }
+
+  modal.style.display="flex";
+}
 
 /* DRAW */
 function draw(){
