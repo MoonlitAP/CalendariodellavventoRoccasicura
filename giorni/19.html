@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎄 Giorno 19 – Trova le parole di Natale</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  padding:16px;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
+  touch-action:manipulation;
+}
+
+h1{color:#ffd700;font-size:1.4em;margin-bottom:6px}
+p{margin:6px 0}
+.timer{color:#ffd54f;font-size:1.1em;margin-bottom:12px}
+
+/* 📱 GRIGLIA MOBILE */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(12, 1fr);
+  gap:4px;
+  max-width:360px;
+  margin:0 auto;
+}
+
+.cell{
+  aspect-ratio:1/1;
+  background:#fff8e1;
+  color:#000;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  font-size:1em;
+  user-select:none;
+}
+
+.cell.highlight{background:#ffd54f}
+.cell.found{background:#00bfff;color:white}
+
+/* 📱 PAROLE */
+.word-list{
+  margin-top:16px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+}
+
+.word{
+  font-size:.85em;
+  padding:6px 12px;
+  border-radius:20px;
+  background:rgba(255,255,255,.15);
+  border:1px solid #f5d97c;
+}
+
+.word.found{
+  text-decoration:line-through;
+  opacity:.6;
+  background:rgba(0,191,255,.3);
+}
+
+/* FINE */
+.completed{
+  margin-top:16px;
+  color:#00ff99;
+  font-size:1.1em;
+}
+
+.leaderboard{
+  margin-top:20px;
+  background:rgba(255,255,255,.1);
+  padding:10px;
+  border-radius:10px;
+  display:none;
+}
+
+table{width:100%;border-collapse:collapse}
+td,th{padding:6px;border-bottom:1px solid #f5d97c;font-size:.9em}
+
+.btn-back{
+  display:inline-block;
+  margin-top:20px;
+  padding:12px 26px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:700;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎄 Giorno 19 – Trova le parole</h1>
+<p>🎅 Buona fortuna, <span id="nome"></span></p>
+<div class="timer" id="timer">⏱ Tempo: 0s</div>
+
+<div class="grid" id="grid"></div>
+<div class="word-list" id="word-list"></div>
+
+<div id="messaggio" class="completed"></div>
+
+<div class="leaderboard" id="leaderboard">
+  <h3>🏆 Classifica</h3>
+  <table id="score-table">
+    <tr><th>Nome</th><th>Tempo</th></tr>
+  </table>
+</div>
+
+<a href="../calendario.html" class="btn-back">⬅ Calendario</a>
+
+<script>
+const nome = localStorage.getItem("utente") || "Ospite";
+document.getElementById("nome").textContent = nome;
+
+const parole=[
+"ROCCASICURA","NATALE","FAMIGLIA","REGALO","BABBO",
+"NEVE","LUCE","STELLA","ALBERO","AMICIZIA",
+"COMUNITA","PRESEPE","INVERNO","CANTO","BAMBINO"
+];
+
+const words = parole.sort(()=>Math.random()-0.5).slice(0,10);
+const size=12;
+const grid=[...Array(size)].map(()=>Array(size).fill(""));
+
+words.forEach(w=>{
+  let ok=false;
+  while(!ok){
+    let r=Math.floor(Math.random()*size);
+    let c=Math.floor(Math.random()*size);
+    let h=Math.random()<.5;
+    if(h && c+w.length<=size && grid[r].slice(c,c+w.length).every(x=>!x)){
+      [...w].forEach((l,i)=>grid[r][c+i]=l); ok=true;
+    }
+    if(!h && r+w.length<=size && grid.slice(r,r+w.length).every(x=>!x[c])){
+      [...w].forEach((l,i)=>grid[r+i][c]=l); ok=true;
+    }
+  }
+});
+
+const ABC="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+grid.forEach((row,r)=>row.forEach((c,i)=>{if(!c)grid[r][i]=ABC[Math.floor(Math.random()*26)]}));
+
+const gridEl=document.getElementById("grid");
+grid.flat().forEach(l=>{
+  const d=document.createElement("div");
+  d.className="cell";
+  d.textContent=l;
+  gridEl.appendChild(d);
+});
+
+const list=document.getElementById("word-list");
+words.forEach(w=>{
+  const s=document.createElement("div");
+  s.className="word";
+  s.textContent=w;
+  list.appendChild(s);
+});
+
+let time=0;
+const t=setInterval(()=>{time++;timer.textContent=`⏱ Tempo: ${time}s`},1000);
+
+let selecting=false, sel=[];
+
+gridEl.addEventListener("pointerdown",e=>{
+  if(!e.target.classList.contains("cell"))return;
+  selecting=true; sel=[e.target];
+  e.target.classList.add("highlight");
+});
+
+gridEl.addEventListener("pointermove",e=>{
+  if(!selecting||!e.target.classList.contains("cell"))return;
+  if(!sel.includes(e.target)){
+    sel.push(e.target);
+    e.target.classList.add("highlight");
+  }
+});
+
+window.addEventListener("pointerup",()=>{
+  if(!selecting)return;
+  selecting=false;
+  const w=sel.map(x=>x.textContent).join("");
+  const r=w.split("").reverse().join("");
+  const f=words.find(x=>x===w||x===r);
+  if(f){
+    sel.forEach(c=>c.classList.add("found"));
+    document.querySelectorAll(".word").forEach(x=>x.textContent===f&&x.classList.add("found"));
+  }else sel.forEach(c=>c.classList.remove("highlight"));
+  if(document.querySelectorAll(".word.found").length===words.length){
+    clearInterval(t);
+    messaggio.textContent=`🎉 Bravo ${nome}! ${time}s`;
+  }
+});
+</script>
+
+</body>
+</html>
