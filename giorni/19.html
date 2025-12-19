@@ -15,7 +15,7 @@ body{
   background:#7b0412;
   color:white;
   text-align:center;
-  touch-action:manipulation;
+  touch-action:none; /* 🔴 FONDAMENTALE PER MOBILE */
 }
 
 h1{color:#ffd700;font-size:1.4em;margin-bottom:4px}
@@ -165,6 +165,7 @@ p{margin:4px 0}
 </div>
 
 <script>
+/* Nome */
 const nome = localStorage.getItem("utente") || "Ospite";
 document.getElementById("nome").textContent = nome;
 
@@ -213,23 +214,37 @@ grid.flat().forEach(l=>{
 
 /* Timer */
 let time=0;
+const timer=document.getElementById("timer");
 const t=setInterval(()=>{time++;timer.textContent=`⏱ Tempo: ${time}s`},1000);
 
-/* Selezione */
-let selecting=false, selected=[];
+/* ===== SELEZIONE TOUCH-FRIENDLY ===== */
+let selecting=false;
+let selected=[];
+
+function getCellFromPoint(x,y){
+  const el=document.elementFromPoint(x,y);
+  if(el && el.classList.contains("cell")) return el;
+  return null;
+}
 
 gridEl.addEventListener("pointerdown",e=>{
-  if(!e.target.classList.contains("cell")||e.target.classList.contains("found"))return;
+  const cell=getCellFromPoint(e.clientX,e.clientY);
+  if(!cell||cell.classList.contains("found"))return;
+
   selecting=true;
-  selected=[e.target];
-  e.target.classList.add("highlight");
+  selected=[cell];
+  cell.classList.add("highlight");
 });
 
 gridEl.addEventListener("pointermove",e=>{
-  if(!selecting||!e.target.classList.contains("cell")||e.target.classList.contains("found"))return;
-  if(!selected.includes(e.target)){
-    selected.push(e.target);
-    e.target.classList.add("highlight");
+  if(!selecting)return;
+
+  const cell=getCellFromPoint(e.clientX,e.clientY);
+  if(!cell||cell.classList.contains("found"))return;
+
+  if(!selected.includes(cell)){
+    selected.push(cell);
+    cell.classList.add("highlight");
   }
 });
 
@@ -245,17 +260,18 @@ window.addEventListener("pointerup",()=>{
     selected.forEach(c=>{
       c.classList.remove("highlight");
       c.classList.add("found");
-      c.dataset.word = found; // ⭐ IMPORTANTISSIMO
+      c.dataset.word=found;
     });
   }else{
     selected.forEach(c=>c.classList.remove("highlight"));
   }
 
-  if(document.querySelectorAll(".cell.found").length){
-    if(words.every(w=>document.querySelector(`.cell.found[data-word="${w}"]`))){
-      clearInterval(t);
-      messaggio.textContent=`🎉 Complimenti ${nome}! Hai completato in ${time}s`;
-    }
+  selected=[];
+
+  if(words.every(w=>document.querySelector(`.cell.found[data-word="${w}"]`))){
+    clearInterval(t);
+    document.getElementById("messaggio").textContent =
+      `🎉 Complimenti ${nome}! Hai completato in ${time}s`;
   }
 });
 
@@ -269,7 +285,7 @@ document.getElementById("btnParole").onclick=()=>{
 
   words.forEach(w=>{
     const ok=document.querySelector(`.cell.found[data-word="${w}"]`);
-    if(ok) trovate++;
+    if(ok)trovate++;
     const div=document.createElement("div");
     div.className="word-modal "+(ok?"word-ok":"word-no");
     div.textContent=w;
