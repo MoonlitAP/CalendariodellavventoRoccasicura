@@ -15,33 +15,16 @@ body{
   color:white;
   text-align:center;
 }
+h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
+#counter{margin:6px 0;font-weight:bold;color:#ffd700;}
+#list{font-size:0.95em;margin-bottom:10px;}
 
-h1{
-  color:#ffd700;
-  margin:10px 0 4px;
-  font-size:1.4em;
-}
-
-#counter{
-  margin:6px 0;
-  font-weight:bold;
-  color:#ffd700;
-}
-
-#list{
-  font-size:0.95em;
-  margin-bottom:10px;
-  opacity:0.95;
-}
-
-/* CONTENITORE IMMAGINE */
 #game{
   position:relative;
   max-width:380px;
   margin:0 auto;
   touch-action:manipulation;
 }
-
 #game img{
   width:100%;
   display:block;
@@ -49,103 +32,54 @@ h1{
   pointer-events:none;
 }
 
-/* HOTSPOT */
-.item, #grinchTrap{
+.item,#grinchTrap{
   position:absolute;
-  width:44px;
-  height:44px;
+  width:44px;height:44px;
   border-radius:50%;
-  transform:translate(-50%, -50%);
+  transform:translate(-50%,-50%);
 }
-
 .item.found{
-  background:rgba(0,255,0,0.18);
+  background:rgba(0,255,0,.2);
   border:2px solid #00ff99;
-  box-shadow:0 0 7px rgba(0,255,153,0.95);
+  box-shadow:0 0 6px #00ff99;
 }
+#grinchTrap{width:70px;height:70px;border-radius:18px;}
 
-/* TRAPPOLA INVISIBILE */
-#grinchTrap{
-  width:70px;
-  height:70px;
-  border-radius:18px;
-  background:transparent;
-}
-
-/* OVERLAY */
 .overlay{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:rgba(0,0,0,.7);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   z-index:20;
 }
-
 .overlayBox{
-  background:white;
-  color:#7b0412;
-  padding:20px;
-  border-radius:16px;
-  max-width:320px;
-  text-align:center;
+  background:white;color:#7b0412;
+  padding:20px;border-radius:16px;
+  max-width:320px;text-align:center;
 }
-
-.overlayBox img{
-  width:100%;
-  border-radius:12px;
-}
-
+.overlayBox img{width:100%;border-radius:12px;}
 .overlayBox button{
-  margin-top:12px;
-  padding:10px 22px;
-  border:none;
-  border-radius:20px;
-  background:#7b0412;
-  color:white;
-  font-weight:bold;
+  margin-top:12px;padding:10px 22px;
+  border:none;border-radius:20px;
+  background:#7b0412;color:white;font-weight:bold;
 }
-
-.hidden{
-  display:none !important;
-}
-
-#msg{
-  margin:10px;
-  color:#00ff99;
-  font-size:1.1em;
-}
-
+.hidden{display:none!important;}
+#msg{margin:10px;color:#00ff99;font-size:1.1em;}
 .btn-back{
-  display:inline-block;
-  margin:14px auto 18px;
-  padding:12px 28px;
-  background:#f3e4e4;
-  color:black;
-  border-radius:30px;
-  font-weight:bold;
-  text-decoration:none;
+  display:inline-block;margin:14px auto 18px;
+  padding:12px 28px;background:#f3e4e4;
+  color:black;border-radius:30px;
+  font-weight:bold;text-decoration:none;
 }
-
-html, body, #game{
-  touch-action:manipulation;
-}
+html,body,#game{touch-action:manipulation;}
 </style>
 </head>
 
 <body>
 
-<!-- OVERLAY INIZIALE -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
     <h2>🎄 Giorno 20</h2>
-    <p>
-      🔍 Trova tutti gli oggetti nascosti nell’immagine.<br><br>
-      🤏 Puoi ingrandire con due dita.<br><br>
-      ⚠️ Attento! Se tocchi il punto sbagliato,<br>
-      dovrai <b>riprovarci</b>.
-    </p>
+    <p>🔍 Trova tutti gli oggetti nell’immagine.<br>🤏 Zoom con due dita.<br>⚠️ Attento ai tocchi sbagliati.</p>
     <button id="startBtn">Inizia</button>
   </div>
 </div>
@@ -155,123 +89,75 @@ html, body, #game{
 <div id="list">🛎️ 🐦 ❤️ 🏐 🎺 🧦 🍪 💡 ⭐ 🕯️</div>
 
 <div id="game">
-  <img src="img/disegno.jpg" alt="Disegno Natale">
+  <img src="img/disegno.jpg">
 
-  <!-- HOTSPOT DEFINITIVI -->
-  <div class="item" data-name="campanella" style="top:86%; left:46%;"></div> <!-- 🛎️ -->
-  <div class="item" data-name="uccellino"  style="top:63%; left:14%;"></div> <!-- 🐦 -->
-  <div class="item" data-name="cuore"       style="top:52%; left:30%;"></div> <!-- ❤️ -->
-  <div class="item" data-name="pallina"     style="top:50%; left:58%;"></div> <!-- 🏐 -->
-  <div class="item" data-name="trombetta"   style="top:28%; left:58%;"></div> <!-- 🎺 -->
-  <div class="item" data-name="calza"       style="top:36%; left:18%;"></div> <!-- 🧦 -->
-  <div class="item" data-name="biscotto"    style="top:43%; left:84%;"></div> <!-- 🍪 -->
-  <div class="item" data-name="lampadina"   style="top:17%; left:77%;"></div> <!-- 💡 -->
-  <div class="item" data-name="stella"      style="top:22%; left:86%;"></div> <!-- ⭐ -->
-  <div class="item" data-name="candela"     style="top:14%; left:92%;"></div> <!-- 🕯️ -->
+  <div class="item" style="top:86%;left:46%;"></div>
+  <div class="item" style="top:63%;left:14%;"></div>
+  <div class="item" style="top:52%;left:30%;"></div>
+  <div class="item" style="top:50%;left:58%;"></div>
+  <div class="item" style="top:28%;left:58%;"></div>
+  <div class="item" style="top:36%;left:18%;"></div>
+  <div class="item" style="top:43%;left:84%;"></div>
+  <div class="item" style="top:17%;left:77%;"></div>
+  <div class="item" style="top:22%;left:86%;"></div>
+  <div class="item" style="top:14%;left:92%;"></div>
 
-  <!-- TRAPPOLA -->
-  <div id="grinchTrap" style="top:41%; left:38%;"></div>
+  <div id="grinchTrap" style="top:41%;left:38%;"></div>
 </div>
 
 <div id="msg"></div>
-
 <a href="../calendario.html" class="btn-back">← Calendario</a>
 
-<!-- OVERLAY ERRORE -->
 <div id="overlayError" class="overlay hidden">
   <div class="overlayBox">
-    <img src="img/cami.png" alt="Attento">
-    <p>
-      <b>ATTENTO!</b><br>
-      Il Grinch sta rubando gli oggetti…<br>
-      <b>Riprova!</b>
-    </p>
+    <img src="img/cami.png">
+    <p><b>ATTENTO!</b><br>Riprova!</p>
     <button id="retryBtn">Riprova</button>
   </div>
 </div>
 
 <script>
-/* BLOCCO DOPPIO TAP */
-let lastTap = 0;
-document.addEventListener("touchend", e=>{
-  const now = Date.now();
-  if(now - lastTap < 300) e.preventDefault();
-  lastTap = now;
-},{passive:false});
+const counter=document.getElementById("counter");
+const items=document.querySelectorAll(".item");
+const totale=items.length;
+let trovati=0;
 
-/* AUDIO “UH-OH” */
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playUhOh(){
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = "sawtooth";
-  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.4);
-  gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.4);
+function updateCounter(){
+  counter.textContent=`🔍 Oggetti trovati: ${trovati} / ${totale}`;
 }
 
-/* TAP UNIFICATO */
-function bindTap(el, fn){
-  el.addEventListener("touchstart", e=>{
-    e.preventDefault();
-    fn();
-  },{passive:false});
-  el.addEventListener("click", e=>{
-    e.preventDefault();
-    fn();
-  });
+function bindTap(el,fn){
+  el.addEventListener("touchstart",e=>{e.preventDefault();fn();},{passive:false});
+  el.addEventListener("click",e=>{e.preventDefault();fn();});
 }
 
-const startOverlay = document.getElementById("startOverlay");
-const overlayError = document.getElementById("overlayError");
-const counter = document.getElementById("counter");
-const msg = document.getElementById("msg");
-const items = document.querySelectorAll(".item");
-const totale = items.length;
-
-let trovati = 0;
-
-function startGame(){
-  startOverlay.classList.add("hidden");
-}
-
-function showError(){
-  playUhOh();
-  overlayError.classList.remove("hidden");
-}
-
-function restart(){
-  trovati = 0;
-  counter.textContent = `🔍 Oggetti trovati: 0 / ${totale}`;
-  msg.textContent = "";
-  items.forEach(i=>{
-    i.dataset.found = "false";
-    i.classList.remove("found");
-  });
-  overlayError.classList.add("hidden");
-}
-
-bindTap(document.getElementById("startBtn"), startGame);
-bindTap(document.getElementById("retryBtn"), restart);
-bindTap(document.getElementById("grinchTrap"), showError);
+bindTap(document.getElementById("startBtn"),()=>{
+  document.getElementById("startOverlay").classList.add("hidden");
+});
 
 items.forEach(i=>{
-  i.dataset.found = "false";
-  bindTap(i, ()=>{
-    if(i.dataset.found === "true") return;
-    i.dataset.found = "true";
+  i.dataset.found="false";
+  bindTap(i,()=>{
+    if(i.dataset.found==="true")return;
+    i.dataset.found="true";
     i.classList.add("found");
     trovati++;
-    counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
-    if(trovati === totale){
-      msg.textContent = "🎉 Bravo! Hai trovato tutti gli oggetti!";
+    updateCounter();
+    if(trovati===totale){
+      document.getElementById("msg").textContent="🎉 Bravo! Hai trovato tutto!";
     }
   });
+});
+
+bindTap(document.getElementById("grinchTrap"),()=>{
+  document.getElementById("overlayError").classList.remove("hidden");
+});
+
+bindTap(document.getElementById("retryBtn"),()=>{
+  trovati=0;updateCounter();
+  document.getElementById("msg").textContent="";
+  items.forEach(i=>{i.dataset.found="false";i.classList.remove("found");});
+  document.getElementById("overlayError").classList.add("hidden");
 });
 </script>
 
