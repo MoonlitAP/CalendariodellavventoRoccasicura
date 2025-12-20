@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 24 – Coding Lab</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
+}
+
+/* TITOLO */
+h1{
+  color:#ffd700;
+  margin:16px 0 8px;
+  font-size:1.6em;
+}
+
+/* CONTENITORE */
+#canvasBox{
+  max-width:420px;
+  margin:0 auto;
+  padding:16px;
+}
+
+/* CARD */
+#gameCard{
+  background:#fff;
+  color:#7b0412;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+
+/* AREA TESTO */
+#fakeCanvas{
+  background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+  border-radius:14px;
+  padding:26px 18px;
+  margin-bottom:18px;
+}
+
+#fakeCanvas h2{
+  margin:0 0 10px;
+  color:#0d47a1;
+}
+
+#fakeCanvas p{
+  font-size:0.95em;
+  line-height:1.5;
+}
+
+/* BOTTONE */
+#startBtn{
+  margin-top:14px;
+  padding:14px 32px;
+  font-size:1.05em;
+  font-weight:bold;
+  border:none;
+  border-radius:30px;
+  background:#1e88e5;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(0,0,0,.3);
+}
+
+#startBtn:hover{
+  background:#1565c0;
+  transform:scale(1.03);
+}
+
+/* TESTO FINALE */
+#finalMsg{
+  margin-top:14px;
+  font-size:0.9em;
+  opacity:.95;
+}
+
+/* BACK */
+.btn-back{
+  display:inline-block;
+  margin:18px auto 22px;
+  padding:12px 26px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:bold;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎄 Giorno 24 – Coding Lab</h1>
+
+<div id="canvasBox">
+  <div id="gameCard">
+
+    <div id="fakeCanvas">
+      <h2>💻 Giocare… programmando</h2>
+      <p>
+        Sono informatica e se c’è una cosa che posso dirti è questa:<br>
+        <b>il modo migliore per entrare nel mondo del coding è giocare.</b><br><br>
+
+        Se ti piace creare, provare, sbagliare e riprovare,<br>
+        allora sei nel posto giusto.<br>
+        Qui puoi divertirti programmando… proprio come con <b>Scratch</b> 🎄✨
+      </p>
+
+      <button id="startBtn" onclick="openGame()">🚀 PROVA IL CODELAB</button>
+    </div>
+
+    <div id="finalMsg">
+      <p>
+        Non serve essere esperti.<br>
+        Serve solo curiosità… e voglia di divertirsi 😉
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<a href="../calendario.html" class="btn-back">← Calendario</a>
+
+<script>
+function openGame(){
+  window.open(
+    "https://santatracker.google.com/intl/it/codelab.html",
+    "_blank"
+  );
+}
+</script>
+
+</body>
+</html>
