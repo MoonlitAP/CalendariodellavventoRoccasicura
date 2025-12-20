@@ -35,12 +35,12 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
 /* HITBOX */
 .item{
   position:absolute;
-  width:26px;
-  height:30px;
-  border-radius:10px;
+  width:22px;
+  height:24px;
+  border-radius:8px;
   transform:translate(-50%,-50%);
+  z-index:5;
 }
-
 .item.found{
   background:rgba(0,255,0,.25);
   border:2px solid #00ff99;
@@ -54,6 +54,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   height:60px;
   border-radius:16px;
   transform:translate(-50%,-50%);
+  z-index:2;
 }
 
 /* OVERLAY */
@@ -73,10 +74,6 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   border-radius:16px;
   max-width:320px;
   text-align:center;
-}
-.overlayBox img{
-  width:100%;
-  border-radius:12px;
 }
 .overlayBox button{
   margin-top:12px;
@@ -112,7 +109,7 @@ html,body,#game{touch-action:manipulation;}
 
 <body>
 
-<!-- OVERLAY INIZIO -->
+<!-- OVERLAY START -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
     <h2>🎄 Giorno 20</h2>
@@ -130,48 +127,46 @@ html,body,#game{touch-action:manipulation;}
 <div id="list">🛎️ 🐦 ❤️ 🏐 🎺 🧦 🍪 💡 ⭐ 🕯️</div>
 
 <div id="game">
-  <img src="img/disegno.jpg" alt="Trova gli oggetti">
+  <img src="img/disegno.jpg" alt="Sleepy Santa">
 
-  <!-- OGGETTI NORMALI -->
-  <div class="item cuore" style="top:53%;left:31%;"></div>
-  <div class="item orso" style="top:51%;left:57%;"></div>
-  <div class="item candela" style="top:37%;left:17%;"></div>
-  <div class="item luce" style="top:23%;left:86%;"></div>
-  <div class="item stella" style="top:15%;left:92%;"></div>
+  <!-- 🛎️ I6 -->
+  <div class="item campana" style="top:85%;left:55%;"></div>
 
-  <!-- OGGETTI GIALLI (MULTI HITBOX) -->
+  <!-- 🐦 G1–G2 -->
+  <div class="item uccello" style="top:65%;left:5%;"></div>
 
-  <!-- guanti -->
-  <div class="item guanti" style="top:86%;left:43%;"></div>
-  <div class="item guanti" style="top:88%;left:48%;"></div>
+  <!-- ❤️ F4 -->
+  <div class="item cuore" style="top:55%;left:35%;"></div>
 
-  <!-- oggetto lungo sinistra -->
-  <div class="item oggettoL" style="top:55%;left:12%;"></div>
-  <div class="item oggettoL" style="top:60%;left:14%;"></div>
-  <div class="item oggettoL" style="top:65%;left:16%;"></div>
+  <!-- 🏐 E6–F6 -->
+  <div class="item palla" style="top:55%;left:55%;"></div>
 
-  <!-- calza / sciarpa destra -->
-  <div class="item calza" style="top:40%;left:78%;"></div>
-  <div class="item calza" style="top:45%;left:82%;"></div>
+  <!-- 🎺 D7–D8–D9 -->
+  <div class="item tromba" style="top:45%;left:75%;"></div>
+  <div class="item tromba" style="top:45%;left:85%;"></div>
 
-  <!-- biscotto -->
-  <div class="item biscotto" style="top:44%;left:85%;"></div>
+  <!-- 🧦 C2–D2–E2 -->
+  <div class="item calza" style="top:35%;left:15%;"></div>
+  <div class="item calza" style="top:45%;left:15%;"></div>
+
+  <!-- 🍪 E9–F9 -->
+  <div class="item biscotto" style="top:55%;left:85%;"></div>
+
+  <!-- 💡 B3–B4 -->
+  <div class="item luce" style="top:25%;left:35%;"></div>
+
+  <!-- ⭐ C9–C10 -->
+  <div class="item stella" style="top:35%;left:90%;"></div>
+
+  <!-- 🕯️ I3–J3 -->
+  <div class="item candela" style="top:90%;left:25%;"></div>
 
   <!-- TRAPPOLA -->
-  <div id="grinchTrap" style="top:41%;left:38%;"></div>
+  <div id="grinchTrap" style="top:45%;left:45%;"></div>
 </div>
 
 <div id="msg"></div>
 <a href="../calendario.html" class="btn-back">← Calendario</a>
-
-<!-- OVERLAY ERRORE -->
-<div id="overlayError" class="overlay hidden">
-  <div class="overlayBox">
-    <img src="img/cami.png" alt="Errore">
-    <p><b>ATTENTO!</b><br>Riprova!</p>
-    <button id="retryBtn">Riprova</button>
-  </div>
-</div>
 
 <script>
 const counter = document.getElementById("counter");
@@ -179,7 +174,6 @@ const items = document.querySelectorAll(".item");
 const totale = 10;
 let trovati = 0;
 
-/* gestione gruppi */
 const gruppi = {};
 items.forEach(item=>{
   const cls = [...item.classList].find(c=>c!=="item");
@@ -192,51 +186,39 @@ function updateCounter(){
 }
 
 function bindTap(el, fn){
-  el.addEventListener("touchstart", e=>{
+  let lock=false;
+  el.addEventListener("touchstart",e=>{
     e.preventDefault();
-    fn();
+    if(lock) return;
+    lock=true; fn();
+    setTimeout(()=>lock=false,300);
   },{passive:false});
-  el.addEventListener("click", e=>{
+  el.addEventListener("click",e=>{
     e.preventDefault();
-    fn();
+    if(lock) return;
+    lock=true; fn();
+    setTimeout(()=>lock=false,300);
   });
 }
 
-/* start */
-bindTap(document.getElementById("startBtn"), ()=>{
+bindTap(document.getElementById("startBtn"),()=>{
   document.getElementById("startOverlay").classList.add("hidden");
 });
 
-/* oggetti */
 Object.values(gruppi).forEach(gruppo=>{
   let trovato=false;
   gruppo.forEach(el=>{
-    bindTap(el, ()=>{
+    bindTap(el,()=>{
       if(trovato) return;
       trovato=true;
       gruppo.forEach(i=>i.classList.add("found"));
       trovati++;
       updateCounter();
       if(trovati===totale){
-        document.getElementById("msg").textContent =
-          "🎉 Bravo! Hai trovato tutto!";
+        document.getElementById("msg").textContent="🎉 Bravo! Hai trovato tutto!";
       }
     });
   });
-});
-
-/* trappola */
-bindTap(document.getElementById("grinchTrap"), ()=>{
-  document.getElementById("overlayError").classList.remove("hidden");
-});
-
-/* retry */
-bindTap(document.getElementById("retryBtn"), ()=>{
-  trovati=0;
-  updateCounter();
-  document.getElementById("msg").textContent="";
-  document.querySelectorAll(".item").forEach(i=>i.classList.remove("found"));
-  document.getElementById("overlayError").classList.add("hidden");
 });
 </script>
 
