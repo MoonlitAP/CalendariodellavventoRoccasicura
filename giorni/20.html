@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎄 Giorno 20 – Trova gli oggetti</title>
+<title>🎄 Trova gli oggetti</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
@@ -15,9 +15,23 @@ body{
   color:white;
   text-align:center;
 }
-h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
-#counter{margin:6px 0;font-weight:bold;color:#ffd700;}
-#list{font-size:0.95em;margin-bottom:10px;}
+
+h1{
+  color:#ffd700;
+  margin:10px 0 4px;
+  font-size:1.4em;
+}
+
+#counter{
+  margin:6px 0;
+  font-weight:bold;
+  color:#ffd700;
+}
+
+#list{
+  font-size:0.95em;
+  margin-bottom:10px;
+}
 
 #game{
   position:relative;
@@ -25,6 +39,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   margin:0 auto;
   touch-action:manipulation;
 }
+
 #game img{
   width:100%;
   display:block;
@@ -32,7 +47,21 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   pointer-events:none;
 }
 
-/* HITBOX */
+/* =========================
+   HITBOX INVISIBILI (OR)
+========================= */
+.hit{
+  position:absolute;
+  width:22px;
+  height:24px;
+  transform:translate(-50%,-50%);
+  background:transparent;
+  z-index:6;
+}
+
+/* =========================
+   CERCHIO VISIVO UNICO
+========================= */
 .item{
   position:absolute;
   width:22px;
@@ -40,14 +69,18 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   border-radius:8px;
   transform:translate(-50%,-50%);
   z-index:5;
+  pointer-events:none; /* IMPORTANTISSIMO */
 }
+
 .item.found{
   background:rgba(0,255,0,.25);
   border:2px solid #00ff99;
   box-shadow:0 0 6px #00ff99;
 }
 
-/* OVERLAY */
+/* =========================
+   OVERLAY INIZIO
+========================= */
 .overlay{
   position:fixed;
   inset:0;
@@ -57,6 +90,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   justify-content:center;
   z-index:20;
 }
+
 .overlayBox{
   background:white;
   color:#7b0412;
@@ -65,6 +99,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   max-width:320px;
   text-align:center;
 }
+
 .overlayBox button{
   margin-top:12px;
   padding:10px 22px;
@@ -74,7 +109,10 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   color:white;
   font-weight:bold;
 }
-.hidden{display:none!important;}
+
+.hidden{
+  display:none!important;
+}
 
 #msg{
   margin:10px;
@@ -93,7 +131,9 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   text-decoration:none;
 }
 
-html,body,#game{touch-action:manipulation;}
+html,body,#game{
+  touch-action:manipulation;
+}
 </style>
 </head>
 
@@ -102,61 +142,33 @@ html,body,#game{touch-action:manipulation;}
 <!-- OVERLAY START -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
-    <h2>🎄 Giorno 20</h2>
-    <p>
-      🔍 Trova tutti gli oggetti nell’immagine.<br>
-      🤏 Zoom con due dita.
-    </p>
+    <h2>🎄 Trova gli oggetti</h2>
+    <p>🔍 Tocca gli oggetti nascosti nell’immagine.</p>
     <button id="startBtn">Inizia</button>
   </div>
 </div>
 
-<h1>🎄 Giorno 20</h1>
+<h1>🎄 Trova gli oggetti</h1>
 <div id="counter">🔍 Oggetti trovati: 0 / 10</div>
 <div id="list">🛎️ 🐦 ❤️ 🏐 🎺 🧦 🍪 💡 ⭐ 🕯️</div>
 
 <div id="game">
-  <img src="img/disegno.jpg" alt="Sleepy Santa">
+  <img src="img/disegno.jpg" alt="Immagine gioco">
 
-  <!-- 🛎️ I6 -->
-  <div class="item campana" style="top:85%; left:55%;"></div>
+  <!-- =========================
+       ESEMPIO OGGETTO: TROMBA
+       3 HITBOX (OR) + 1 CERCHIO
+  ========================= -->
 
-  <!-- 🐦 G1 – G2 -->
-  <div class="item uccello" style="top:65%; left:5%;"></div>
-  <div class="item uccello" style="top:65%; left:15%;"></div>
+  <!-- HITBOX INVISIBILI -->
+  <div class="hit tromba-hit" style="top:38%; left:68%;"></div>
+  <div class="hit tromba-hit" style="top:38%; left:76%;"></div>
+  <div class="hit tromba-hit" style="top:38%; left:84%;"></div>
 
-  <!-- ❤️ F4 -->
-  <div class="item cuore" style="top:55%; left:35%;"></div>
+  <!-- CERCHIO VISIVO UNICO -->
+  <div class="item tromba" style="top:38%; left:76%;"></div>
 
-  <!-- 🏐 E6 – F6 -->
-  <div class="item palla" style="top:45%; left:55%;"></div>
-  <div class="item palla" style="top:55%; left:55%;"></div>
-
-  <!-- 🎺 D7 – D8 – D9 -->
-  <div class="item tromba" style="top:35%; left:65%;"></div>
-  <div class="item tromba" style="top:35%; left:75%;"></div>
-  <div class="item tromba" style="top:35%; left:85%;"></div>
-
-  <!-- 🧦 C2 – D2 – E2 -->
-  <div class="item calza" style="top:25%; left:15%;"></div>
-  <div class="item calza" style="top:35%; left:15%;"></div>
-  <div class="item calza" style="top:45%; left:15%;"></div>
-
-  <!-- 🍪 E9 – F9 -->
-  <div class="item biscotto" style="top:45%; left:85%;"></div>
-  <div class="item biscotto" style="top:55%; left:85%;"></div>
-
-  <!-- 💡 B3 – B4 -->
-  <div class="item luce" style="top:15%; left:25%;"></div>
-  <div class="item luce" style="top:15%; left:35%;"></div>
-
-  <!-- ⭐ C9 – C10 -->
-  <div class="item stella" style="top:25%; left:85%;"></div>
-  <div class="item stella" style="top:25%; left:95%;"></div>
-
-  <!-- 🕯️ I3 – J3 -->
-  <div class="item candela" style="top:85%; left:25%;"></div>
-  <div class="item candela" style="top:95%; left:25%;"></div>
+  <!-- (Ripeti lo schema sopra per tutti gli altri oggetti) -->
 </div>
 
 <div id="msg"></div>
@@ -164,58 +176,69 @@ html,body,#game{touch-action:manipulation;}
 
 <script>
 const counter = document.getElementById("counter");
-const items = document.querySelectorAll(".item");
-const totale = 10;
+const totale = 10; // NUMERO OGGETTI
 let trovati = 0;
-
-/* raggruppa hitbox per oggetto */
-const gruppi = {};
-items.forEach(item=>{
-  const cls = [...item.classList].find(c=>c!=="item");
-  if(!gruppi[cls]) gruppi[cls]=[];
-  gruppi[cls].push(item);
-});
 
 function updateCounter(){
   counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
 }
 
+/* blocco doppio evento mobile */
 function bindTap(el, fn){
   let lock=false;
   el.addEventListener("touchstart",e=>{
     e.preventDefault();
     if(lock) return;
-    lock=true; fn();
+    lock=true;
+    fn();
     setTimeout(()=>lock=false,300);
   },{passive:false});
   el.addEventListener("click",e=>{
     e.preventDefault();
     if(lock) return;
-    lock=true; fn();
+    lock=true;
+    fn();
     setTimeout(()=>lock=false,300);
   });
 }
 
-bindTap(document.getElementById("startBtn"),()=>{
-  document.getElementById("startOverlay").classList.add("hidden");
-});
+/* funzione OR + 1 cerchio */
+function setupObject(name){
+  const hits = document.querySelectorAll(`.${name}-hit`);
+  const item = document.querySelector(`.item.${name}`);
+  let found = false;
 
-/* logica oggetti */
-Object.values(gruppi).forEach(gruppo=>{
-  let trovato=false;
-  gruppo.forEach(el=>{
-    bindTap(el,()=>{
-      if(trovato) return;
-      trovato=true;
-      gruppo.forEach(i=>i.classList.add("found"));
+  hits.forEach(hit=>{
+    bindTap(hit, ()=>{
+      if(found) return;
+      found = true;
+      item.classList.add("found");
       trovati++;
       updateCounter();
-      if(trovati===totale){
-        document.getElementById("msg").textContent="🎉 Bravo! Hai trovato tutto!";
+      if(trovati === totale){
+        document.getElementById("msg").textContent =
+          "🎉 Bravo! Hai trovato tutto!";
       }
     });
   });
+}
+
+/* START */
+bindTap(document.getElementById("startBtn"), ()=>{
+  document.getElementById("startOverlay").classList.add("hidden");
 });
+
+/* ATTIVA OGGETTI (UNO PER RIGA) */
+setupObject("tromba");
+/* setupObject("calza"); */
+/* setupObject("campana"); */
+/* setupObject("candela"); */
+/* setupObject("biscotto"); */
+/* setupObject("luce"); */
+/* setupObject("stella"); */
+/* setupObject("palla"); */
+/* setupObject("cuore"); */
+/* setupObject("uccello"); */
 </script>
 
 </body>
