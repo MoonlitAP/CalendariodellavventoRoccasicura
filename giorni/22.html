@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 22 – Giochi matematici</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
+}
+
+/* TITOLO */
+h1{
+  color:#ffd700;
+  margin:16px 0 8px;
+  font-size:1.6em;
+}
+
+/* CONTENITORE */
+#canvasBox{
+  max-width:420px;
+  margin:0 auto;
+  padding:16px;
+}
+
+/* CARD */
+#gameCard{
+  background:#fff;
+  color:#7b0412;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+
+/* AREA CANVAS */
+#fakeCanvas{
+  background:linear-gradient(135deg,#fff3e0,#ffe0b2);
+  border-radius:14px;
+  padding:28px 18px;
+  margin-bottom:18px;
+}
+
+#fakeCanvas h2{
+  margin:0 0 10px;
+  color:#e65100;
+}
+
+#fakeCanvas p{
+  font-size:0.95em;
+  line-height:1.5;
+}
+
+/* BOTTONE */
+#startBtn{
+  margin-top:12px;
+  padding:14px 32px;
+  font-size:1.05em;
+  font-weight:bold;
+  border:none;
+  border-radius:30px;
+  background:#ff9800;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(0,0,0,.3);
+}
+
+#startBtn:hover{
+  background:#fb8c00;
+  transform:scale(1.03);
+}
+
+/* TESTO INFO */
+#info{
+  margin-top:14px;
+  font-size:0.85em;
+  opacity:.9;
+}
+
+/* BACK */
+.btn-back{
+  display:inline-block;
+  margin:16px auto 20px;
+  padding:12px 26px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:bold;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎄 Giorno 22 – Giochi matematici</h1>
+
+<div id="canvasBox">
+  <div id="gameCard">
+
+    <div id="fakeCanvas">
+      <h2>➕➖✖️➗ La matematica si gioca!</h2>
+      <p>
+        La scuola è finita… ma la sfida continua 😉<br>
+        Oggi è il giorno giusto per mettere alla prova la tua
+        <b>capacità con i numeri</b> tra giochi, enigmi e piccoli rompicapo.
+        <br><br>
+        Perché la matematica non è solo studio:<br>
+        <b>è logica, intuizione e divertimento!</b> 🎄✨
+      </p>
+
+      <button id="startBtn" onclick="openGame()">🎯 GIOCA ORA</button>
+    </div>
+
+    <div id="info">
+      Il gioco si aprirà in una nuova scheda.
+    </div>
+
+  </div>
+</div>
+
+<a href="../calendario.html" class="btn-back">← Calendario</a>
+
+<script>
+function openGame(){
+  window.open(
+    "https://view.genially.com/6380ed68401c6a0011088c55/interactive-content-giochi-matematici-natalizi",
+    "_blank"
+  );
+}
+</script>
+
+</body>
+</html>
