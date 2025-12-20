@@ -46,7 +46,7 @@ h1{
   width:100%;
   display:block;
   border-radius:12px;
-  pointer-events:none; /* FIX FONDAMENTALE */
+  pointer-events:none; /* IMPORTANTISSIMO */
 }
 
 /* OGGETTI DA TROVARE */
@@ -126,7 +126,7 @@ h1{
   text-decoration:none;
 }
 
-/* BLOCCO DOPPIO TAP */
+/* BLOCCO DOPPIO TAP (PINCH OK) */
 html, body, #game{
   touch-action: manipulation;
 }
@@ -156,17 +156,17 @@ html, body, #game{
 <div id="game">
   <img src="img/disegno.jpg" alt="Disegno Natale">
 
-  <!-- HOTSPOT OGGETTI (44x44) -->
-  <div class="item" style="top:16%; left:26%; width:44px; height:44px;"></div>
-  <div class="item" style="top:24%; left:78%; width:44px; height:44px;"></div>
-  <div class="item" style="top:33%; left:8%;  width:44px; height:44px;"></div>
-  <div class="item" style="top:45%; left:64%; width:44px; height:44px;"></div>
-  <div class="item" style="top:50%; left:44%; width:44px; height:44px;"></div>
-  <div class="item" style="top:55%; left:20%; width:44px; height:44px;"></div>
-  <div class="item" style="top:60%; left:70%; width:44px; height:44px;"></div>
-  <div class="item" style="top:65%; left:10%; width:44px; height:44px;"></div>
-  <div class="item" style="top:78%; left:22%; width:44px; height:44px;"></div>
-  <div class="item" style="top:78%; left:48%; width:44px; height:44px;"></div>
+  <!-- HOTSPOT OGGETTI (COORDINATE DEFINITIVE) -->
+  <div class="item" style="top:12%; left:34%; width:44px; height:44px;"></div>  <!-- 🎀 Fiocco -->
+  <div class="item" style="top:18%; left:82%; width:44px; height:44px;"></div>  <!-- ⭐ Stella -->
+  <div class="item" style="top:32%; left:10%; width:44px; height:44px;"></div>  <!-- 🧦 Calza -->
+  <div class="item" style="top:40%; left:66%; width:44px; height:44px;"></div>  <!-- 👢 Scarpa -->
+  <div class="item" style="top:49%; left:48%; width:44px; height:44px;"></div>  <!-- 🐭 Topolino -->
+  <div class="item" style="top:52%; left:28%; width:44px; height:44px;"></div>  <!-- 🍃 Foglia -->
+  <div class="item" style="top:63%; left:12%; width:44px; height:44px;"></div>  <!-- 🕊️ Uccellino -->
+  <div class="item" style="top:69%; left:18%; width:44px; height:44px;"></div>  <!-- 🐟 Pesciolino -->
+  <div class="item" style="top:78%; left:22%; width:44px; height:44px;"></div>  <!-- 🔑 Chiave -->
+  <div class="item" style="top:78%; left:48%; width:44px; height:44px;"></div>  <!-- 🛎️ Campanella -->
 
   <!-- TRAPPOLA INVISIBILE -->
   <div id="grinchTrap"></div>
@@ -261,4 +261,3 @@ function restart(){
 
 </body>
 </html>
-
