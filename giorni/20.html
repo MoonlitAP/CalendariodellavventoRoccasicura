@@ -32,7 +32,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   pointer-events:none;
 }
 
-/* HITBOX CORRETTE */
+/* HITBOX */
 .item{
   position:absolute;
   width:26px;
@@ -40,6 +40,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   border-radius:10px;
   transform:translate(-50%,-50%);
 }
+
 .item.found{
   background:rgba(0,255,0,.25);
   border:2px solid #00ff99;
@@ -55,6 +56,7 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   transform:translate(-50%,-50%);
 }
 
+/* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
@@ -110,7 +112,7 @@ html,body,#game{touch-action:manipulation;}
 
 <body>
 
-<!-- OVERLAY START -->
+<!-- OVERLAY INIZIO -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
     <h2>🎄 Giorno 20</h2>
@@ -130,17 +132,30 @@ html,body,#game{touch-action:manipulation;}
 <div id="game">
   <img src="img/disegno.jpg" alt="Trova gli oggetti">
 
-  <!-- HITBOX PRECISE -->
-  <div class="item" style="top:88%;left:46%;"></div> <!-- guanto -->
-  <div class="item" style="top:64%;left:13%;"></div> <!-- libro -->
-  <div class="item" style="top:53%;left:31%;"></div> <!-- cuore -->
-  <div class="item" style="top:51%;left:57%;"></div> <!-- orsetto -->
-  <div class="item" style="top:29%;left:58%;"></div> <!-- calza -->
-  <div class="item" style="top:37%;left:17%;"></div> <!-- candela -->
-  <div class="item" style="top:44%;left:85%;"></div> <!-- biscotto -->
-  <div class="item" style="top:18%;left:77%;"></div> <!-- appendiabiti -->
-  <div class="item" style="top:23%;left:86%;"></div> <!-- luce -->
-  <div class="item" style="top:15%;left:92%;"></div> <!-- stella -->
+  <!-- OGGETTI NORMALI -->
+  <div class="item cuore" style="top:53%;left:31%;"></div>
+  <div class="item orso" style="top:51%;left:57%;"></div>
+  <div class="item candela" style="top:37%;left:17%;"></div>
+  <div class="item luce" style="top:23%;left:86%;"></div>
+  <div class="item stella" style="top:15%;left:92%;"></div>
+
+  <!-- OGGETTI GIALLI (MULTI HITBOX) -->
+
+  <!-- guanti -->
+  <div class="item guanti" style="top:86%;left:43%;"></div>
+  <div class="item guanti" style="top:88%;left:48%;"></div>
+
+  <!-- oggetto lungo sinistra -->
+  <div class="item oggettoL" style="top:55%;left:12%;"></div>
+  <div class="item oggettoL" style="top:60%;left:14%;"></div>
+  <div class="item oggettoL" style="top:65%;left:16%;"></div>
+
+  <!-- calza / sciarpa destra -->
+  <div class="item calza" style="top:40%;left:78%;"></div>
+  <div class="item calza" style="top:45%;left:82%;"></div>
+
+  <!-- biscotto -->
+  <div class="item biscotto" style="top:44%;left:85%;"></div>
 
   <!-- TRAPPOLA -->
   <div id="grinchTrap" style="top:41%;left:38%;"></div>
@@ -161,55 +176,66 @@ html,body,#game{touch-action:manipulation;}
 <script>
 const counter = document.getElementById("counter");
 const items = document.querySelectorAll(".item");
-const totale = items.length;
+const totale = 10;
 let trovati = 0;
+
+/* gestione gruppi */
+const gruppi = {};
+items.forEach(item=>{
+  const cls = [...item.classList].find(c=>c!=="item");
+  if(!gruppi[cls]) gruppi[cls]=[];
+  gruppi[cls].push(item);
+});
 
 function updateCounter(){
   counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
 }
 
 function bindTap(el, fn){
-  el.addEventListener("touchstart", e => {
+  el.addEventListener("touchstart", e=>{
     e.preventDefault();
     fn();
-  }, { passive:false });
-
-  el.addEventListener("click", e => {
+  },{passive:false});
+  el.addEventListener("click", e=>{
     e.preventDefault();
     fn();
   });
 }
 
-bindTap(document.getElementById("startBtn"), () => {
+/* start */
+bindTap(document.getElementById("startBtn"), ()=>{
   document.getElementById("startOverlay").classList.add("hidden");
 });
 
-items.forEach(item => {
-  item.dataset.found = "false";
-  bindTap(item, () => {
-    if(item.dataset.found === "true") return;
-    item.dataset.found = "true";
-    item.classList.add("found");
-    trovati++;
-    updateCounter();
-    if(trovati === totale){
-      document.getElementById("msg").textContent = "🎉 Bravo! Hai trovato tutto!";
-    }
+/* oggetti */
+Object.values(gruppi).forEach(gruppo=>{
+  let trovato=false;
+  gruppo.forEach(el=>{
+    bindTap(el, ()=>{
+      if(trovato) return;
+      trovato=true;
+      gruppo.forEach(i=>i.classList.add("found"));
+      trovati++;
+      updateCounter();
+      if(trovati===totale){
+        document.getElementById("msg").textContent =
+          "🎉 Bravo! Hai trovato tutto!";
+      }
+    });
   });
 });
 
-bindTap(document.getElementById("grinchTrap"), () => {
+/* trappola */
+bindTap(document.getElementById("grinchTrap"), ()=>{
   document.getElementById("overlayError").classList.remove("hidden");
 });
 
-bindTap(document.getElementById("retryBtn"), () => {
-  trovati = 0;
+/* retry */
+bindTap(document.getElementById("retryBtn"), ()=>{
+  trovati=0;
   updateCounter();
-  document.getElementById("msg").textContent = "";
-  items.forEach(i => {
-    i.dataset.found = "false";
-    i.classList.remove("found");
-  });
+  document.getElementById("msg").textContent="";
+  document.querySelectorAll(".item").forEach(i=>i.classList.remove("found"));
   document.getElementById("overlayError").classList.add("hidden");
 });
 </script>
