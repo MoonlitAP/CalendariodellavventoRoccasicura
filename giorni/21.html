@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giorno 21 - Present Bounce</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            background-color: #4285f4;
+            color: white;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #357ae8;
+        }
+        p {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Giorno 21 – Gioca a Present Bounce</h1>
+
+    <button onclick="openGame()">Apri il gioco</button>
+
+    <p>
+        <strong>Present Bounce</strong> è un gioco interattivo presente nel calendario natalizio
+        del <em>Google Santa Tracker</em>. L’obiettivo del gioco è aiutare gli elfi di Babbo Natale
+        a far rimbalzare un regalo lungo un percorso utilizzando elementi come molle e
+        nastri trasportatori per portarlo fino alla destinazione finale.
+    </p>
+
+    <p>
+        Cliccando sul pulsante “Apri il gioco”, si aprirà il gioco in una nuova scheda del browser.
+        Dopo aver caricato la pagina, potrai giocare direttamente dal sito originale.
+    </p>
+
+    <script>
+        function openGame() {
+            window.open("https://santatracker.google.com/presentbounce.html", "_blank");
+        }
+    </script>
+</body>
+</html>
