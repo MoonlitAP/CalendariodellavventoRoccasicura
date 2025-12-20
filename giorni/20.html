@@ -23,23 +23,23 @@ h1{
 }
 
 #counter{
-  margin:6px 0 6px;
+  margin:6px 0;
   font-weight:bold;
   color:#ffd700;
 }
 
 #list{
-  font-size:0.9em;
+  font-size:0.95em;
   margin-bottom:10px;
   opacity:0.95;
 }
 
-/* CONTENITORE GIOCO */
+/* CONTENITORE IMMAGINE */
 #game{
   position:relative;
   max-width:380px;
   margin:0 auto;
-  touch-action: manipulation;
+  touch-action:manipulation;
 }
 
 #game img{
@@ -55,16 +55,16 @@ h1{
   width:44px;
   height:44px;
   border-radius:50%;
-  transform: translate(-50%, -50%);
+  transform:translate(-50%, -50%);
 }
 
 .item.found{
-  background: rgba(0,255,0,0.18);
-  border: 2px solid #00ff99;
-  box-shadow: 0 0 7px rgba(0,255,153,0.95);
+  background:rgba(0,255,0,0.18);
+  border:2px solid #00ff99;
+  box-shadow:0 0 7px rgba(0,255,153,0.95);
 }
 
-/* TRAPPOLA */
+/* TRAPPOLA INVISIBILE */
 #grinchTrap{
   width:70px;
   height:70px;
@@ -119,7 +119,7 @@ h1{
 
 .btn-back{
   display:inline-block;
-  margin:12px auto 18px;
+  margin:14px auto 18px;
   padding:12px 28px;
   background:#f3e4e4;
   color:black;
@@ -129,7 +129,7 @@ h1{
 }
 
 html, body, #game{
-  touch-action: manipulation;
+  touch-action:manipulation;
 }
 </style>
 </head>
@@ -158,16 +158,16 @@ html, body, #game{
   <img src="img/disegno.jpg" alt="Disegno Natale">
 
   <!-- HOTSPOT DEFINITIVI -->
-  <div class="item" data-name="campanella" style="top:87%; left:55%;"></div>
-  <div class="item" data-name="uccellino"  style="top:63%; left:14%;"></div>
-  <div class="item" data-name="cuore"       style="top:52%; left:33%;"></div>
-  <div class="item" data-name="pallina"     style="top:49%; left:45%;"></div>
-  <div class="item" data-name="trombetta"   style="top:21%; left:52%;"></div>
-  <div class="item" data-name="calza"       style="top:36%; left:15%;"></div>
-  <div class="item" data-name="biscotto"    style="top:43%; left:86%;"></div>
-  <div class="item" data-name="lampadina"   style="top:22%; left:92%;"></div>
-  <div class="item" data-name="stella"      style="top:24%; left:86%;"></div>
-  <div class="item" data-name="candela"     style="top:20%; left:96%;"></div>
+  <div class="item" data-name="campanella" style="top:86%; left:46%;"></div> <!-- 🛎️ -->
+  <div class="item" data-name="uccellino"  style="top:63%; left:14%;"></div> <!-- 🐦 -->
+  <div class="item" data-name="cuore"       style="top:52%; left:30%;"></div> <!-- ❤️ -->
+  <div class="item" data-name="pallina"     style="top:50%; left:58%;"></div> <!-- 🏐 -->
+  <div class="item" data-name="trombetta"   style="top:28%; left:58%;"></div> <!-- 🎺 -->
+  <div class="item" data-name="calza"       style="top:36%; left:18%;"></div> <!-- 🧦 -->
+  <div class="item" data-name="biscotto"    style="top:43%; left:84%;"></div> <!-- 🍪 -->
+  <div class="item" data-name="lampadina"   style="top:17%; left:77%;"></div> <!-- 💡 -->
+  <div class="item" data-name="stella"      style="top:22%; left:86%;"></div> <!-- ⭐ -->
+  <div class="item" data-name="candela"     style="top:14%; left:92%;"></div> <!-- 🕯️ -->
 
   <!-- TRAPPOLA -->
   <div id="grinchTrap" style="top:41%; left:38%;"></div>
@@ -199,7 +199,7 @@ document.addEventListener("touchend", e=>{
   lastTap = now;
 },{passive:false});
 
-/* AUDIO */
+/* AUDIO “UH-OH” */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playUhOh(){
   const osc = audioCtx.createOscillator();
@@ -215,6 +215,7 @@ function playUhOh(){
   osc.stop(audioCtx.currentTime + 0.4);
 }
 
+/* TAP UNIFICATO */
 function bindTap(el, fn){
   el.addEventListener("touchstart", e=>{
     e.preventDefault();
