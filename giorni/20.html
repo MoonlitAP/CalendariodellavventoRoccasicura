@@ -47,16 +47,6 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   box-shadow:0 0 6px #00ff99;
 }
 
-/* TRAPPOLA */
-#grinchTrap{
-  position:absolute;
-  width:60px;
-  height:60px;
-  border-radius:16px;
-  transform:translate(-50%,-50%);
-  z-index:2;
-}
-
 /* OVERLAY */
 .overlay{
   position:fixed;
@@ -115,8 +105,7 @@ html,body,#game{touch-action:manipulation;}
     <h2>🎄 Giorno 20</h2>
     <p>
       🔍 Trova tutti gli oggetti nell’immagine.<br>
-      🤏 Zoom con due dita.<br>
-      ⚠️ Attento ai tocchi sbagliati.
+      🤏 Zoom con due dita.
     </p>
     <button id="startBtn">Inizia</button>
   </div>
@@ -130,39 +119,44 @@ html,body,#game{touch-action:manipulation;}
   <img src="img/disegno.jpg" alt="Sleepy Santa">
 
   <!-- 🛎️ I6 -->
-  <div class="item campana" style="top:85%;left:55%;"></div>
+  <div class="item campana" style="top:85%; left:55%;"></div>
 
-  <!-- 🐦 G1–G2 -->
-  <div class="item uccello" style="top:65%;left:5%;"></div>
+  <!-- 🐦 G1 – G2 -->
+  <div class="item uccello" style="top:65%; left:5%;"></div>
+  <div class="item uccello" style="top:65%; left:15%;"></div>
 
   <!-- ❤️ F4 -->
-  <div class="item cuore" style="top:55%;left:35%;"></div>
+  <div class="item cuore" style="top:55%; left:35%;"></div>
 
-  <!-- 🏐 E6–F6 -->
-  <div class="item palla" style="top:55%;left:55%;"></div>
+  <!-- 🏐 E6 – F6 -->
+  <div class="item palla" style="top:45%; left:55%;"></div>
+  <div class="item palla" style="top:55%; left:55%;"></div>
 
-  <!-- 🎺 D7–D8–D9 -->
-  <div class="item tromba" style="top:45%;left:75%;"></div>
-  <div class="item tromba" style="top:45%;left:85%;"></div>
+  <!-- 🎺 D7 – D8 – D9 -->
+  <div class="item tromba" style="top:35%; left:65%;"></div>
+  <div class="item tromba" style="top:35%; left:75%;"></div>
+  <div class="item tromba" style="top:35%; left:85%;"></div>
 
-  <!-- 🧦 C2–D2–E2 -->
-  <div class="item calza" style="top:35%;left:15%;"></div>
-  <div class="item calza" style="top:45%;left:15%;"></div>
+  <!-- 🧦 C2 – D2 – E2 -->
+  <div class="item calza" style="top:25%; left:15%;"></div>
+  <div class="item calza" style="top:35%; left:15%;"></div>
+  <div class="item calza" style="top:45%; left:15%;"></div>
 
-  <!-- 🍪 E9–F9 -->
-  <div class="item biscotto" style="top:55%;left:85%;"></div>
+  <!-- 🍪 E9 – F9 -->
+  <div class="item biscotto" style="top:45%; left:85%;"></div>
+  <div class="item biscotto" style="top:55%; left:85%;"></div>
 
-  <!-- 💡 B3–B4 -->
-  <div class="item luce" style="top:25%;left:35%;"></div>
+  <!-- 💡 B3 – B4 -->
+  <div class="item luce" style="top:15%; left:25%;"></div>
+  <div class="item luce" style="top:15%; left:35%;"></div>
 
-  <!-- ⭐ C9–C10 -->
-  <div class="item stella" style="top:35%;left:90%;"></div>
+  <!-- ⭐ C9 – C10 -->
+  <div class="item stella" style="top:25%; left:85%;"></div>
+  <div class="item stella" style="top:25%; left:95%;"></div>
 
-  <!-- 🕯️ I3–J3 -->
-  <div class="item candela" style="top:90%;left:25%;"></div>
-
-  <!-- TRAPPOLA -->
-  <div id="grinchTrap" style="top:45%;left:45%;"></div>
+  <!-- 🕯️ I3 – J3 -->
+  <div class="item candela" style="top:85%; left:25%;"></div>
+  <div class="item candela" style="top:95%; left:25%;"></div>
 </div>
 
 <div id="msg"></div>
@@ -174,6 +168,7 @@ const items = document.querySelectorAll(".item");
 const totale = 10;
 let trovati = 0;
 
+/* raggruppa hitbox per oggetto */
 const gruppi = {};
 items.forEach(item=>{
   const cls = [...item.classList].find(c=>c!=="item");
@@ -205,6 +200,7 @@ bindTap(document.getElementById("startBtn"),()=>{
   document.getElementById("startOverlay").classList.add("hidden");
 });
 
+/* logica oggetti */
 Object.values(gruppi).forEach(gruppo=>{
   let trovato=false;
   gruppo.forEach(el=>{
@@ -224,3 +220,4 @@ Object.values(gruppi).forEach(gruppo=>{
 
 </body>
 </html>
+
