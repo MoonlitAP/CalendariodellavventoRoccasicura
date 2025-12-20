@@ -32,54 +32,93 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
   pointer-events:none;
 }
 
-.item,#grinchTrap{
+/* HITBOX CORRETTE */
+.item{
   position:absolute;
-  width:44px;height:44px;
-  border-radius:50%;
+  width:26px;
+  height:30px;
+  border-radius:10px;
   transform:translate(-50%,-50%);
 }
 .item.found{
-  background:rgba(0,255,0,.2);
+  background:rgba(0,255,0,.25);
   border:2px solid #00ff99;
   box-shadow:0 0 6px #00ff99;
 }
-#grinchTrap{width:70px;height:70px;border-radius:18px;}
+
+/* TRAPPOLA */
+#grinchTrap{
+  position:absolute;
+  width:60px;
+  height:60px;
+  border-radius:16px;
+  transform:translate(-50%,-50%);
+}
 
 .overlay{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.7);
-  display:flex;align-items:center;justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   z-index:20;
 }
 .overlayBox{
-  background:white;color:#7b0412;
-  padding:20px;border-radius:16px;
-  max-width:320px;text-align:center;
+  background:white;
+  color:#7b0412;
+  padding:20px;
+  border-radius:16px;
+  max-width:320px;
+  text-align:center;
 }
-.overlayBox img{width:100%;border-radius:12px;}
+.overlayBox img{
+  width:100%;
+  border-radius:12px;
+}
 .overlayBox button{
-  margin-top:12px;padding:10px 22px;
-  border:none;border-radius:20px;
-  background:#7b0412;color:white;font-weight:bold;
+  margin-top:12px;
+  padding:10px 22px;
+  border:none;
+  border-radius:20px;
+  background:#7b0412;
+  color:white;
+  font-weight:bold;
 }
 .hidden{display:none!important;}
-#msg{margin:10px;color:#00ff99;font-size:1.1em;}
-.btn-back{
-  display:inline-block;margin:14px auto 18px;
-  padding:12px 28px;background:#f3e4e4;
-  color:black;border-radius:30px;
-  font-weight:bold;text-decoration:none;
+
+#msg{
+  margin:10px;
+  color:#00ff99;
+  font-size:1.1em;
 }
+
+.btn-back{
+  display:inline-block;
+  margin:14px auto 18px;
+  padding:12px 28px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:bold;
+  text-decoration:none;
+}
+
 html,body,#game{touch-action:manipulation;}
 </style>
 </head>
 
 <body>
 
+<!-- OVERLAY START -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
     <h2>🎄 Giorno 20</h2>
-    <p>🔍 Trova tutti gli oggetti nell’immagine.<br>🤏 Zoom con due dita.<br>⚠️ Attento ai tocchi sbagliati.</p>
+    <p>
+      🔍 Trova tutti gli oggetti nell’immagine.<br>
+      🤏 Zoom con due dita.<br>
+      ⚠️ Attento ai tocchi sbagliati.
+    </p>
     <button id="startBtn">Inizia</button>
   </div>
 </div>
@@ -89,74 +128,88 @@ html,body,#game{touch-action:manipulation;}
 <div id="list">🛎️ 🐦 ❤️ 🏐 🎺 🧦 🍪 💡 ⭐ 🕯️</div>
 
 <div id="game">
-  <img src="img/disegno.jpg">
+  <img src="img/disegno.jpg" alt="Trova gli oggetti">
 
-  <div class="item" style="top:86%;left:46%;"></div>
-  <div class="item" style="top:63%;left:14%;"></div>
-  <div class="item" style="top:52%;left:30%;"></div>
-  <div class="item" style="top:50%;left:58%;"></div>
-  <div class="item" style="top:28%;left:58%;"></div>
-  <div class="item" style="top:36%;left:18%;"></div>
-  <div class="item" style="top:43%;left:84%;"></div>
-  <div class="item" style="top:17%;left:77%;"></div>
-  <div class="item" style="top:22%;left:86%;"></div>
-  <div class="item" style="top:14%;left:92%;"></div>
+  <!-- HITBOX PRECISE -->
+  <div class="item" style="top:88%;left:46%;"></div> <!-- guanto -->
+  <div class="item" style="top:64%;left:13%;"></div> <!-- libro -->
+  <div class="item" style="top:53%;left:31%;"></div> <!-- cuore -->
+  <div class="item" style="top:51%;left:57%;"></div> <!-- orsetto -->
+  <div class="item" style="top:29%;left:58%;"></div> <!-- calza -->
+  <div class="item" style="top:37%;left:17%;"></div> <!-- candela -->
+  <div class="item" style="top:44%;left:85%;"></div> <!-- biscotto -->
+  <div class="item" style="top:18%;left:77%;"></div> <!-- appendiabiti -->
+  <div class="item" style="top:23%;left:86%;"></div> <!-- luce -->
+  <div class="item" style="top:15%;left:92%;"></div> <!-- stella -->
 
+  <!-- TRAPPOLA -->
   <div id="grinchTrap" style="top:41%;left:38%;"></div>
 </div>
 
 <div id="msg"></div>
 <a href="../calendario.html" class="btn-back">← Calendario</a>
 
+<!-- OVERLAY ERRORE -->
 <div id="overlayError" class="overlay hidden">
   <div class="overlayBox">
-    <img src="img/cami.png">
+    <img src="img/cami.png" alt="Errore">
     <p><b>ATTENTO!</b><br>Riprova!</p>
     <button id="retryBtn">Riprova</button>
   </div>
 </div>
 
 <script>
-const counter=document.getElementById("counter");
-const items=document.querySelectorAll(".item");
-const totale=items.length;
-let trovati=0;
+const counter = document.getElementById("counter");
+const items = document.querySelectorAll(".item");
+const totale = items.length;
+let trovati = 0;
 
 function updateCounter(){
-  counter.textContent=`🔍 Oggetti trovati: ${trovati} / ${totale}`;
+  counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
 }
 
-function bindTap(el,fn){
-  el.addEventListener("touchstart",e=>{e.preventDefault();fn();},{passive:false});
-  el.addEventListener("click",e=>{e.preventDefault();fn();});
+function bindTap(el, fn){
+  el.addEventListener("touchstart", e => {
+    e.preventDefault();
+    fn();
+  }, { passive:false });
+
+  el.addEventListener("click", e => {
+    e.preventDefault();
+    fn();
+  });
 }
 
-bindTap(document.getElementById("startBtn"),()=>{
+bindTap(document.getElementById("startBtn"), () => {
   document.getElementById("startOverlay").classList.add("hidden");
 });
 
-items.forEach(i=>{
-  i.dataset.found="false";
-  bindTap(i,()=>{
-    if(i.dataset.found==="true")return;
-    i.dataset.found="true";
-    i.classList.add("found");
+items.forEach(item => {
+  item.dataset.found = "false";
+  bindTap(item, () => {
+    if(item.dataset.found === "true") return;
+    item.dataset.found = "true";
+    item.classList.add("found");
     trovati++;
     updateCounter();
-    if(trovati===totale){
-      document.getElementById("msg").textContent="🎉 Bravo! Hai trovato tutto!";
+    if(trovati === totale){
+      document.getElementById("msg").textContent = "🎉 Bravo! Hai trovato tutto!";
     }
   });
 });
 
-bindTap(document.getElementById("grinchTrap"),()=>{
+bindTap(document.getElementById("grinchTrap"), () => {
   document.getElementById("overlayError").classList.remove("hidden");
 });
 
-bindTap(document.getElementById("retryBtn"),()=>{
-  trovati=0;updateCounter();
-  document.getElementById("msg").textContent="";
-  items.forEach(i=>{i.dataset.found="false";i.classList.remove("found");});
+bindTap(document.getElementById("retryBtn"), () => {
+  trovati = 0;
+  updateCounter();
+  document.getElementById("msg").textContent = "";
+  items.forEach(i => {
+    i.dataset.found = "false";
+    i.classList.remove("found");
+  });
   document.getElementById("overlayError").classList.add("hidden");
 });
 </script>
