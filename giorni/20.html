@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎄 Trova gli oggetti</title>
+<title>🎄 Giorno 20 – Trova gli oggetti</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
@@ -15,23 +15,9 @@ body{
   color:white;
   text-align:center;
 }
-
-h1{
-  color:#ffd700;
-  margin:10px 0 4px;
-  font-size:1.4em;
-}
-
-#counter{
-  margin:6px 0;
-  font-weight:bold;
-  color:#ffd700;
-}
-
-#list{
-  font-size:0.95em;
-  margin-bottom:10px;
-}
+h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
+#counter{margin:6px 0;font-weight:bold;color:#ffd700;}
+#list{font-size:0.95em;margin-bottom:10px;}
 
 #game{
   position:relative;
@@ -39,7 +25,6 @@ h1{
   margin:0 auto;
   touch-action:manipulation;
 }
-
 #game img{
   width:100%;
   display:block;
@@ -47,9 +32,7 @@ h1{
   pointer-events:none;
 }
 
-/* =========================
-   HITBOX INVISIBILI (OR)
-========================= */
+/* HITBOX INVISIBILI */
 .hit{
   position:absolute;
   width:22px;
@@ -59,9 +42,7 @@ h1{
   z-index:6;
 }
 
-/* =========================
-   CERCHIO VISIVO UNICO
-========================= */
+/* CERCHIO VISIVO */
 .item{
   position:absolute;
   width:22px;
@@ -69,18 +50,15 @@ h1{
   border-radius:8px;
   transform:translate(-50%,-50%);
   z-index:5;
-  pointer-events:none; /* IMPORTANTISSIMO */
+  pointer-events:none;
 }
-
 .item.found{
   background:rgba(0,255,0,.25);
   border:2px solid #00ff99;
   box-shadow:0 0 6px #00ff99;
 }
 
-/* =========================
-   OVERLAY INIZIO
-========================= */
+/* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
@@ -90,7 +68,6 @@ h1{
   justify-content:center;
   z-index:20;
 }
-
 .overlayBox{
   background:white;
   color:#7b0412;
@@ -99,7 +76,6 @@ h1{
   max-width:320px;
   text-align:center;
 }
-
 .overlayBox button{
   margin-top:12px;
   padding:10px 22px;
@@ -109,138 +85,143 @@ h1{
   color:white;
   font-weight:bold;
 }
+.hidden{display:none!important;}
 
-.hidden{
-  display:none!important;
-}
+#msg{margin:10px;color:#00ff99;font-size:1.1em;}
 
-#msg{
-  margin:10px;
-  color:#00ff99;
-  font-size:1.1em;
-}
-
-.btn-back{
-  display:inline-block;
-  margin:14px auto 18px;
-  padding:12px 28px;
-  background:#f3e4e4;
-  color:black;
-  border-radius:30px;
-  font-weight:bold;
-  text-decoration:none;
-}
-
-html,body,#game{
-  touch-action:manipulation;
-}
+html,body,#game{touch-action:manipulation;}
 </style>
 </head>
 
 <body>
 
-<!-- OVERLAY START -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
-    <h2>🎄 Trova gli oggetti</h2>
-    <p>🔍 Tocca gli oggetti nascosti nell’immagine.</p>
+    <h2>🎄 Giorno 20</h2>
+    <p>🔍 Trova tutti gli oggetti nascosti.</p>
     <button id="startBtn">Inizia</button>
   </div>
 </div>
 
-<h1>🎄 Trova gli oggetti</h1>
+<h1>🎄 Giorno 20</h1>
 <div id="counter">🔍 Oggetti trovati: 0 / 10</div>
 <div id="list">🛎️ 🐦 ❤️ 🏐 🎺 🧦 🍪 💡 ⭐ 🕯️</div>
 
 <div id="game">
-  <img src="img/disegno.jpg" alt="Immagine gioco">
+<img src="img/disegno.jpg" alt="Sleepy Santa">
 
-  <!-- =========================
-       ESEMPIO OGGETTO: TROMBA
-       3 HITBOX (OR) + 1 CERCHIO
-  ========================= -->
+<!-- 🛎️ CAMPANA – I6 -->
+<div class="hit campana-hit" style="top:85%;left:55%;"></div>
+<div class="item campana" style="top:85%;left:55%;"></div>
 
-  <!-- HITBOX INVISIBILI -->
-  <div class="hit tromba-hit" style="top:38%; left:68%;"></div>
-  <div class="hit tromba-hit" style="top:38%; left:76%;"></div>
-  <div class="hit tromba-hit" style="top:38%; left:84%;"></div>
+<!-- 🐦 UCCELLO – G1 G2 -->
+<div class="hit uccello-hit" style="top:65%;left:5%;"></div>
+<div class="hit uccello-hit" style="top:65%;left:15%;"></div>
+<div class="item uccello" style="top:65%;left:10%;"></div>
 
-  <!-- CERCHIO VISIVO UNICO -->
-  <div class="item tromba" style="top:38%; left:76%;"></div>
+<!-- ❤️ CUORE – F4 -->
+<div class="hit cuore-hit" style="top:55%;left:35%;"></div>
+<div class="item cuore" style="top:55%;left:35%;"></div>
 
-  <!-- (Ripeti lo schema sopra per tutti gli altri oggetti) -->
+<!-- 🏐 PALLA – E6 F6 -->
+<div class="hit palla-hit" style="top:45%;left:55%;"></div>
+<div class="hit palla-hit" style="top:55%;left:55%;"></div>
+<div class="item palla" style="top:50%;left:55%;"></div>
+
+<!-- 🎺 TROMBA – D7 D8 D9 -->
+<div class="hit tromba-hit" style="top:38%;left:68%;"></div>
+<div class="hit tromba-hit" style="top:38%;left:76%;"></div>
+<div class="hit tromba-hit" style="top:38%;left:84%;"></div>
+<div class="item tromba" style="top:38%;left:76%;"></div>
+
+<!-- 🧦 CALZA – C2 D2 E2 -->
+<div class="hit calza-hit" style="top:25%;left:15%;"></div>
+<div class="hit calza-hit" style="top:35%;left:15%;"></div>
+<div class="hit calza-hit" style="top:45%;left:15%;"></div>
+<div class="item calza" style="top:35%;left:15%;"></div>
+
+<!-- 🍪 BISCOTTO – E9 F9 -->
+<div class="hit biscotto-hit" style="top:48%;left:82%;"></div>
+<div class="hit biscotto-hit" style="top:58%;left:82%;"></div>
+<div class="item biscotto" style="top:53%;left:82%;"></div>
+
+<!-- 💡 LUCE – B3 B4 -->
+<div class="hit luce-hit" style="top:18%;left:28%;"></div>
+<div class="hit luce-hit" style="top:18%;left:38%;"></div>
+<div class="item luce" style="top:18%;left:33%;"></div>
+
+<!-- ⭐ STELLA – C9 C10 -->
+<div class="hit stella-hit" style="top:25%;left:85%;"></div>
+<div class="hit stella-hit" style="top:25%;left:95%;"></div>
+<div class="item stella" style="top:25%;left:90%;"></div>
+
+<!-- 🕯️ CANDELA – I3 J3 -->
+<div class="hit candela-hit" style="top:85%;left:25%;"></div>
+<div class="hit candela-hit" style="top:95%;left:25%;"></div>
+<div class="item candela" style="top:90%;left:25%;"></div>
+
 </div>
 
 <div id="msg"></div>
-<a href="../calendario.html" class="btn-back">← Calendario</a>
 
 <script>
-const counter = document.getElementById("counter");
-const totale = 10; // NUMERO OGGETTI
-let trovati = 0;
+const counter=document.getElementById("counter");
+const totale=10;
+let trovati=0;
 
 function updateCounter(){
-  counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
+  counter.textContent=`🔍 Oggetti trovati: ${trovati} / ${totale}`;
 }
 
-/* blocco doppio evento mobile */
-function bindTap(el, fn){
+function bindTap(el,fn){
   let lock=false;
   el.addEventListener("touchstart",e=>{
     e.preventDefault();
     if(lock) return;
-    lock=true;
-    fn();
+    lock=true; fn();
     setTimeout(()=>lock=false,300);
   },{passive:false});
   el.addEventListener("click",e=>{
     e.preventDefault();
     if(lock) return;
-    lock=true;
-    fn();
+    lock=true; fn();
     setTimeout(()=>lock=false,300);
   });
 }
 
-/* funzione OR + 1 cerchio */
 function setupObject(name){
-  const hits = document.querySelectorAll(`.${name}-hit`);
-  const item = document.querySelector(`.item.${name}`);
-  let found = false;
-
+  const hits=document.querySelectorAll(`.${name}-hit`);
+  const item=document.querySelector(`.item.${name}`);
+  let found=false;
   hits.forEach(hit=>{
-    bindTap(hit, ()=>{
+    bindTap(hit,()=>{
       if(found) return;
-      found = true;
+      found=true;
       item.classList.add("found");
       trovati++;
       updateCounter();
-      if(trovati === totale){
-        document.getElementById("msg").textContent =
-          "🎉 Bravo! Hai trovato tutto!";
+      if(trovati===totale){
+        document.getElementById("msg").textContent="🎉 Bravo! Hai trovato tutto!";
       }
     });
   });
 }
 
-/* START */
-bindTap(document.getElementById("startBtn"), ()=>{
+bindTap(document.getElementById("startBtn"),()=>{
   document.getElementById("startOverlay").classList.add("hidden");
 });
 
-/* ATTIVA OGGETTI (UNO PER RIGA) */
+setupObject("campana");
+setupObject("uccello");
+setupObject("cuore");
+setupObject("palla");
 setupObject("tromba");
-/* setupObject("calza"); */
-/* setupObject("campana"); */
-/* setupObject("candela"); */
-/* setupObject("biscotto"); */
-/* setupObject("luce"); */
-/* setupObject("stella"); */
-/* setupObject("palla"); */
-/* setupObject("cuore"); */
-/* setupObject("uccello"); */
+setupObject("calza");
+setupObject("biscotto");
+setupObject("luce");
+setupObject("stella");
+setupObject("candela");
 </script>
 
 </body>
 </html>
-
