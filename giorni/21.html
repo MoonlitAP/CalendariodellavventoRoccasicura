@@ -1,58 +1,137 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giorno 21 - Present Bounce</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            text-align: center;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            background-color: #4285f4;
-            color: white;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #357ae8;
-        }
-        p {
-            max-width: 600px;
-            margin: 20px auto;
-            text-align: left;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 21 – Present Bounce</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
+}
+
+/* TITOLO */
+h1{
+  color:#ffd700;
+  margin:16px 0 8px;
+  font-size:1.6em;
+}
+
+/* CONTENITORE CANVAS */
+#canvasBox{
+  max-width:420px;
+  margin:0 auto;
+  padding:16px;
+}
+
+/* CARD GIOCO */
+#gameCard{
+  background:#fff;
+  color:#7b0412;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+
+/* FINTA AREA CANVAS */
+#fakeCanvas{
+  background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+  border-radius:14px;
+  padding:28px 18px;
+  margin-bottom:18px;
+}
+
+#fakeCanvas h2{
+  margin:0 0 10px;
+  color:#1565c0;
+}
+
+#fakeCanvas p{
+  font-size:0.95em;
+  line-height:1.4;
+}
+
+/* BOTTONE GIOCO */
+#startBtn{
+  margin-top:10px;
+  padding:14px 32px;
+  font-size:1.1em;
+  font-weight:bold;
+  border:none;
+  border-radius:30px;
+  background:#4285f4;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(0,0,0,.3);
+}
+
+#startBtn:hover{
+  background:#2f6fe4;
+  transform:scale(1.03);
+}
+
+/* TESTO SOTTO */
+#info{
+  margin-top:14px;
+  font-size:0.85em;
+  opacity:.9;
+}
+
+/* BACK */
+.btn-back{
+  display:inline-block;
+  margin:16px auto 20px;
+  padding:12px 26px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:bold;
+  text-decoration:none;
+}
+</style>
 </head>
+
 <body>
-    <h1>Giorno 21 – Gioca a Present Bounce</h1>
 
-    <button onclick="openGame()">Apri il gioco</button>
+<h1>🎄 Giorno 21 – Present Bounce</h1>
 
-    <p>
-        <strong>Present Bounce</strong> è un gioco interattivo presente nel calendario natalizio
-        del <em>Google Santa Tracker</em>. L’obiettivo del gioco è aiutare gli elfi di Babbo Natale
-        a far rimbalzare un regalo lungo un percorso utilizzando elementi come molle e
-        nastri trasportatori per portarlo fino alla destinazione finale.
-    </p>
+<div id="canvasBox">
+  <div id="gameCard">
 
-    <p>
-        Cliccando sul pulsante “Apri il gioco”, si aprirà il gioco in una nuova scheda del browser.
-        Dopo aver caricato la pagina, potrai giocare direttamente dal sito originale.
-    </p>
+    <div id="fakeCanvas">
+      <h2>🎁 Present Bounce</h2>
+      <p>
+        Aiuta gli elfi di Babbo Natale a far rimbalzare il regalo fino alla destinazione!  
+        Usa logica e tempismo per superare ogni livello.
+      </p>
 
-    <script>
-        function openGame() {
-            window.open("https://santatracker.google.com/presentbounce.html", "_blank");
-        }
-    </script>
+      <button id="startBtn" onclick="openGame()">▶ GIOCA ORA</button>
+    </div>
+
+    <div id="info">
+      Il gioco si aprirà in una nuova scheda dal sito ufficiale Google Santa Tracker.
+    </div>
+
+  </div>
+</div>
+
+<a href="../calendario.html" class="btn-back">← Calendario</a>
+
+<script>
+function openGame(){
+  window.open(
+    "https://santatracker.google.com/presentbounce.html",
+    "_blank"
+  );
+}
+</script>
+
 </body>
 </html>
+
