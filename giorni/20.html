@@ -35,13 +35,12 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
 /* HITBOX INVISIBILI */
 .hit{
   position:absolute;
-  width:36px;          /* PIÙ GRANDE */
-  height:36px;         /* PIÙ GRANDE */
+  width:36px;
+  height:36px;
   transform:translate(-50%,-50%);
   background:transparent;
   z-index:6;
 }
-
 
 /* CERCHIO VISIVO */
 .item{
@@ -90,12 +89,24 @@ h1{color:#ffd700;margin:10px 0 4px;font-size:1.4em;}
 
 #msg{margin:10px;color:#00ff99;font-size:1.1em;}
 
+a.btn-calendar{
+  display:inline-block;
+  margin-top:14px;
+  padding:10px 26px;
+  background:#7b0412;
+  color:white;
+  border-radius:20px;
+  font-weight:bold;
+  text-decoration:none;
+}
+
 html,body,#game{touch-action:manipulation;}
 </style>
 </head>
 
 <body>
 
+<!-- OVERLAY START -->
 <div id="startOverlay" class="overlay">
   <div class="overlayBox">
     <h2>🎄 Giorno 20</h2>
@@ -111,59 +122,71 @@ html,body,#game{touch-action:manipulation;}
 <div id="game">
 <img src="img/disegno.jpg" alt="Sleepy Santa">
 
-<!-- 🛎️ CAMPANA – I6 -->
+<!-- 🛎️ -->
 <div class="hit campana-hit" style="top:85%;left:55%;"></div>
 <div class="item campana" style="top:85%;left:55%;"></div>
 
-<!-- 🐦 UCCELLO – G1 G2 -->
+<!-- 🐦 -->
 <div class="hit uccello-hit" style="top:65%;left:5%;"></div>
 <div class="hit uccello-hit" style="top:65%;left:15%;"></div>
 <div class="item uccello" style="top:65%;left:10%;"></div>
 
-<!-- ❤️ CUORE – F4 -->
+<!-- ❤️ -->
 <div class="hit cuore-hit" style="top:55%;left:35%;"></div>
 <div class="item cuore" style="top:55%;left:35%;"></div>
 
-<!-- 🏐 PALLA – E6 F6 -->
+<!-- 🏐 -->
 <div class="hit palla-hit" style="top:45%;left:55%;"></div>
 <div class="hit palla-hit" style="top:55%;left:55%;"></div>
 <div class="item palla" style="top:50%;left:55%;"></div>
 
-<!-- 🎺 TROMBA – D7 D8 D9 -->
+<!-- 🎺 -->
 <div class="hit tromba-hit" style="top:38%;left:68%;"></div>
 <div class="hit tromba-hit" style="top:38%;left:76%;"></div>
 <div class="hit tromba-hit" style="top:38%;left:84%;"></div>
 <div class="item tromba" style="top:38%;left:76%;"></div>
 
-<!-- 🧦 CALZA – C2 D2 E2 -->
+<!-- 🧦 -->
 <div class="hit calza-hit" style="top:25%;left:15%;"></div>
 <div class="hit calza-hit" style="top:35%;left:15%;"></div>
 <div class="hit calza-hit" style="top:45%;left:15%;"></div>
 <div class="item calza" style="top:35%;left:15%;"></div>
 
-<!-- 🍪 BISCOTTO – E9 F9 -->
+<!-- 🍪 -->
 <div class="hit biscotto-hit" style="top:48%;left:82%;"></div>
 <div class="hit biscotto-hit" style="top:58%;left:82%;"></div>
 <div class="item biscotto" style="top:53%;left:82%;"></div>
 
-<!-- 💡 LUCE – B3 B4 -->
+<!-- 💡 -->
 <div class="hit luce-hit" style="top:18%;left:28%;"></div>
 <div class="hit luce-hit" style="top:18%;left:38%;"></div>
 <div class="item luce" style="top:18%;left:33%;"></div>
 
-<!-- ⭐ STELLA – C9 C10 -->
+<!-- ⭐ -->
 <div class="hit stella-hit" style="top:25%;left:85%;"></div>
 <div class="hit stella-hit" style="top:25%;left:95%;"></div>
 <div class="item stella" style="top:25%;left:90%;"></div>
 
-<!-- 🕯️ CANDELA – I3 J3 -->
+<!-- 🕯️ -->
 <div class="hit candela-hit" style="top:85%;left:25%;"></div>
 <div class="hit candela-hit" style="top:95%;left:25%;"></div>
 <div class="item candela" style="top:90%;left:25%;"></div>
 
 </div>
 
-<div id="msg"></div>
+<!-- OVERLAY FINALE -->
+<div id="endOverlay" class="overlay hidden">
+  <div class="overlayBox">
+    <h2>👀 Sei pronto?</h2>
+    <p>
+      Una caccia al tesoro in paese si avvicina…<br>
+      tieni gli occhi aperti 🎄✨
+    </p>
+    <a href="../calendario.html" class="btn-calendar">
+      Torna al Calendario
+    </a>
+  </div>
+</div>
 
 <script>
 const counter=document.getElementById("counter");
@@ -202,7 +225,7 @@ function setupObject(name){
       trovati++;
       updateCounter();
       if(trovati===totale){
-        document.getElementById("msg").textContent="🎉 Bravo! Hai trovato tutto!";
+        document.getElementById("endOverlay").classList.remove("hidden");
       }
     });
   });
