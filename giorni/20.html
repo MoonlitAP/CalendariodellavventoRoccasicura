@@ -3,136 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎄 Giorno 20 – Attento! Riprova!</title>
+<title>🎄 Giorno 20 – Trova gli oggetti</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-  body{
-    margin:0;
-    font-family:'Ubuntu',sans-serif;
-    background:#7b0412;
-    color:white;
-    text-align:center;
-  }
+body{
+  margin:0;
+  font-family:'Ubuntu',sans-serif;
+  background:#7b0412;
+  color:white;
+  text-align:center;
+}
 
-  h1{
-    color:#ffd700;
-    margin:10px 0 4px;
-    font-size:1.4em;
-  }
+h1{
+  color:#ffd700;
+  margin:10px 0 4px;
+  font-size:1.4em;
+}
 
-  #counter{
-    margin:6px 0 6px;
-    font-weight:bold;
-    color:#ffd700;
-  }
+#counter{
+  margin:6px 0 6px;
+  font-weight:bold;
+  color:#ffd700;
+}
 
-  #list{
-    font-size:0.9em;
-    margin-bottom:10px;
-    opacity:0.95;
-  }
+#list{
+  font-size:0.9em;
+  margin-bottom:10px;
+  opacity:0.95;
+}
 
-  /* CONTENITORE GIOCO */
-  #game{
-    position:relative;
-    max-width:380px;
-    margin:0 auto;
-    touch-action: manipulation;
-  }
+/* CONTENITORE GIOCO */
+#game{
+  position:relative;
+  max-width:380px;
+  margin:0 auto;
+  touch-action: manipulation;
+}
 
-  #game img{
-    width:100%;
-    display:block;
-    border-radius:12px;
-    pointer-events:none; /* IMPORTANTISSIMO: l'immagine non deve prendere i tocchi */
-  }
+#game img{
+  width:100%;
+  display:block;
+  border-radius:12px;
+  pointer-events:none;
+}
 
-  /* HOTSPOT */
-  .item, #grinchTrap{
-    position:absolute;
-    width:44px;
-    height:44px;
-    border-radius:50%;
-    transform: translate(-50%, -50%); /* top/left = CENTRO */
-  }
+/* HOTSPOT */
+.item, #grinchTrap{
+  position:absolute;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  transform: translate(-50%, -50%);
+}
 
-  .item.found{
-    background: rgba(0,255,0,0.18);
-    border: 2px solid #00ff99;
-    box-shadow: 0 0 7px rgba(0,255,153,0.95);
-  }
+.item.found{
+  background: rgba(0,255,0,0.18);
+  border: 2px solid #00ff99;
+  box-shadow: 0 0 7px rgba(0,255,153,0.95);
+}
 
-  /* TRAPPOLA INVISIBILE */
-  #grinchTrap{
-    width:70px;
-    height:70px;
-    border-radius:18px;
-    background: transparent;
-  }
+/* TRAPPOLA */
+#grinchTrap{
+  width:70px;
+  height:70px;
+  border-radius:18px;
+  background:transparent;
+}
 
-  /* OVERLAY */
-  .overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:20;
-  }
+/* OVERLAY */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+}
 
-  .overlayBox{
-    background:white;
-    color:#7b0412;
-    padding:20px;
-    border-radius:16px;
-    max-width:320px;
-    text-align:center;
-  }
+.overlayBox{
+  background:white;
+  color:#7b0412;
+  padding:20px;
+  border-radius:16px;
+  max-width:320px;
+  text-align:center;
+}
 
-  .overlayBox img{
-    width:100%;
-    border-radius:12px;
-  }
+.overlayBox img{
+  width:100%;
+  border-radius:12px;
+}
 
-  .overlayBox button{
-    margin-top:12px;
-    padding:10px 22px;
-    border:none;
-    border-radius:20px;
-    background:#7b0412;
-    color:white;
-    font-weight:bold;
-  }
+.overlayBox button{
+  margin-top:12px;
+  padding:10px 22px;
+  border:none;
+  border-radius:20px;
+  background:#7b0412;
+  color:white;
+  font-weight:bold;
+}
 
-  /* Nascondi overlay in modo robusto (mobile) */
-  .hidden{
-    display:none !important;
-  }
+.hidden{
+  display:none !important;
+}
 
-  #msg{
-    margin:10px;
-    color:#00ff99;
-    font-size:1.1em;
-  }
+#msg{
+  margin:10px;
+  color:#00ff99;
+  font-size:1.1em;
+}
 
-  .btn-back{
-    display:inline-block;
-    margin:12px auto 18px;
-    padding:12px 28px;
-    background:#f3e4e4;
-    color:black;
-    border-radius:30px;
-    font-weight:bold;
-    text-decoration:none;
-  }
+.btn-back{
+  display:inline-block;
+  margin:12px auto 18px;
+  padding:12px 28px;
+  background:#f3e4e4;
+  color:black;
+  border-radius:30px;
+  font-weight:bold;
+  text-decoration:none;
+}
 
-  /* BLOCCO DOPPIO TAP (pinch OK) */
-  html, body, #game{
-    touch-action: manipulation;
-  }
+html, body, #game{
+  touch-action: manipulation;
+}
 </style>
 </head>
 
@@ -154,24 +152,24 @@
 
 <h1>🎄 Giorno 20</h1>
 <div id="counter">🔍 Oggetti trovati: 0 / 10</div>
-<div id="list">🎀 ⭐ 🧦 👢 🐭 🍃 🕊️ 🐟 🔑 🛎️</div>
+<div id="list">🛎️ 🐦 ❤️ 🏐 🎺 🧦 🍪 💡 ⭐ 🕯️</div>
 
 <div id="game">
   <img src="img/disegno.jpg" alt="Disegno Natale">
 
-  <!-- HOTSPOT (CENTRI in %) ricavati dai tuoi cerchi verdi -->
-  <div class="item" data-name="fiocco"      style="top:17.2%; left:31.7%;"></div> <!-- 🎀 -->
-  <div class="item" data-name="stella"      style="top:23.0%; left:91.5%;"></div> <!-- ⭐ -->
-  <div class="item" data-name="calza"       style="top:37.2%; left:16.2%;"></div> <!-- 🧦 -->
-  <div class="item" data-name="scarpa"      style="top:37.3%; left:78.7%;"></div> <!-- 👢 -->
-  <div class="item" data-name="topolino"    style="top:49.1%; left:56.3%;"></div> <!-- 🐭 -->
-  <div class="item" data-name="foglia"      style="top:54.5%; left:33.6%;"></div> <!-- 🍃 -->
-  <div class="item" data-name="uccellino"   style="top:68.6%; left:10.5%;"></div> <!-- 🕊️ -->
-  <div class="item" data-name="pesciolino"  style="top:91.1%; left:28.2%;"></div> <!-- 🐟 -->
-  <div class="item" data-name="chiave"      style="top:90.2%; left:16.2%;"></div> <!-- 🔑 -->
-  <div class="item" data-name="campanella"  style="top:87.2%; left:56.3%;"></div> <!-- 🛎️ -->
+  <!-- HOTSPOT DEFINITIVI -->
+  <div class="item" data-name="campanella" style="top:87%; left:55%;"></div>
+  <div class="item" data-name="uccellino"  style="top:63%; left:14%;"></div>
+  <div class="item" data-name="cuore"       style="top:52%; left:33%;"></div>
+  <div class="item" data-name="pallina"     style="top:49%; left:45%;"></div>
+  <div class="item" data-name="trombetta"   style="top:21%; left:52%;"></div>
+  <div class="item" data-name="calza"       style="top:36%; left:15%;"></div>
+  <div class="item" data-name="biscotto"    style="top:43%; left:86%;"></div>
+  <div class="item" data-name="lampadina"   style="top:22%; left:92%;"></div>
+  <div class="item" data-name="stella"      style="top:24%; left:86%;"></div>
+  <div class="item" data-name="candela"     style="top:20%; left:96%;"></div>
 
-  <!-- TRAPPOLA INVISIBILE (mettila dove vuoi: qui vicino al volto di Babbo) -->
+  <!-- TRAPPOLA -->
   <div id="grinchTrap" style="top:41%; left:38%;"></div>
 </div>
 
@@ -193,98 +191,88 @@
 </div>
 
 <script>
-  /* BLOCCO DOPPIO TAP */
-  let lastTap = 0;
-  document.addEventListener("touchend", e=>{
-    const now = Date.now();
-    if(now - lastTap < 300) e.preventDefault();
-    lastTap = now;
+/* BLOCCO DOPPIO TAP */
+let lastTap = 0;
+document.addEventListener("touchend", e=>{
+  const now = Date.now();
+  if(now - lastTap < 300) e.preventDefault();
+  lastTap = now;
+},{passive:false});
+
+/* AUDIO */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playUhOh(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.4);
+}
+
+function bindTap(el, fn){
+  el.addEventListener("touchstart", e=>{
+    e.preventDefault();
+    fn();
   },{passive:false});
+  el.addEventListener("click", e=>{
+    e.preventDefault();
+    fn();
+  });
+}
 
-  /* AUDIO UH-OH (beep) */
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playUhOh(){
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.4);
-    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.4);
-  }
+const startOverlay = document.getElementById("startOverlay");
+const overlayError = document.getElementById("overlayError");
+const counter = document.getElementById("counter");
+const msg = document.getElementById("msg");
+const items = document.querySelectorAll(".item");
+const totale = items.length;
 
-  /* helper: gestisce bene touch + click */
-  function bindTap(el, fn){
-    el.addEventListener("touchstart", (e)=>{
-      e.preventDefault(); // evita ghost click
-      fn();
-    }, {passive:false});
+let trovati = 0;
 
-    el.addEventListener("click", (e)=>{
-      e.preventDefault();
-      fn();
-    });
-  }
+function startGame(){
+  startOverlay.classList.add("hidden");
+}
 
-  const startOverlay = document.getElementById("startOverlay");
-  const overlayError = document.getElementById("overlayError");
-  const msg = document.getElementById("msg");
-  const counter = document.getElementById("counter");
-  const items = document.querySelectorAll(".item");
-  const totale = items.length;
+function showError(){
+  playUhOh();
+  overlayError.classList.remove("hidden");
+}
 
-  let trovati = 0;
-  counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
-
-  function startGame(){
-    startOverlay.classList.add("hidden");
-  }
-
-  function showError(){
-    playUhOh();
-    overlayError.classList.remove("hidden");
-  }
-
-  function restart(){
-    trovati = 0;
-    counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
-    msg.textContent = "";
-    items.forEach(i=>{
-      i.dataset.found = "false";
-      i.classList.remove("found");
-    });
-    overlayError.classList.add("hidden");
-  }
-
-  /* Start */
-  bindTap(document.getElementById("startBtn"), startGame);
-
-  /* Oggetti */
+function restart(){
+  trovati = 0;
+  counter.textContent = `🔍 Oggetti trovati: 0 / ${totale}`;
+  msg.textContent = "";
   items.forEach(i=>{
     i.dataset.found = "false";
-    bindTap(i, ()=>{
-      if(i.dataset.found === "true") return;
-      i.dataset.found = "true";
-      i.classList.add("found");
-      trovati++;
-      counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
-      if(trovati === totale){
-        msg.textContent = "🎉 Bravo! Hai trovato tutti gli oggetti!";
-      }
-    });
+    i.classList.remove("found");
   });
+  overlayError.classList.add("hidden");
+}
 
-  /* Trappola */
-  bindTap(document.getElementById("grinchTrap"), showError);
+bindTap(document.getElementById("startBtn"), startGame);
+bindTap(document.getElementById("retryBtn"), restart);
+bindTap(document.getElementById("grinchTrap"), showError);
 
-  /* Riprova */
-  bindTap(document.getElementById("retryBtn"), restart);
+items.forEach(i=>{
+  i.dataset.found = "false";
+  bindTap(i, ()=>{
+    if(i.dataset.found === "true") return;
+    i.dataset.found = "true";
+    i.classList.add("found");
+    trovati++;
+    counter.textContent = `🔍 Oggetti trovati: ${trovati} / ${totale}`;
+    if(trovati === totale){
+      msg.textContent = "🎉 Bravo! Hai trovato tutti gli oggetti!";
+    }
+  });
+});
 </script>
 
 </body>
 </html>
-
